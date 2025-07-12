@@ -1,9 +1,10 @@
-const { BigQuery } = require('@google-cloud/bigquery');
-const { initializeDatabase, insertSnapshot } = require('../src/lib/database');
-const fs = require('fs');
-const path = require('path');
+import { BigQuery } from '@google-cloud/bigquery';
+import { initializeDatabase, insertSnapshot } from '../src/lib/database';
+import fs from 'fs';
+import path from 'path';
+import dotenv from 'dotenv';
 
-require('dotenv').config({ path: '.env.local' });
+dotenv.config({ path: '.env.local' });
 
 if (!process.env.GOOGLE_CLOUD_PROJECT_ID) {
   console.error('GOOGLE_CLOUD_PROJECT_ID environment variable is required');
@@ -14,17 +15,23 @@ const bigquery = new BigQuery({
   projectId: process.env.GOOGLE_CLOUD_PROJECT_ID,
 });
 
-function formatDate(date) {
+function formatDate(date: Date): string {
   return date.toISOString().split('T')[0];
 }
 
-function addDays(date, days) {
+function addDays(date: Date, days: number): Date {
   const result = new Date(date);
   result.setDate(result.getDate() + days);
   return result;
 }
 
-async function runQueryForDate(targetDate) {
+interface BigQueryRow {
+  tool: string;
+  repo_count: string;
+  pct_of_active_repos: string;
+}
+
+async function runQueryForDate(targetDate: Date): Promise<void> {
   const sqlTemplate = fs.readFileSync(path.join(__dirname, '../leaderboard_v2.sql'), 'utf8');
   
   const formattedDate = formatDate(targetDate);
@@ -52,7 +59,7 @@ async function runQueryForDate(targetDate) {
 
   const totalActiveRepos = await calculateTotalActiveRepos(startDate, formattedDate);
   
-  for (const row of rows) {
+  for (const row of rows as BigQueryRow[]) {
     const snapshot = {
       date: formattedDate,
       tool: row.tool,
@@ -66,7 +73,7 @@ async function runQueryForDate(targetDate) {
   }
 }
 
-async function calculateTotalActiveRepos(startDate, endDate) {
+async function calculateTotalActiveRepos(startDate: string, endDate: string): Promise<number> {
   const query = `
     WITH raw_events AS (
       SELECT DISTINCT repo.name AS repo_name
@@ -87,10 +94,10 @@ async function calculateTotalActiveRepos(startDate, endDate) {
   });
 
   const [rows] = await job.getQueryResults();
-  return rows.length > 0 ? parseInt(rows[0].total_active_repos) : 0;
+  return rows.length > 0 ? parseInt(rows[0].total_active_repos as string) : 0;
 }
 
-async function backfillDateRange(startDate, endDate) {
+async function backfillDateRange(startDate: Date, endDate: Date): Promise<void> {
   console.log(`Starting backfill from ${formatDate(startDate)} to ${formatDate(endDate)}`);
   
   await initializeDatabase();
@@ -113,10 +120,10 @@ async function backfillDateRange(startDate, endDate) {
   console.log('Backfill completed');
 }
 
-async function main() {
+async function main(): Promise<void> {
   const args = process.argv.slice(2);
   
-  let startDate, endDate;
+  let startDate: Date, endDate: Date;
   
   if (args.length === 0) {
     endDate = new Date();
@@ -124,7 +131,7 @@ async function main() {
   } else if (args.length === 1) {
     const daysBack = parseInt(args[0]);
     if (isNaN(daysBack)) {
-      console.error('Usage: npm run backfill [days_back] or npm run backfill [start_date] [end_date]');
+      console.error('Usage: pnpm run backfill [days_back] or pnpm run backfill [start_date] [end_date]');
       process.exit(1);
     }
     endDate = new Date();
@@ -138,7 +145,7 @@ async function main() {
       process.exit(1);
     }
   } else {
-    console.error('Usage: npm run backfill [days_back] or npm run backfill [start_date] [end_date]');
+    console.error('Usage: pnpm run backfill [days_back] or pnpm run backfill [start_date] [end_date]');
     process.exit(1);
   }
 
@@ -147,4 +154,4 @@ async function main() {
 
 if (require.main === module) {
   main().catch(console.error);
-}
+} 

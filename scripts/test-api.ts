@@ -1,5 +1,10 @@
+interface APIResponse {
+  timestamps?: string[];
+  active_repos?: number;
+  tools?: Record<string, any>;
+}
 
-async function testAPI() {
+async function testAPI(): Promise<void> {
   try {
     console.log('Testing API endpoint...');
     const response = await fetch('http://localhost:3000/api/leaderboard');
@@ -8,7 +13,7 @@ async function testAPI() {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
     
-    const data = await response.json();
+    const data: APIResponse = await response.json();
     console.log('API Response:', JSON.stringify(data, null, 2));
     
     if (data.timestamps && data.active_repos && data.tools) {
@@ -19,10 +24,10 @@ async function testAPI() {
       console.log('❌ API structure is incorrect');
     }
   } catch (error) {
-    console.error('❌ API test failed:', error.message);
+    console.error('❌ API test failed:', error instanceof Error ? error.message : error);
   }
 }
 
 if (require.main === module) {
   testAPI();
-}
+} 
