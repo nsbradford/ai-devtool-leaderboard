@@ -35,6 +35,7 @@ export default function LeaderboardChart() {
     startDate: format(new Date(Date.now() - 2 * 365 * 24 * 60 * 60 * 1000), 'yyyy-MM-dd'),
     endDate: format(new Date(), 'yyyy-MM-dd')
   });
+  const [isLogScale, setIsLogScale] = useState(false);
 
   useEffect(() => {
     async function fetchData() {
@@ -230,6 +231,16 @@ export default function LeaderboardChart() {
                 </PopoverContent>
               </Popover>
             </div>
+            <div className="flex items-center space-x-2">
+              <label className="text-sm font-medium">Scale:</label>
+              <Button 
+                variant={isLogScale ? "default" : "outline"}
+                onClick={() => setIsLogScale(!isLogScale)}
+                className="w-[120px]"
+              >
+                {isLogScale ? "Logarithmic" : "Linear"}
+              </Button>
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -306,6 +317,8 @@ export default function LeaderboardChart() {
                 <YAxis 
                   label={{ value: 'Usage (%)', angle: -90, position: 'insideLeft' }}
                   tick={{ fontSize: 12 }}
+                  scale={isLogScale ? "log" : "linear"}
+                  domain={isLogScale ? [0.1, 'dataMax'] : ['dataMin', 'dataMax']}
                 />
                 <Tooltip 
                   formatter={(value: number, name: string) => [
@@ -352,6 +365,8 @@ export default function LeaderboardChart() {
                 <YAxis 
                   label={{ value: 'Repository Count', angle: -90, position: 'insideLeft' }}
                   tick={{ fontSize: 12 }}
+                  scale={isLogScale ? "log" : "linear"}
+                  domain={isLogScale ? [1, 'dataMax'] : ['dataMin', 'dataMax']}
                 />
                 <Tooltip 
                   formatter={(value: number, name: string) => [
