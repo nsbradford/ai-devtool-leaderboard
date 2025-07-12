@@ -34,7 +34,7 @@ export async function GET(request: Request) {
       });
     }
 
-    const dateMap = new Map<string, Map<string, any>>();
+    const dateMap = new Map<string, Map<string, number>>();
     const allTools = new Set<string>();
     
     for (const snapshot of snapshots) {
