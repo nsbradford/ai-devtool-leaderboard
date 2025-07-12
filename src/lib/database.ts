@@ -60,74 +60,74 @@ export async function getSnapshotsInDateRange(startDate: string, endDate: string
   }
 }
 
-export async function initializeDatabase(): Promise<void> {
-  try {
-    console.log('Initializing database schema...');
+// export async function initializeDatabase(): Promise<void> {
+//   try {
+//     console.log('Initializing database schema...');
     
-    const sql = getSql();
+//     const sql = getSql();
     
-    // Daily metrics table - stores total active repos per day
-    await sql`
-      CREATE TABLE IF NOT EXISTS daily_metrics (
-        date DATE PRIMARY KEY,
-        total_active_repos INTEGER NOT NULL,
-        created_at TIMESTAMP DEFAULT NOW(),
-        updated_at TIMESTAMP DEFAULT NOW()
-      )
-    `;
+//     // Daily metrics table - stores total active repos per day
+//     await sql`
+//       CREATE TABLE IF NOT EXISTS daily_metrics (
+//         date DATE PRIMARY KEY,
+//         total_active_repos INTEGER NOT NULL,
+//         created_at TIMESTAMP DEFAULT NOW(),
+//         updated_at TIMESTAMP DEFAULT NOW()
+//       )
+//     `;
     
-    // Tool metrics table - stores individual tool data per day
-    await sql`
-      CREATE TABLE IF NOT EXISTS tool_metrics (
-        id SERIAL PRIMARY KEY,
-        date DATE NOT NULL,
-        tool VARCHAR(100) NOT NULL,
-        repo_count INTEGER NOT NULL,
-        created_at TIMESTAMP DEFAULT NOW(),
-        updated_at TIMESTAMP DEFAULT NOW(),
-        UNIQUE(date, tool)
-      )
-    `;
+//     // Tool metrics table - stores individual tool data per day
+//     await sql`
+//       CREATE TABLE IF NOT EXISTS tool_metrics (
+//         id SERIAL PRIMARY KEY,
+//         date DATE NOT NULL,
+//         tool VARCHAR(100) NOT NULL,
+//         repo_count INTEGER NOT NULL,
+//         created_at TIMESTAMP DEFAULT NOW(),
+//         updated_at TIMESTAMP DEFAULT NOW(),
+//         UNIQUE(date, tool)
+//       )
+//     `;
     
-    // Data source tracking table
-    // await sql`
-    //   CREATE TABLE IF NOT EXISTS data_sources (
-    //     id SERIAL PRIMARY KEY,
-    //     source_name VARCHAR(100) NOT NULL,
-    //     last_run_at TIMESTAMP,
-    //     status VARCHAR(50) DEFAULT 'pending',
-    //     records_processed INTEGER DEFAULT 0,
-    //     created_at TIMESTAMP DEFAULT NOW()
-    //   )
-    // `;
+//     // Data source tracking table
+//     // await sql`
+//     //   CREATE TABLE IF NOT EXISTS data_sources (
+//     //     id SERIAL PRIMARY KEY,
+//     //     source_name VARCHAR(100) NOT NULL,
+//     //     last_run_at TIMESTAMP,
+//     //     status VARCHAR(50) DEFAULT 'pending',
+//     //     records_processed INTEGER DEFAULT 0,
+//     //     created_at TIMESTAMP DEFAULT NOW()
+//     //   )
+//     // `;
     
-    // Indexes for performance
-    await sql`
-      CREATE INDEX IF NOT EXISTS idx_daily_metrics_date 
-      ON daily_metrics(date)
-    `;
+//     // Indexes for performance
+//     await sql`
+//       CREATE INDEX IF NOT EXISTS idx_daily_metrics_date 
+//       ON daily_metrics(date)
+//     `;
     
-    await sql`
-      CREATE INDEX IF NOT EXISTS idx_tool_metrics_date 
-      ON tool_metrics(date)
-    `;
+//     await sql`
+//       CREATE INDEX IF NOT EXISTS idx_tool_metrics_date 
+//       ON tool_metrics(date)
+//     `;
     
-    await sql`
-      CREATE INDEX IF NOT EXISTS idx_tool_metrics_tool 
-      ON tool_metrics(tool)
-    `;
+//     await sql`
+//       CREATE INDEX IF NOT EXISTS idx_tool_metrics_tool 
+//       ON tool_metrics(tool)
+//     `;
     
-    await sql`
-      CREATE INDEX IF NOT EXISTS idx_tool_metrics_date_tool 
-      ON tool_metrics(date, tool)
-    `;
+//     await sql`
+//       CREATE INDEX IF NOT EXISTS idx_tool_metrics_date_tool 
+//       ON tool_metrics(date, tool)
+//     `;
     
-    console.log('Database schema initialized successfully');
-  } catch (error) {
-    console.error('Database initialization failed:', error);
-    throw error;
-  }
-}
+//     console.log('Database schema initialized successfully');
+//   } catch (error) {
+//     console.error('Database initialization failed:', error);
+//     throw error;
+//   }
+// }
 
 export async function insertSnapshot(snapshot: Snapshot): Promise<void> {
   try {
