@@ -1,4 +1,6 @@
 
+import { neon } from '@neondatabase/serverless';
+
 export interface Snapshot {
   date: string;
   tool: string;
@@ -7,63 +9,81 @@ export interface Snapshot {
   total_active_repos: number;
 }
 
-const generateStubData = (): Snapshot[] => {
-  const today = new Date();
-  const data: Snapshot[] = [];
-  
-  for (let i = 6; i >= 0; i--) {
-    const date = new Date(today);
-    date.setDate(date.getDate() - i);
-    const dateStr = date.toISOString().split('T')[0];
-    
-    const baseRepos = 8000 + Math.floor(Math.random() * 400);
-    
-    data.push(
-      {
-        date: dateStr,
-        tool: 'GitHub Copilot',
-        repo_count: Math.floor(baseRepos * 0.25 + Math.random() * 100),
-        pct_of_active_repos: 25.3,
-        total_active_repos: baseRepos
-      },
-      {
-        date: dateStr,
-        tool: 'Cursor',
-        repo_count: Math.floor(baseRepos * 0.16 + Math.random() * 80),
-        pct_of_active_repos: 15.8,
-        total_active_repos: baseRepos
-      },
-      {
-        date: dateStr,
-        tool: 'Claude Dev',
-        repo_count: Math.floor(baseRepos * 0.11 + Math.random() * 60),
-        pct_of_active_repos: 11.4,
-        total_active_repos: baseRepos
-      }
-    );
-  }
-  
-  return data;
-};
-
-const STUB_DATA: Snapshot[] = generateStubData();
+const sql = neon(process.env.DATABASE_URL!);
 
 export async function getSnapshotsInDateRange(startDate: string, endDate: string): Promise<Snapshot[]> {
-  console.log(`[STUB] Getting snapshots from ${startDate} to ${endDate}`);
-  
-  const start = new Date(startDate);
-  const end = new Date(endDate);
-  
-  return STUB_DATA.filter(snapshot => {
-    const snapshotDate = new Date(snapshot.date);
-    return snapshotDate >= start && snapshotDate <= end;
-  });
+  try {
+    console.log(`Getting snapshots from ${startDate} to ${endDate}`);
+    
+    const snapshots = await sql`
+      SELECT 
+        date::text,
+        tool,
+        repo_count,
+        pct_of_active_repos,
+        total_active_repos
+      FROM leaderboard_snapshots 
+      WHERE date >= ${startDate} 
+        AND date <= ${endDate}
+      ORDER BY date, tool
+    `;
+    
+    return snapshots as Snapshot[];
+  } catch (error) {
+    console.error('Database query failed:', error);
+    throw error;
+  }
 }
 
 export async function initializeDatabase(): Promise<void> {
-  console.log('[STUB] Database initialization (stub mode)');
+  try {
+    console.log('Initializing database schema...');
+    
+    await sql`
+      CREATE TABLE IF NOT EXISTS leaderboard_snapshots (
+        id SERIAL PRIMARY KEY,
+        date DATE NOT NULL,
+        tool VARCHAR(100) NOT NULL,
+        repo_count INTEGER NOT NULL,
+        pct_of_active_repos DECIMAL(5,2) NOT NULL,
+        total_active_repos INTEGER NOT NULL,
+        created_at TIMESTAMP DEFAULT NOW(),
+        UNIQUE(date, tool)
+      )
+    `;
+    
+    await sql`
+      CREATE INDEX IF NOT EXISTS idx_leaderboard_snapshots_date 
+      ON leaderboard_snapshots(date)
+    `;
+    
+    await sql`
+      CREATE INDEX IF NOT EXISTS idx_leaderboard_snapshots_tool 
+      ON leaderboard_snapshots(tool)
+    `;
+    
+    console.log('Database schema initialized successfully');
+  } catch (error) {
+    console.error('Database initialization failed:', error);
+    throw error;
+  }
 }
 
 export async function insertSnapshot(snapshot: Snapshot): Promise<void> {
-  console.log('[STUB] Inserting snapshot:', snapshot);
+  try {
+    await sql`
+      INSERT INTO leaderboard_snapshots (date, tool, repo_count, pct_of_active_repos, total_active_repos)
+      VALUES (${snapshot.date}, ${snapshot.tool}, ${snapshot.repo_count}, ${snapshot.pct_of_active_repos}, ${snapshot.total_active_repos})
+      ON CONFLICT (date, tool) DO UPDATE SET
+        repo_count = EXCLUDED.repo_count,
+        pct_of_active_repos = EXCLUDED.pct_of_active_repos,
+        total_active_repos = EXCLUDED.total_active_repos,
+        created_at = NOW()
+    `;
+    
+    console.log(`Inserted/updated: ${snapshot.tool} - ${snapshot.repo_count} repos (${snapshot.pct_of_active_repos}%)`);
+  } catch (error) {
+    console.error('Failed to insert snapshot:', error);
+    throw error;
+  }
 }
