@@ -9,6 +9,21 @@ export interface Snapshot {
   total_active_repos: number;
 }
 
+export interface DailyMetrics {
+  date: string;
+  total_active_repos: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ToolMetrics {
+  date: string;
+  tool: string;
+  repo_count: number;
+  created_at: string;
+  updated_at: string;
+}
+
 function getSql() {
   if (!process.env.DATABASE_URL) {
     throw new Error('DATABASE_URL environment variable is not set');
@@ -23,15 +38,19 @@ export async function getSnapshotsInDateRange(startDate: string, endDate: string
     const sql = getSql();
     const snapshots = await sql`
       SELECT 
-        date::text,
-        tool,
-        repo_count,
-        pct_of_active_repos,
-        total_active_repos
-      FROM leaderboard_snapshots 
-      WHERE date >= ${startDate} 
-        AND date <= ${endDate}
-      ORDER BY date, tool
+        dm.date::text,
+        tm.tool,
+        tm.repo_count,
+        ROUND(
+          (tm.repo_count::DECIMAL / dm.total_active_repos * 100)::DECIMAL, 
+          2
+        ) AS pct_of_active_repos,
+        dm.total_active_repos
+      FROM daily_metrics dm
+      JOIN tool_metrics tm ON dm.date = tm.date
+      WHERE dm.date >= ${startDate} 
+        AND dm.date <= ${endDate}
+      ORDER BY dm.date, tm.repo_count DESC
     `;
     
     return snapshots as Snapshot[];
@@ -46,27 +65,61 @@ export async function initializeDatabase(): Promise<void> {
     console.log('Initializing database schema...');
     
     const sql = getSql();
+    
+    // Daily metrics table - stores total active repos per day
     await sql`
-      CREATE TABLE IF NOT EXISTS leaderboard_snapshots (
+      CREATE TABLE IF NOT EXISTS daily_metrics (
+        date DATE PRIMARY KEY,
+        total_active_repos INTEGER NOT NULL,
+        created_at TIMESTAMP DEFAULT NOW(),
+        updated_at TIMESTAMP DEFAULT NOW()
+      )
+    `;
+    
+    // Tool metrics table - stores individual tool data per day
+    await sql`
+      CREATE TABLE IF NOT EXISTS tool_metrics (
         id SERIAL PRIMARY KEY,
         date DATE NOT NULL,
         tool VARCHAR(100) NOT NULL,
         repo_count INTEGER NOT NULL,
-        pct_of_active_repos DECIMAL(5,2) NOT NULL,
-        total_active_repos INTEGER NOT NULL,
         created_at TIMESTAMP DEFAULT NOW(),
+        updated_at TIMESTAMP DEFAULT NOW(),
         UNIQUE(date, tool)
       )
     `;
     
+    // Data source tracking table
+    // await sql`
+    //   CREATE TABLE IF NOT EXISTS data_sources (
+    //     id SERIAL PRIMARY KEY,
+    //     source_name VARCHAR(100) NOT NULL,
+    //     last_run_at TIMESTAMP,
+    //     status VARCHAR(50) DEFAULT 'pending',
+    //     records_processed INTEGER DEFAULT 0,
+    //     created_at TIMESTAMP DEFAULT NOW()
+    //   )
+    // `;
+    
+    // Indexes for performance
     await sql`
-      CREATE INDEX IF NOT EXISTS idx_leaderboard_snapshots_date 
-      ON leaderboard_snapshots(date)
+      CREATE INDEX IF NOT EXISTS idx_daily_metrics_date 
+      ON daily_metrics(date)
     `;
     
     await sql`
-      CREATE INDEX IF NOT EXISTS idx_leaderboard_snapshots_tool 
-      ON leaderboard_snapshots(tool)
+      CREATE INDEX IF NOT EXISTS idx_tool_metrics_date 
+      ON tool_metrics(date)
+    `;
+    
+    await sql`
+      CREATE INDEX IF NOT EXISTS idx_tool_metrics_tool 
+      ON tool_metrics(tool)
+    `;
+    
+    await sql`
+      CREATE INDEX IF NOT EXISTS idx_tool_metrics_date_tool 
+      ON tool_metrics(date, tool)
     `;
     
     console.log('Database schema initialized successfully');
@@ -79,19 +132,89 @@ export async function initializeDatabase(): Promise<void> {
 export async function insertSnapshot(snapshot: Snapshot): Promise<void> {
   try {
     const sql = getSql();
+    
+    // Insert/update daily metrics
     await sql`
-      INSERT INTO leaderboard_snapshots (date, tool, repo_count, pct_of_active_repos, total_active_repos)
-      VALUES (${snapshot.date}, ${snapshot.tool}, ${snapshot.repo_count}, ${snapshot.pct_of_active_repos}, ${snapshot.total_active_repos})
-      ON CONFLICT (date, tool) DO UPDATE SET
-        repo_count = EXCLUDED.repo_count,
-        pct_of_active_repos = EXCLUDED.pct_of_active_repos,
+      INSERT INTO daily_metrics (date, total_active_repos, updated_at)
+      VALUES (${snapshot.date}, ${snapshot.total_active_repos}, NOW())
+      ON CONFLICT (date) DO UPDATE SET
         total_active_repos = EXCLUDED.total_active_repos,
-        created_at = NOW()
+        updated_at = NOW()
     `;
     
-    console.log(`Inserted/updated: ${snapshot.tool} - ${snapshot.repo_count} repos (${snapshot.pct_of_active_repos}%)`);
+    // Insert/update tool metrics
+    await sql`
+      INSERT INTO tool_metrics (date, tool, repo_count, updated_at)
+      VALUES (${snapshot.date}, ${snapshot.tool}, ${snapshot.repo_count}, NOW())
+      ON CONFLICT (date, tool) DO UPDATE SET
+        repo_count = EXCLUDED.repo_count,
+        updated_at = NOW()
+    `;
+    
+    console.log(`Inserted/updated: ${snapshot.tool} - ${snapshot.repo_count} repos`);
   } catch (error) {
     console.error('Failed to insert snapshot:', error);
+    throw error;
+  }
+}
+
+export async function insertDailyMetrics(date: string, totalActiveRepos: number): Promise<void> {
+  try {
+    const sql = getSql();
+    await sql`
+      INSERT INTO daily_metrics (date, total_active_repos, updated_at)
+      VALUES (${date}, ${totalActiveRepos}, NOW())
+      ON CONFLICT (date) DO UPDATE SET
+        total_active_repos = EXCLUDED.total_active_repos,
+        updated_at = NOW()
+    `;
+  } catch (error) {
+    console.error('Failed to insert daily metrics:', error);
+    throw error;
+  }
+}
+
+export async function insertToolMetrics(date: string, tool: string, repoCount: number): Promise<void> {
+  try {
+    const sql = getSql();
+    await sql`
+      INSERT INTO tool_metrics (date, tool, repo_count, updated_at)
+      VALUES (${date}, ${tool}, ${repoCount}, NOW())
+      ON CONFLICT (date, tool) DO UPDATE SET
+        repo_count = EXCLUDED.repo_count,
+        updated_at = NOW()
+    `;
+  } catch (error) {
+    console.error('Failed to insert tool metrics:', error);
+    throw error;
+  }
+}
+
+export async function getLatestDataDate(): Promise<string | null> {
+  try {
+    const sql = getSql();
+    const result = await sql`
+      SELECT MAX(date)::text as latest_date
+      FROM daily_metrics
+    `;
+    return result[0]?.latest_date || null;
+  } catch (error) {
+    console.error('Failed to get latest data date:', error);
+    throw error;
+  }
+}
+
+export async function getToolList(): Promise<string[]> {
+  try {
+    const sql = getSql();
+    const result = await sql`
+      SELECT DISTINCT tool
+      FROM tool_metrics
+      ORDER BY tool
+    `;
+    return result.map(row => row.tool);
+  } catch (error) {
+    console.error('Failed to get tool list:', error);
     throw error;
   }
 }
