@@ -9,12 +9,18 @@ export interface Snapshot {
   total_active_repos: number;
 }
 
-const sql = neon(process.env.DATABASE_URL!);
+function getSql() {
+  if (!process.env.DATABASE_URL) {
+    throw new Error('DATABASE_URL environment variable is not set');
+  }
+  return neon(process.env.DATABASE_URL);
+}
 
 export async function getSnapshotsInDateRange(startDate: string, endDate: string): Promise<Snapshot[]> {
   try {
     console.log(`Getting snapshots from ${startDate} to ${endDate}`);
     
+    const sql = getSql();
     const snapshots = await sql`
       SELECT 
         date::text,
@@ -39,6 +45,7 @@ export async function initializeDatabase(): Promise<void> {
   try {
     console.log('Initializing database schema...');
     
+    const sql = getSql();
     await sql`
       CREATE TABLE IF NOT EXISTS leaderboard_snapshots (
         id SERIAL PRIMARY KEY,
@@ -71,6 +78,7 @@ export async function initializeDatabase(): Promise<void> {
 
 export async function insertSnapshot(snapshot: Snapshot): Promise<void> {
   try {
+    const sql = getSql();
     await sql`
       INSERT INTO leaderboard_snapshots (date, tool, repo_count, pct_of_active_repos, total_active_repos)
       VALUES (${snapshot.date}, ${snapshot.tool}, ${snapshot.repo_count}, ${snapshot.pct_of_active_repos}, ${snapshot.total_active_repos})
