@@ -7,9 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "backfill": "node scripts/backfill.js",
-    "setup-db": "node scripts/setup-database.js",
-    "test-api": "node scripts/test-api.js"
+    "backfill": "tsx scripts/backfill.ts",
+    "setup-db": "tsx scripts/setup-database.ts",
+    "test-api": "tsx scripts/test-api.ts"
   },
   "dependencies": {
     "@google-cloud/bigquery": "^7.0.0",
@@ -27,7 +27,8 @@
     "react-day-picker": "^9.8.0",
     "react-dom": "^19.0.0",
     "recharts": "^3.1.0",
-    "tailwind-merge": "^3.3.1"
+    "tailwind-merge": "^3.3.1",
+    "ts-node": "^10.9.2"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
@@ -38,6 +39,7 @@
     "eslint": "^9",
     "eslint-config-next": "15.3.5",
     "tailwindcss": "^4",
+    "tsx": "^4.7.0",
     "tw-animate-css": "^1.3.5",
     "typescript": "^5"
   }
