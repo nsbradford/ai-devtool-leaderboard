@@ -1,0 +1,72 @@
+[
+  {
+    "id": "65095814",
+    "account_login": "ellipsis-dev[bot]",
+    "name": "Ellipsis",
+    "avatar_url": "https://avatars.githubusercontent.com/in/64358?v=4",
+    "created_at": "2025-07-12 20:16:03.103191"
+  },
+  {
+    "id": "96075541",
+    "account_login": "graphite-app[bot]",
+    "name": "Graphite",
+    "avatar_url": "https://avatars.githubusercontent.com/in/158384?v=4",
+    "created_at": "2025-07-12 20:16:03.103191"
+  },
+  {
+    "id": "136622811",
+    "account_login": "coderabbitai[bot]",
+    "name": "CodeRabbit",
+    "avatar_url": "https://avatars.githubusercontent.com/in/347564?v=4",
+    "created_at": "2025-07-12 20:16:03.103191"
+  },
+  {
+    "id": "151058649",
+    "account_login": "qodo-merge-pro[bot]",
+    "name": "Qodo",
+    "avatar_url": "https://avatars.githubusercontent.com/in/484649?v=4",
+    "created_at": "2025-07-12 20:16:03.103191"
+  },
+  {
+    "id": "151821869",
+    "account_login": "codeant-ai[bot]",
+    "name": "CodeAnt",
+    "avatar_url": "https://avatars.githubusercontent.com/in/646884?v=4",
+    "created_at": "2025-07-12 20:18:03.499728"
+  },
+  {
+    "id": "165735046",
+    "account_login": "greptile-apps[bot]",
+    "name": "Greptile",
+    "avatar_url": "https://avatars.githubusercontent.com/in/867647?v=4",
+    "created_at": "2025-07-12 20:16:03.103191"
+  },
+  {
+    "id": "175728472",
+    "account_login": "copilot-pull-request-reviewer[bot",
+    "name": "Copilot",
+    "avatar_url": "https://avatars.githubusercontent.com/in/946600?v=4",
+    "created_at": "2025-07-12 20:16:03.103191"
+  },
+  {
+    "id": "189301087",
+    "account_login": "windsurf-bot[bot]",
+    "name": "Windsurf",
+    "avatar_url": "https://avatars.githubusercontent.com/in/1066231?v=4",
+    "created_at": "2025-07-12 20:16:03.103191"
+  },
+  {
+    "id": "191113872",
+    "account_login": "cubic-dev-ai[bot]",
+    "name": "Cubic",
+    "avatar_url": "https://avatars.githubusercontent.com/in/1082092?v=4",
+    "created_at": "2025-07-12 20:16:03.103191"
+  },
+  {
+    "id": "206951365",
+    "account_login": "cursor[bot]",
+    "name": "Cursor",
+    "avatar_url": "https://avatars.githubusercontent.com/in/1210556?v=4",
+    "created_at": "2025-07-12 20:16:03.103191"
+  }
+]
