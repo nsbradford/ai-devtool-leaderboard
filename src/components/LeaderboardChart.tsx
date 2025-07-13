@@ -215,9 +215,12 @@ export default function LeaderboardChart() {
         {/* <p className="text-muted-foreground">
           {viewType === 'weekly' ? '7-day' : '30-day'} rolling view of AI code review tool usage across active GitHub repositories
         </p> */}
+        <p className="text-muted-foreground">
+            "What AI tools are being adopted in open-source repos?"
+        </p>
 
         <p className="text-muted-foreground">
-            View on <a href="https://github.com/nsbradford/ai-devtool-leaderboard" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-400 hover:underline">GitHub</a>. Made by <a href="https://www.nsbradford.com" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-400 hover:underline">Nick Bradford</a>.
+            View source on <a href="https://github.com/nsbradford/ai-devtool-leaderboard" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-400 hover:underline">GitHub</a>. 
           </p>
       </div>
 
@@ -226,9 +229,9 @@ export default function LeaderboardChart() {
         <CardHeader>
           <div className="flex items-center justify-between mb-4">
             <div>
-              <CardTitle>Usage Trends ({viewType === 'weekly' ? '7-Day' : '30-Day'} View)</CardTitle>
+              <CardTitle>Usage Trends</CardTitle>
               <CardDescription>
-                Number of repositories using each AI code review tool
+                Number of repositories with an AI code review, {viewType === 'weekly' ? '7-day' : '30-day'} rolling window
               </CardDescription>
             </div>
             <Popover>
@@ -458,6 +461,10 @@ export default function LeaderboardChart() {
           </div>
         </CardContent>
       </Card>
+
+      <p className="text-muted-foreground">
+        Vibe coded by <a href="https://www.nsbradford.com" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-400 hover:underline">Nick Bradford</a>.
+      </p>
     </div>
   );
 }
