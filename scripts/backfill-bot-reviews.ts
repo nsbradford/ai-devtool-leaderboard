@@ -1,6 +1,8 @@
 import { getBotReviewsForDay } from '../src/lib/bigquery';
 import { upsertBotReviewsForDate } from '../src/lib/database';
 import dotenv from 'dotenv';
+import yargs from 'yargs';
+import { hideBin } from 'yargs/helpers';
 
 dotenv.config({ path: '.env.local' });
 
@@ -73,7 +75,7 @@ async function processDate(targetDate: string, semaphore: Semaphore): Promise<vo
     // Upsert the data
     await upsertBotReviewsForDate(botReviews);
     
-    console.log(`Successfully processed ${targetDate}`);
+    // console.log(`Successfully processed ${targetDate}`);
   } catch (error) {
     console.error(`Error processing ${targetDate}:`, error);
     throw error;
@@ -87,18 +89,20 @@ async function backfillBotReviewsDateRange(startDate: Date, endDate: Date, maxCo
   console.log(`Max concurrency: ${maxConcurrency}`);
 
   const semaphore = new Semaphore(maxConcurrency);
-  const currentDate = new Date(startDate);
   const finalDate = new Date(endDate);
   const datePromises: Promise<void>[] = [];
   const allDates: string[] = [];
 
   // Collect all dates to process
+  let currentDate = new Date(startDate);
   while (currentDate <= finalDate) {
     allDates.push(formatDate(currentDate));
-    currentDate.setDate(currentDate.getDate() + 1);
+    currentDate = addDays(currentDate, 1);
   }
 
   console.log(`Total dates to process: ${allDates.length}`);
+  // console.log(`DEBUG: First 5 dates: ${allDates.slice(0, 5).join(', ')}`);
+  // console.log(`DEBUG: Last 5 dates: ${allDates.slice(-5).join(', ')}`);
 
   // Process all dates with controlled concurrency
   const startTime = Date.now();
@@ -122,66 +126,64 @@ async function backfillBotReviewsDateRange(startDate: Date, endDate: Date, maxCo
 }
 
 async function main(): Promise<void> {
-  const args = process.argv.slice(2);
-  
+  const argv = await yargs(hideBin(process.argv))
+    .option('days', {
+      alias: 'd',
+      type: 'number',
+      description: 'Number of days to go back from today'
+    })
+    .option('start', {
+      alias: 's',
+      type: 'string',
+      description: 'Start date (YYYY-MM-DD format)'
+    })
+    .option('end', {
+      alias: 'e',
+      type: 'string',
+      description: 'End date (YYYY-MM-DD format)'
+    })
+    .option('concurrency', {
+      alias: 'c',
+      type: 'number',
+      default: 8,
+      description: 'Maximum number of concurrent operations (1-10)'
+    })
+    .help()
+    .alias('help', 'h')
+    .argv;
+
   let startDate: Date, endDate: Date;
-  let maxConcurrency = 4; // Default concurrency limit
-  
-  if (args.length === 0) {
-    // Default to last 7 days
-    endDate = new Date();
-    startDate = addDays(endDate, -7);
-  } else if (args.length === 1) {
-    const daysBack = parseInt(args[0]);
-    if (isNaN(daysBack)) {
-      console.error('Usage: pnpm run backfill-bot-reviews [days_back] [concurrency] or pnpm run backfill-bot-reviews [start_date] [end_date] [concurrency]');
-      process.exit(1);
-    }
-    endDate = new Date();
-    startDate = addDays(endDate, -daysBack);
-  } else if (args.length === 2) {
-    // Check if second arg is a number (concurrency) or date
-    const secondArg = parseInt(args[1]);
-    if (!isNaN(secondArg)) {
-      // Format: [days_back] [concurrency]
-      const daysBack = parseInt(args[0]);
-      if (isNaN(daysBack)) {
-        console.error('Usage: pnpm run backfill-bot-reviews [days_back] [concurrency] or pnpm run backfill-bot-reviews [start_date] [end_date] [concurrency]');
-        process.exit(1);
-      }
-      endDate = new Date();
-      startDate = addDays(endDate, -daysBack);
-      maxConcurrency = secondArg;
-    } else {
-      // Format: [start_date] [end_date]
-      startDate = new Date(args[0]);
-      endDate = new Date(args[1]);
-      
-      if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
-        console.error('Invalid date format. Use YYYY-MM-DD');
-        process.exit(1);
-      }
-    }
-  } else if (args.length === 3) {
-    // Format: [start_date] [end_date] [concurrency]
-    startDate = new Date(args[0]);
-    endDate = new Date(args[1]);
-    maxConcurrency = parseInt(args[2]);
-    
-    if (isNaN(startDate.getTime()) || isNaN(endDate.getTime()) || isNaN(maxConcurrency)) {
-      console.error('Invalid format. Use: [start_date] [end_date] [concurrency] where dates are YYYY-MM-DD and concurrency is a number');
-      process.exit(1);
-    }
-  } else {
-    console.error('Usage: pnpm run backfill-bot-reviews [days_back] [concurrency] or pnpm run backfill-bot-reviews [start_date] [end_date] [concurrency]');
-    process.exit(1);
-  }
+  let maxConcurrency = argv.concurrency;
 
   // Validate concurrency limit
   if (maxConcurrency < 1 || maxConcurrency > 10) {
     console.warn(`Concurrency limit ${maxConcurrency} seems extreme. Consider using 1-8 for optimal performance.`);
   }
 
+  if (argv.days) {
+    // Use days back from today
+    endDate = new Date();
+    startDate = addDays(endDate, -argv.days);
+  } else if (argv.start && argv.end) {
+    // Use specific date range
+    startDate = new Date(argv.start);
+    endDate = new Date(argv.end);
+    
+    if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+      console.error('Invalid date format. Use YYYY-MM-DD');
+      process.exit(1);
+    }
+  } else {
+    // Default to last 7 days
+    endDate = new Date();
+    startDate = addDays(endDate, -7);
+  }
+
+  // Debug: Log the parsed dates
+  // console.log(`\nDEBUG: Parsed arguments:`);
+  // console.log(`  Start date: ${startDate.toISOString()} (${formatDate(startDate)})`);
+  // console.log(`  End date: ${endDate.toISOString()} (${formatDate(endDate)})`);
+  // console.log(`  Max concurrency: ${maxConcurrency}`);
   await backfillBotReviewsDateRange(startDate, endDate, maxConcurrency);
 }
 

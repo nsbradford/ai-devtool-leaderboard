@@ -9,7 +9,6 @@ interface BigQueryRow {
   bot_id: number;
 }
 
-
 /**
  * Parse base64-encoded Google Cloud service account credentials
  * @returns Parsed credentials object or undefined if not available
@@ -70,15 +69,15 @@ export async function getBotReviewsForDay(
       ORDER BY repo_name;
     `;
 
-    console.log(`Running bot reviews query for ${targetDate}...`);
-    console.log(`Bot IDs: ${botIdList.join(', ')}`);
+    // console.log(`Running bot reviews query for ${targetDate}...`);
+    // console.log(`Bot IDs: ${botIdList.join(', ')}`);
 
     const [rows] = await bigquery.query({
       query,
       useLegacySql: false,
     });
 
-    console.log(`Query completed. Found ${rows.length} bot review events.`);
+    // console.log(`Query completed. Found ${rows.length} bot review events.`);
 
     // print all the rows
     // console.log(rows);
@@ -96,5 +95,3 @@ export async function getBotReviewsForDay(
     throw error;
   }
 }
-
-So,
