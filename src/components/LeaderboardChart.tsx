@@ -231,7 +231,7 @@ export default function LeaderboardChart() {
             <div>
               <CardTitle>Usage Trends</CardTitle>
               <CardDescription>
-                Number of repositories with an AI code review, {viewType === 'weekly' ? '7-day' : '30-day'} rolling window
+                Number of repositories with an AI code review, {viewType === 'weekly' ? '7-day' : '30-day'} rolling window. Data sourced from <a href="https://www.gharchive.org/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-400 hover:underline">GH Archive</a> starting 2023-07-01 and updated daily.
               </CardDescription>
             </div>
             <Popover>
@@ -461,8 +461,9 @@ export default function LeaderboardChart() {
           </div>
         </CardContent>
       </Card>
-
-      <p className="text-muted-foreground">
+      <br />
+      <hr className="border-border" />
+      <p className="text-muted-foreground text-xs">
         Vibe coded by <a href="https://www.nsbradford.com" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-400 hover:underline">Nick Bradford</a>.
       </p>
     </div>
