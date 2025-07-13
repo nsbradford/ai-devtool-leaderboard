@@ -11,14 +11,22 @@ import { format } from 'date-fns';
 import type { LeaderboardData, LeaderboardStats, ToolRanking, DateRange, MaterializedViewType } from '@/types/api';
 import { ThemeToggle } from '@/components/theme-toggle';
 
-const TOOL_COLORS = {
-  "coderabbitai[bot]": "#8884d8",
-  "ellipsis-dev[bot]": "#82ca9d", 
-  "github-actions[bot]": "#ffc658",
-  "dependabot[bot]": "#ff7300",
-  "codecov[bot]": "#00ff88",
-  "sonarcloud[bot]": "#ff0088",
-  "renovate[bot]": "#8800ff"
+// Generate a random color for each tool
+const generateToolColors = (toolNames: string[]): Record<string, string> => {
+  const colors = [
+    '#8884d8', '#82ca9d', '#ffc658', '#ff7300', '#00ff88', '#ff0088', '#8800ff',
+    '#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57', '#ff9ff3', '#54a0ff',
+    '#5f27cd', '#ff6348', '#2ed573', '#ff4757', '#3742fa', '#ffa502', '#ff9f43',
+    '#10ac84', '#ee5a24', '#575fcf', '#3c40c6', '#0fbcf9', '#00d2d3', '#54a0ff',
+    '#5f27cd', '#ff6348', '#2ed573', '#ff4757', '#3742fa', '#ffa502', '#ff9f43'
+  ];
+  
+  const toolColors: Record<string, string> = {};
+  toolNames.forEach((toolName, index) => {
+    toolColors[toolName] = colors[index % colors.length];
+  });
+  
+  return toolColors;
 };
 
 interface ChartDataPoint {
@@ -32,7 +40,7 @@ export default function LeaderboardChart() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [dateRange, setDateRange] = useState<DateRange>({
-    startDate: '2025-05-01',
+    startDate: '2025-01-01',
     endDate: format(new Date(Date.now() - 24 * 60 * 60 * 1000), 'yyyy-MM-dd')
   });
   const [viewType, setViewType] = useState<MaterializedViewType>('weekly');
@@ -342,17 +350,20 @@ export default function LeaderboardChart() {
                   labelFormatter={(label) => `Date: ${label}`}
                 />
                 <Legend />
-                {Object.keys(stats.data.tools).map((toolName) => (
-                  <Line
-                    key={toolName}
-                    type="monotone"
-                    dataKey={toolName}
-                    stroke={TOOL_COLORS[toolName as keyof typeof TOOL_COLORS] || "#8884d8"}
-                    strokeWidth={2}
-                    name={toolName}
-                    dot={{ r: 4 }}
-                  />
-                ))}
+                {Object.keys(stats.data.tools).map((toolName) => {
+                  const toolColors = generateToolColors(Object.keys(stats.data.tools));
+                  return (
+                    <Line
+                      key={toolName}
+                      type="monotone"
+                      dataKey={toolName}
+                      stroke={toolColors[toolName] || "#8884d8"}
+                      strokeWidth={2}
+                      name={toolName}
+                      dot={false}
+                    />
+                  );
+                })}
               </LineChart>
             </ResponsiveContainer>
           </div>
