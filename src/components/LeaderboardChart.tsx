@@ -6,10 +6,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { CalendarIcon, Check, ChevronDown, ChevronRight } from 'lucide-react';
+import { CalendarIcon, Check, ChevronDown } from 'lucide-react';
 import { format } from 'date-fns';
-import type { LeaderboardData, LeaderboardStats, ToolRanking, DateRange, MaterializedViewType, DevTool } from '@/types/api';
+import type { LeaderboardData, LeaderboardStats, DateRange, MaterializedViewType, DevTool } from '@/types/api';
 import { ThemeToggle } from '@/components/theme-toggle';
+import Image from 'next/image';
 // Removed Collapsible import, using Popover instead
 
 interface ChartDataPoint {
@@ -27,10 +28,8 @@ export default function LeaderboardChart() {
     startDate: '2025-03-01',
     endDate: format(new Date(Date.now() - 24 * 60 * 60 * 1000), 'yyyy-MM-dd')
   });
-  const [viewType, setViewType] = useState<MaterializedViewType>('weekly');
-  const [isLogScale, setIsLogScale] = useState(false);
+  const [viewType] = useState<MaterializedViewType>('weekly');
   const [selectedTools, setSelectedTools] = useState<Set<string>>(new Set());
-  const [isCollapsibleOpen, setIsCollapsibleOpen] = useState(false);
 
   // Initialize selected tools when stats data is loaded
   useEffect(() => {
@@ -148,33 +147,33 @@ export default function LeaderboardChart() {
     return toolColors;
   };
 
-  if (stats.data.timestamps.length === 0) {
-    return (
-      <div className="container mx-auto p-6 space-y-6">
-        <div className="text-center">
-          <h1 className="text-4xl font-bold mb-2">AI Code Review Tools Leaderboard</h1>
-          <p className="text-muted-foreground">
-            7-day rolling view of AI code review tool usage across active GitHub repositories
-          </p>
-        </div>
-        <Card>
-          <CardContent className="p-6">
-            <div className="text-center text-muted-foreground">
-              <p className="text-lg mb-2">No data available for the selected date range</p>
-              <p className="text-sm">
-                This could be because:
-              </p>
-              <ul className="text-sm mt-2 space-y-1">
-                <li>• No data has been backfilled yet</li>
-                <li>• The database connection is not configured</li>
-                <li>• The selected date range has no data</li>
-              </ul>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
+  // if (stats.data.timestamps.length === 0) {
+  //   return (
+  //     <div className="container mx-auto p-6 space-y-6">
+  //       <div className="text-center">
+  //         <h1 className="text-4xl font-bold mb-2">AI Code Review Tools Leaderboard</h1>
+  //         <p className="text-muted-foreground">
+  //           7-day rolling view of AI code review tool usage across active GitHub repositories
+  //         </p>
+  //       </div>
+  //       <Card>
+  //         <CardContent className="p-6">
+  //           <div className="text-center text-muted-foreground">
+  //             <p className="text-lg mb-2">No data available for the selected date range</p>
+  //             <p className="text-sm">
+  //               This could be because:
+  //             </p>
+  //             <ul className="text-sm mt-2 space-y-1">
+  //               <li>• No data has been backfilled yet</li>
+  //               <li>• The database connection is not configured</li>
+  //               <li>• The selected date range has no data</li>
+  //             </ul>
+  //           </div>
+  //         </CardContent>
+  //       </Card>
+  //     </div>
+  //   );
+  // }
 
   const chartData: ChartDataPoint[] = stats.data.timestamps
     .map((timestamp, index) => {
@@ -211,95 +210,20 @@ export default function LeaderboardChart() {
         <div className="absolute top-0 right-0">
           <ThemeToggle />
         </div>
-        <h1 className="text-4xl font-bold mb-2">AI Code Review Tools Leaderboard</h1>
-        <p className="text-muted-foreground">
+        <h1 className="text-4xl font-bold mb-2">AI Code Review Leaderboard</h1>
+        {/* <p className="text-muted-foreground">
           {viewType === 'weekly' ? '7-day' : '30-day'} rolling view of AI code review tool usage across active GitHub repositories
-        </p>
-      </div>
+        </p> */}
 
-      {/* Date Range Controls */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Date Range</CardTitle>
-          <CardDescription>
-            Select the date range for the chart display
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-col sm:flex-row gap-4 items-center">
-            <div className="flex items-center space-x-2">
-              <label className="text-sm font-medium">Start Date:</label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button variant="outline" className="w-[240px] justify-start text-left font-normal">
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {format(new Date(dateRange.startDate), 'PPP')}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={new Date(dateRange.startDate)}
-                    onSelect={(date) => date && setDateRange(prev => ({ ...prev, startDate: format(date, 'yyyy-MM-dd') }))}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
-            <div className="flex items-center space-x-2">
-              <label className="text-sm font-medium">End Date:</label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button variant="outline" className="w-[240px] justify-start text-left font-normal">
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {format(new Date(dateRange.endDate), 'PPP')}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={new Date(dateRange.endDate)}
-                    onSelect={(date) => date && setDateRange(prev => ({ ...prev, endDate: format(date, 'yyyy-MM-dd') }))}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
-            {/* <div className="flex items-center space-x-2">
-              <label className="text-sm font-medium">View Type:</label>
-              <Button 
-                variant={viewType === 'weekly' ? "default" : "outline"}
-                onClick={() => setViewType('weekly')}
-                className="w-[120px]"
-              >
-                Weekly
-              </Button>
-              <Button 
-                variant={viewType === 'monthly' ? "default" : "outline"}
-                onClick={() => setViewType('monthly')}
-                className="w-[120px]"
-              >
-                Monthly
-              </Button>
-            </div> */}
-            {/* <div className="flex items-center space-x-2">
-              <label className="text-sm font-medium">Scale:</label>
-              <Button 
-                variant={isLogScale ? "default" : "outline"}
-                onClick={() => setIsLogScale(!isLogScale)}
-                className="w-[120px]"
-              >
-                {isLogScale ? "Logarithmic" : "Linear"}
-              </Button>
-            </div> */}
-          </div>
-        </CardContent>
-      </Card>
+        <p className="text-muted-foreground">
+            View on <a href="https://github.com/nsbradford/ai-devtool-leaderboard" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-400 hover:underline">GitHub</a>. Made by <a href="https://www.nsbradford.com" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-400 hover:underline">Nick Bradford</a>.
+          </p>
+      </div>
 
       {/* Chart Section */}
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between mb-4">
             <div>
               <CardTitle>Usage Trends ({viewType === 'weekly' ? '7-Day' : '30-Day'} View)</CardTitle>
               <CardDescription>
@@ -363,9 +287,11 @@ export default function LeaderboardChart() {
                             }}
                           >
                             {avatarUrl && (
-                              <img 
+                              <Image 
                                 src={avatarUrl} 
                                 alt={`${displayName} avatar`}
+                                width={16}
+                                height={16}
                                 className="w-4 h-4 rounded-full"
                                 onError={(e) => {
                                   e.currentTarget.style.display = 'none';
@@ -384,6 +310,46 @@ export default function LeaderboardChart() {
               </PopoverContent>
             </Popover>
           </div>
+          <div className="flex flex-col sm:flex-row gap-4 items-center">
+            <div className="flex items-center space-x-2">
+              <label className="text-sm font-medium">Start Date:</label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className="w-[200px] justify-start text-left font-normal">
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {format(new Date(dateRange.startDate), 'PPP')}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={new Date(dateRange.startDate)}
+                    onSelect={(date) => date && setDateRange(prev => ({ ...prev, startDate: format(date, 'yyyy-MM-dd') }))}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+            <div className="flex items-center space-x-2">
+              <label className="text-sm font-medium">End Date:</label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className="w-[200px] justify-start text-left font-normal">
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {format(new Date(dateRange.endDate), 'PPP')}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={new Date(dateRange.endDate)}
+                    onSelect={(date) => date && setDateRange(prev => ({ ...prev, endDate: format(date, 'yyyy-MM-dd') }))}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="h-96">
@@ -397,8 +363,8 @@ export default function LeaderboardChart() {
                 <YAxis 
                   label={{ value: 'Repository Count', angle: -90, position: 'insideLeft' }}
                   tick={{ fontSize: 12 }}
-                  scale={isLogScale ? "log" : "linear"}
-                  domain={isLogScale ? [1, 'dataMax'] : ['dataMin', 'dataMax']}
+                  scale="linear"
+                  domain={['dataMin', 'dataMax']}
                 />
                 <Tooltip 
                   formatter={(value: number, name: string) => [
@@ -467,9 +433,11 @@ export default function LeaderboardChart() {
                         {index + 1}
                       </span>
                       {avatarUrl && (
-                        <img 
+                        <Image 
                           src={avatarUrl} 
                           alt={`${displayName} avatar`}
+                          width={24}
+                          height={24}
                           className="w-6 h-6 rounded-full"
                           onError={(e) => {
                             // Fallback to a placeholder if image fails to load
@@ -492,3 +460,4 @@ export default function LeaderboardChart() {
     </div>
   );
 }
+

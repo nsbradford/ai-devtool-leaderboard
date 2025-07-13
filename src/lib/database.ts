@@ -1,7 +1,6 @@
 
 import { neon } from '@neondatabase/serverless';
 import { BotReviewInRepoDate, MaterializedViewData, MaterializedViewType } from '@/types/api';
-import devtools from '../devtools.json';
 
 function getSql() {
   if (!process.env.DATABASE_URL) {
