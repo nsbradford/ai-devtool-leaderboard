@@ -216,7 +216,7 @@ export default function LeaderboardChart() {
           {viewType === 'weekly' ? '7-day' : '30-day'} rolling view of AI code review tool usage across active GitHub repositories
         </p> */}
         <p className="text-muted-foreground">
-            "What AI tools are being adopted in open-source repos?"
+            What AI tools are being adopted in open-source repos?
         </p>
 
         <p className="text-muted-foreground">
