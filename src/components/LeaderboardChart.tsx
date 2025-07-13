@@ -6,10 +6,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { CalendarIcon } from 'lucide-react';
+import { CalendarIcon, Check, ChevronDown, ChevronRight } from 'lucide-react';
 import { format } from 'date-fns';
 import type { LeaderboardData, LeaderboardStats, ToolRanking, DateRange, MaterializedViewType, DevTool } from '@/types/api';
 import { ThemeToggle } from '@/components/theme-toggle';
+// Removed Collapsible import, using Popover instead
 
 interface ChartDataPoint {
   date: string;
@@ -18,19 +19,26 @@ interface ChartDataPoint {
 }
 
 export default function LeaderboardChart() {
-  // Debug: Only show these tools for debugging (using tool IDs)
-  const DEBUG_TOOL_IDS = null; ['65095814', '189301087']; // Ellipsis, Windsurf
-  
   const [stats, setStats] = useState<LeaderboardStats | null>(null);
   const [devtools, setDevtools] = useState<DevTool[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [dateRange, setDateRange] = useState<DateRange>({
-    startDate: '2025-06-01',
+    startDate: '2025-03-01',
     endDate: format(new Date(Date.now() - 24 * 60 * 60 * 1000), 'yyyy-MM-dd')
   });
   const [viewType, setViewType] = useState<MaterializedViewType>('weekly');
   const [isLogScale, setIsLogScale] = useState(false);
+  const [selectedTools, setSelectedTools] = useState<Set<string>>(new Set());
+  const [isCollapsibleOpen, setIsCollapsibleOpen] = useState(false);
+
+  // Initialize selected tools when stats data is loaded
+  useEffect(() => {
+    if (stats && stats.data.tools && Object.keys(stats.data.tools).length > 0) {
+      // Initialize with all tools selected
+      setSelectedTools(new Set(Object.keys(stats.data.tools)));
+    }
+  }, [stats]);
 
   useEffect(() => {
     async function fetchDevtools() {
@@ -182,8 +190,8 @@ export default function LeaderboardChart() {
       };
 
       Object.entries(stats.data.tools).forEach(([toolId, counts]) => {
-        // Only include debug tools
-        if (DEBUG_TOOL_IDS === null || DEBUG_TOOL_IDS.includes(toolId)) {
+        // Only include selected tools (or all if none selected)
+        if (selectedTools.size === 0 || selectedTools.has(toolId)) {
           const countsArray = counts as number[];
           const displayName = getToolDisplayName(toolId);
           dataPoint[displayName] = countsArray[index];
@@ -291,11 +299,91 @@ export default function LeaderboardChart() {
       {/* Chart Section */}
       <Card>
         <CardHeader>
-          <CardTitle>Usage Trends ({viewType === 'weekly' ? '7-Day' : '30-Day'} View)
-            {/* - Debug: {DEBUG_TOOL_IDS.map(id => getToolDisplayName(id)).join(' & ')} only */}</CardTitle>
-          <CardDescription>
-            Number of repositories using each AI code review tool
-          </CardDescription>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle>Usage Trends ({viewType === 'weekly' ? '7-Day' : '30-Day'} View)</CardTitle>
+              <CardDescription>
+                Number of repositories using each AI code review tool
+              </CardDescription>
+            </div>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" size="sm" className="flex items-center gap-2">
+                  <ChevronDown className="h-4 w-4" />
+                  Tools ({selectedTools.size === 0 ? 'All' : selectedTools.size})
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-72 p-0">
+                <div className="flex flex-col space-y-3 p-4 border-b rounded-t-lg bg-muted/50">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">
+                      {selectedTools.size === 0 ? 'All tools selected' : `${selectedTools.size} of ${Object.keys(stats.data.tools).length} tools selected`}
+                    </span>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        if (selectedTools.size === Object.keys(stats.data.tools).length) {
+                          setSelectedTools(new Set()); // Clear all
+                        } else {
+                          setSelectedTools(new Set(Object.keys(stats.data.tools))); // Select all
+                        }
+                      }}
+                    >
+                      {selectedTools.size === Object.keys(stats.data.tools).length ? 'Clear All' : 'Select All'}
+                    </Button>
+                  </div>
+                  <div className="space-y-1">
+                    {Object.keys(stats.data.tools)
+                      .map((toolId) => ({
+                        toolId,
+                        displayName: getToolDisplayName(toolId),
+                        devtool: devtools.find((dt: DevTool) => dt.id === toolId),
+                      }))
+                      .sort((a, b) => a.displayName.localeCompare(b.displayName))
+                      .map(({ toolId, displayName, devtool }) => {
+                        const isSelected = selectedTools.has(toolId);
+                        const avatarUrl = devtool?.avatar_url;
+                        return (
+                          <div
+                            key={toolId}
+                            className={`flex items-center space-x-2 p-2 rounded-md border cursor-pointer transition-colors ${
+                              isSelected 
+                                ? 'bg-primary/10 border-primary/20' 
+                                : 'bg-background border-border hover:bg-muted'
+                            }`}
+                            onClick={() => {
+                              const newSelected = new Set(selectedTools);
+                              if (isSelected) {
+                                newSelected.delete(toolId);
+                              } else {
+                                newSelected.add(toolId);
+                              }
+                              setSelectedTools(newSelected);
+                            }}
+                          >
+                            {avatarUrl && (
+                              <img 
+                                src={avatarUrl} 
+                                alt={`${displayName} avatar`}
+                                className="w-4 h-4 rounded-full"
+                                onError={(e) => {
+                                  e.currentTarget.style.display = 'none';
+                                }}
+                              />
+                            )}
+                            <span className="text-sm font-medium truncate">{displayName}</span>
+                            {isSelected && (
+                              <Check className="w-4 h-4 text-primary ml-auto" />
+                            )}
+                          </div>
+                        );
+                      })}
+                  </div>
+                </div>
+              </PopoverContent>
+            </Popover>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="h-96">
@@ -321,9 +409,9 @@ export default function LeaderboardChart() {
                 />
                 <Legend />
                 {Object.keys(stats.data.tools)
-                  .filter(toolId => DEBUG_TOOL_IDS === null || DEBUG_TOOL_IDS.includes(toolId))
+                  .filter(toolId => selectedTools.size === 0 ? false : selectedTools.has(toolId))
                   .map((toolId) => {
-                    const toolColors = generateToolColors(DEBUG_TOOL_IDS || []);
+                    const toolColors = generateToolColors(Array.from(selectedTools));
                     const displayName = getToolDisplayName(toolId);
                     return (
                       <Line
@@ -346,8 +434,9 @@ export default function LeaderboardChart() {
       {/* Rankings Section */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">Current Rankings - Debug: {DEBUG_TOOL_IDS === null ? 'all' : DEBUG_TOOL_IDS.map(id => getToolDisplayName(id)).join(' & ')} only</CardTitle>
+          <CardTitle className="text-lg">Current Rankings</CardTitle>
           <CardDescription className="text-xs">
+            All tools ranked by current repository count
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -355,7 +444,6 @@ export default function LeaderboardChart() {
             {(() => {
               const latestIndex = stats.data.timestamps.length - 1;
               const rankings = Object.entries(stats.data.tools)
-                .filter(([toolId]) => DEBUG_TOOL_IDS === null || DEBUG_TOOL_IDS.includes(toolId))
                 .map(([toolId, counts]) => {
                   const countsArray = counts as number[];
                   const currentCount = countsArray[latestIndex] || 0;
