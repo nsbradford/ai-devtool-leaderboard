@@ -32,8 +32,8 @@ export default function LeaderboardChart() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [dateRange, setDateRange] = useState<DateRange>({
-    startDate: format(new Date(Date.now() - 2 * 365 * 24 * 60 * 60 * 1000), 'yyyy-MM-dd'),
-    endDate: format(new Date(), 'yyyy-MM-dd')
+    startDate: '2025-01-01',
+    endDate: format(new Date(Date.now() - 24 * 60 * 60 * 1000), 'yyyy-MM-dd')
   });
   const [viewType, setViewType] = useState<MaterializedViewType>('weekly');
   const [isLogScale, setIsLogScale] = useState(false);
@@ -260,7 +260,7 @@ export default function LeaderboardChart() {
         </CardContent>
       </Card>
 
-      {/* Rankings Section */}
+      {/* Rankings Section - Commented out
       <Card>
         <CardHeader>
           <CardTitle>Current Rankings</CardTitle>
@@ -307,6 +307,7 @@ export default function LeaderboardChart() {
           </div>
         </CardContent>
       </Card>
+      */}
 
       {/* Chart Section */}
               <Card>
