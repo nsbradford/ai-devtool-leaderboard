@@ -38,6 +38,14 @@ export interface MaterializedViewData {
   tool_name?: string;
 }
 
+export interface DevTool {
+  id: string;
+  account_login: string;
+  name: string;
+  avatar_url: string;
+  created_at: string;
+}
+
 export interface LeaderboardQueryParams {
   startDate?: string;
   endDate?: string;

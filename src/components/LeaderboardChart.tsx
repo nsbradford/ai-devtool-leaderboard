@@ -8,26 +8,8 @@ import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { CalendarIcon } from 'lucide-react';
 import { format } from 'date-fns';
-import type { LeaderboardData, LeaderboardStats, ToolRanking, DateRange, MaterializedViewType } from '@/types/api';
+import type { LeaderboardData, LeaderboardStats, ToolRanking, DateRange, MaterializedViewType, DevTool } from '@/types/api';
 import { ThemeToggle } from '@/components/theme-toggle';
-
-// Generate a random color for each tool
-const generateToolColors = (toolNames: string[]): Record<string, string> => {
-  const colors = [
-    '#8884d8', '#82ca9d', '#ffc658', '#ff7300', '#00ff88', '#ff0088', '#8800ff',
-    '#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57', '#ff9ff3', '#54a0ff',
-    '#5f27cd', '#ff6348', '#2ed573', '#ff4757', '#3742fa', '#ffa502', '#ff9f43',
-    '#10ac84', '#ee5a24', '#575fcf', '#3c40c6', '#0fbcf9', '#00d2d3', '#54a0ff',
-    '#5f27cd', '#ff6348', '#2ed573', '#ff4757', '#3742fa', '#ffa502', '#ff9f43'
-  ];
-  
-  const toolColors: Record<string, string> = {};
-  toolNames.forEach((toolName, index) => {
-    toolColors[toolName] = colors[index % colors.length];
-  });
-  
-  return toolColors;
-};
 
 interface ChartDataPoint {
   date: string;
@@ -37,14 +19,35 @@ interface ChartDataPoint {
 
 export default function LeaderboardChart() {
   const [stats, setStats] = useState<LeaderboardStats | null>(null);
+  const [devtools, setDevtools] = useState<DevTool[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [dateRange, setDateRange] = useState<DateRange>({
-    startDate: '2025-01-01',
+    startDate: '2025-03-18',
     endDate: format(new Date(Date.now() - 24 * 60 * 60 * 1000), 'yyyy-MM-dd')
   });
   const [viewType, setViewType] = useState<MaterializedViewType>('weekly');
   const [isLogScale, setIsLogScale] = useState(false);
+
+  useEffect(() => {
+    async function fetchDevtools() {
+      try {
+        const baseUrl = typeof window !== 'undefined' && window.location.hostname !== 'localhost' 
+          ? window.location.origin 
+          : '';
+        const response = await fetch(`${baseUrl}/api/devtools`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch devtools data');
+        }
+        const data: DevTool[] = await response.json();
+        setDevtools(data);
+      } catch (err) {
+        console.error('Failed to fetch devtools:', err);
+      }
+    }
+
+    fetchDevtools();
+  }, []);
 
   useEffect(() => {
     async function fetchData() {
@@ -127,6 +130,38 @@ export default function LeaderboardChart() {
   }
 
   if (!stats) return null;
+  if (devtools.length === 0) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-lg">Loading devtools data...</div>
+      </div>
+    );
+  }
+
+  // Map bot account_logins to display names
+  const getToolDisplayName = (accountLogin: string): string => {
+    const devtool = devtools.find((dt: DevTool) => dt.account_login === accountLogin);
+    const displayName = devtool ? devtool.name : accountLogin;
+    return displayName;
+  };
+
+  // Generate a random color for each tool
+  const generateToolColors = (toolNames: string[]): Record<string, string> => {
+    const colors = [
+      '#8884d8', '#82ca9d', '#ffc658', '#ff7300', '#00ff88', '#ff0088', '#8800ff',
+      '#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57', '#ff9ff3', '#54a0ff',
+      '#5f27cd', '#ff6348', '#2ed573', '#ff4757', '#3742fa', '#ffa502', '#ff9f43',
+      '#10ac84', '#ee5a24', '#575fcf', '#3c40c6', '#0fbcf9', '#00d2d3', '#54a0ff',
+      '#5f27cd', '#ff6348', '#2ed573', '#ff4757', '#3742fa', '#ffa502', '#ff9f43'
+    ];
+    
+    const toolColors: Record<string, string> = {};
+    toolNames.forEach((toolName, index) => {
+      toolColors[toolName] = colors[index % colors.length];
+    });
+    
+    return toolColors;
+  };
 
   if (stats.data.timestamps.length === 0) {
     return (
@@ -172,12 +207,14 @@ export default function LeaderboardChart() {
 
       Object.entries(stats.data.tools).forEach(([toolName, counts]) => {
         const countsArray = counts as number[];
-        dataPoint[toolName] = countsArray[index];
+        const displayName = getToolDisplayName(toolName);
+        dataPoint[displayName] = countsArray[index];
       });
 
       return dataPoint;
     })
     .sort((a, b) => a.timestamp - b.timestamp);
+
 
   return (
     <div className="container mx-auto p-6 space-y-6">
@@ -239,7 +276,7 @@ export default function LeaderboardChart() {
                 </PopoverContent>
               </Popover>
             </div>
-            <div className="flex items-center space-x-2">
+            {/* <div className="flex items-center space-x-2">
               <label className="text-sm font-medium">View Type:</label>
               <Button 
                 variant={viewType === 'weekly' ? "default" : "outline"}
@@ -255,8 +292,8 @@ export default function LeaderboardChart() {
               >
                 Monthly
               </Button>
-            </div>
-            <div className="flex items-center space-x-2">
+            </div> */}
+            {/* <div className="flex items-center space-x-2">
               <label className="text-sm font-medium">Scale:</label>
               <Button 
                 variant={isLogScale ? "default" : "outline"}
@@ -265,7 +302,7 @@ export default function LeaderboardChart() {
               >
                 {isLogScale ? "Logarithmic" : "Linear"}
               </Button>
-            </div>
+            </div> */}
           </div>
         </CardContent>
       </Card>
@@ -352,14 +389,15 @@ export default function LeaderboardChart() {
                 <Legend />
                 {Object.keys(stats.data.tools).map((toolName) => {
                   const toolColors = generateToolColors(Object.keys(stats.data.tools));
+                  const displayName = getToolDisplayName(toolName);
                   return (
                     <Line
                       key={toolName}
                       type="monotone"
-                      dataKey={toolName}
+                      dataKey={displayName}
                       stroke={toolColors[toolName] || "#8884d8"}
                       strokeWidth={2}
-                      name={toolName}
+                      name={displayName}
                       dot={false}
                     />
                   );
