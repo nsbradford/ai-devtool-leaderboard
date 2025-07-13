@@ -8,7 +8,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { CalendarIcon } from 'lucide-react';
 import { format } from 'date-fns';
-import type { LeaderboardData, LeaderboardStats, ToolRanking, DateRange } from '@/types/api';
+import type { LeaderboardData, LeaderboardStats, ToolRanking, DateRange, MaterializedViewType } from '@/types/api';
 import { ThemeToggle } from '@/components/theme-toggle';
 
 const TOOL_COLORS = {
@@ -35,6 +35,7 @@ export default function LeaderboardChart() {
     startDate: format(new Date(Date.now() - 2 * 365 * 24 * 60 * 60 * 1000), 'yyyy-MM-dd'),
     endDate: format(new Date(), 'yyyy-MM-dd')
   });
+  const [viewType, setViewType] = useState<MaterializedViewType>('weekly');
   const [isLogScale, setIsLogScale] = useState(false);
 
   useEffect(() => {
@@ -42,7 +43,8 @@ export default function LeaderboardChart() {
       try {
         const params = new URLSearchParams({
           startDate: dateRange.startDate,
-          endDate: dateRange.endDate
+          endDate: dateRange.endDate,
+          viewType: viewType
         });
         
         const baseUrl = typeof window !== 'undefined' && window.location.hostname !== 'localhost' 
@@ -70,7 +72,6 @@ export default function LeaderboardChart() {
           .map(([name, counts]) => {
             const countsArray = counts as number[];
             const currentCount = countsArray[latestIndex] || 0;
-            const percentage = totalActiveRepos > 0 ? (currentCount / totalActiveRepos) * 100 : 0;
             const previousCount = countsArray[latestIndex - 1] || currentCount;
             
             let trend: 'up' | 'down' | 'stable' = 'stable';
@@ -80,7 +81,7 @@ export default function LeaderboardChart() {
             return {
               name,
               current_count: currentCount,
-              percentage,
+              percentage: 0, // No percentage calculation
               trend
             };
           })
@@ -99,7 +100,7 @@ export default function LeaderboardChart() {
     }
 
     fetchData();
-  }, [dateRange]);
+  }, [dateRange, viewType]);
 
   if (loading) {
     return (
@@ -162,9 +163,6 @@ export default function LeaderboardChart() {
 
     Object.entries(stats.data.tools).forEach(([toolName, counts]) => {
       const countsArray = counts as number[];
-      const activeRepos = stats.data.active_repos[index];
-      const percentage = activeRepos > 0 ? (countsArray[index] / activeRepos) * 100 : 0;
-      dataPoint[`${toolName}_pct`] = parseFloat(percentage.toFixed(1));
       dataPoint[toolName] = countsArray[index];
     });
 
@@ -179,7 +177,7 @@ export default function LeaderboardChart() {
         </div>
         <h1 className="text-4xl font-bold mb-2">AI Code Review Tools Leaderboard</h1>
         <p className="text-muted-foreground">
-          7-day rolling view of AI code review tool usage across active GitHub repositories
+          {viewType === 'weekly' ? '7-day' : '30-day'} rolling view of AI code review tool usage across active GitHub repositories
         </p>
       </div>
 
@@ -232,6 +230,23 @@ export default function LeaderboardChart() {
               </Popover>
             </div>
             <div className="flex items-center space-x-2">
+              <label className="text-sm font-medium">View Type:</label>
+              <Button 
+                variant={viewType === 'weekly' ? "default" : "outline"}
+                onClick={() => setViewType('weekly')}
+                className="w-[120px]"
+              >
+                Weekly
+              </Button>
+              <Button 
+                variant={viewType === 'monthly' ? "default" : "outline"}
+                onClick={() => setViewType('monthly')}
+                className="w-[120px]"
+              >
+                Monthly
+              </Button>
+            </div>
+            <div className="flex items-center space-x-2">
               <label className="text-sm font-medium">Scale:</label>
               <Button 
                 variant={isLogScale ? "default" : "outline"}
@@ -250,7 +265,7 @@ export default function LeaderboardChart() {
         <CardHeader>
           <CardTitle>Current Rankings</CardTitle>
           <CardDescription>
-            Based on {stats.total_active_repos.toLocaleString()} active repositories (had a PR review in the last week)
+            Based on {stats.total_active_repos.toLocaleString()} active repositories (had a PR review in the last {viewType === 'weekly' ? 'week' : 'month'})
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -261,7 +276,6 @@ export default function LeaderboardChart() {
                   <th className="text-left py-2 px-4 font-medium">#</th>
                   <th className="text-left py-2 px-4 font-medium">Tool</th>
                   <th className="text-right py-2 px-4 font-medium">Repositories</th>
-                  <th className="text-right py-2 px-4 font-medium">Percentage</th>
                   <th className="text-center py-2 px-4 font-medium">Trend</th>
                 </tr>
               </thead>
@@ -276,9 +290,6 @@ export default function LeaderboardChart() {
                     </td>
                     <td className="py-3 px-4 text-right">
                       {tool.current_count.toLocaleString()}
-                    </td>
-                    <td className="py-3 px-4 text-right">
-                      {tool.percentage.toFixed(1)}%
                     </td>
                     <td className="py-3 px-4 text-center">
                       <span className={`text-sm font-medium ${
@@ -298,61 +309,13 @@ export default function LeaderboardChart() {
       </Card>
 
       {/* Chart Section */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Usage Trends (7-Day View)</CardTitle>
-          <CardDescription>
-            Percentage of active repositories using each AI code review tool
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="h-96">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis 
-                  dataKey="date" 
-                  tick={{ fontSize: 12 }}
-                />
-                <YAxis 
-                  label={{ value: 'Usage (%)', angle: -90, position: 'insideLeft' }}
-                  tick={{ fontSize: 12 }}
-                  scale={isLogScale ? "log" : "linear"}
-                  domain={isLogScale ? [0.1, 'dataMax'] : ['dataMin', 'dataMax']}
-                />
-                <Tooltip 
-                  formatter={(value: number, name: string) => [
-                    `${value}%`,
-                    name.replace('_pct', '')
-                  ]}
-                  labelFormatter={(label) => `Date: ${label}`}
-                />
-                <Legend />
-                {Object.keys(stats.data.tools).map((toolName) => (
-                  <Line
-                    key={toolName}
-                    type="monotone"
-                    dataKey={`${toolName}_pct`}
-                    stroke={TOOL_COLORS[toolName as keyof typeof TOOL_COLORS] || "#8884d8"}
-                    strokeWidth={2}
-                    name={toolName}
-                    dot={{ r: 4 }}
-                  />
-                ))}
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Absolute Numbers Chart */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Absolute Usage Numbers</CardTitle>
-          <CardDescription>
-            Number of repositories using each AI code review tool
-          </CardDescription>
-        </CardHeader>
+              <Card>
+          <CardHeader>
+            <CardTitle>Usage Trends ({viewType === 'weekly' ? '7-Day' : '30-Day'} View)</CardTitle>
+            <CardDescription>
+              Number of repositories using each AI code review tool
+            </CardDescription>
+          </CardHeader>
         <CardContent>
           <div className="h-96">
             <ResponsiveContainer width="100%" height="100%">

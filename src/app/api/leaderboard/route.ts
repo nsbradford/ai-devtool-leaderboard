@@ -1,77 +1,91 @@
 import { NextResponse } from 'next/server';
-import type { LeaderboardData } from '@/types/api';
+import type { LeaderboardData, MaterializedViewType, MaterializedViewData } from '@/types/api';
 import { getLeaderboardDataForDateRange, getLeaderboardDataForDay } from '@/lib/bigquery';
+import { getToolNamesForBotIds } from '@/lib/database';
 
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const startDate = searchParams.get('startDate');
     const endDate = searchParams.get('endDate');
-    const singleDay = searchParams.get('day'); // New parameter for single day queries
+    const singleDay = searchParams.get('day');
+    const viewType = (searchParams.get('viewType') as MaterializedViewType) || 'weekly';
     
     const defaultEndDate = new Date().toISOString().split('T')[0];
     const defaultStartDate = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
     
-    let leaderboardData: LeaderboardData;
+    let materializedData: MaterializedViewData[];
     
     if (singleDay) {
-      // Single day query - more efficient
-      console.log(`Fetching leaderboard data for single day: ${singleDay}`);
-      const dayResults = await getLeaderboardDataForDay(singleDay);
-      
-      // Convert to the expected format
-      const timestamp = Math.floor(new Date(singleDay).getTime() / 1000);
-      const tools: Record<string, number[]> = {};
-      
-      // Calculate total active repos from the percentage data
-      let totalActiveRepos = 0;
-      if (dayResults.length > 0) {
-        // Find the tool with the highest percentage to estimate total active repos
-        const maxPercentage = Math.max(...dayResults.map(r => r.pct_of_active_repos));
-        const maxRepoCount = Math.max(...dayResults.map(r => r.repo_count));
-        totalActiveRepos = Math.round((maxRepoCount / maxPercentage) * 100);
-      }
-      
-      dayResults.forEach(result => {
-        tools[result.tool] = [result.repo_count];
-      });
-      
-      leaderboardData = {
-        timestamps: [timestamp],
-        active_repos: [totalActiveRepos],
-        tools
-      };
+      // Single day query
+      console.log(`Fetching ${viewType} leaderboard data for single day: ${singleDay}`);
+      materializedData = await getLeaderboardDataForDay(singleDay, viewType);
     } else {
       // Date range query
       const queryStartDate = startDate || defaultStartDate;
       const queryEndDate = endDate || defaultEndDate;
       
-      console.log(`Fetching leaderboard data from ${queryStartDate} to ${queryEndDate}`);
-      const rangeResults = await getLeaderboardDataForDateRange(queryStartDate, queryEndDate);
-      
-      // For date ranges, we need to aggregate the data differently
-      // This is a simplified approach - you might want to enhance this
-      const tools: Record<string, number[]> = {};
-      const allTools = new Set<string>();
-      
-      rangeResults.forEach(result => {
-        allTools.add(result.tool);
-        if (!tools[result.tool]) {
-          tools[result.tool] = [];
-        }
-        tools[result.tool].push(result.repo_count);
-      });
-      
-      // For now, we'll create a single data point representing the aggregated range
-      const midTimestamp = Math.floor((new Date(queryStartDate).getTime() + new Date(queryEndDate).getTime()) / 2000);
-      const totalActiveRepos = rangeResults.reduce((sum, result) => sum + result.repo_count, 0);
-      
-      leaderboardData = {
-        timestamps: [midTimestamp],
-        active_repos: [totalActiveRepos],
-        tools
-      };
+      console.log(`Fetching ${viewType} leaderboard data from ${queryStartDate} to ${queryEndDate}`);
+      materializedData = await getLeaderboardDataForDateRange(queryStartDate, queryEndDate, viewType);
     }
+
+    if (materializedData.length === 0) {
+      return NextResponse.json({
+        timestamps: [],
+        active_repos: [],
+        tools: {}
+      });
+    }
+
+    // Get unique bot IDs and fetch tool names
+    const botIds = [...new Set(materializedData.map(item => item.bot_id))];
+    const toolNames = await getToolNamesForBotIds(botIds);
+
+    // Group data by date
+    const dateGroups = new Map<string, MaterializedViewData[]>();
+    materializedData.forEach(item => {
+      const date = item.event_date;
+      if (!dateGroups.has(date)) {
+        dateGroups.set(date, []);
+      }
+      dateGroups.get(date)!.push(item);
+    });
+
+    // Convert to LeaderboardData format
+    const sortedDates = Array.from(dateGroups.keys()).sort();
+    const timestamps = sortedDates.map(date => Math.floor(new Date(date).getTime() / 1000));
+    
+    const tools: Record<string, number[]> = {};
+    
+    // Initialize tools with empty arrays
+    Object.values(toolNames).forEach(toolName => {
+      tools[toolName] = new Array(sortedDates.length).fill(0);
+    });
+
+    // Fill in the data
+    sortedDates.forEach((date, dateIndex) => {
+      const dayData = dateGroups.get(date)!;
+      
+      dayData.forEach(item => {
+        const toolName = toolNames[item.bot_id] || `bot-${item.bot_id}`;
+        if (!tools[toolName]) {
+          tools[toolName] = new Array(sortedDates.length).fill(0);
+        }
+        tools[toolName][dateIndex] = item.repo_count;
+      });
+    });
+
+    // Calculate total active repos (sum of all tools for each day)
+    const active_repos = sortedDates.map((date) => {
+      const dayData = dateGroups.get(date)!;
+      return dayData.reduce((sum, item) => sum + item.repo_count, 0);
+    });
+
+    const leaderboardData: LeaderboardData = {
+      timestamps,
+      active_repos,
+      tools
+    };
 
     return NextResponse.json(leaderboardData);
   } catch (error) {

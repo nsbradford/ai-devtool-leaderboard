@@ -1,6 +1,7 @@
 
 import { neon } from '@neondatabase/serverless';
-import { BotReviewInRepoDate } from '@/types/api';
+import { BotReviewInRepoDate, MaterializedViewData, MaterializedViewType } from '@/types/api';
+import devtools from '../devtools.json';
 
 function getSql() {
   if (!process.env.DATABASE_URL) {
@@ -62,7 +63,6 @@ export async function upsertBotReviewsForDate(botReviews: BotReviewInRepoDate[],
 
   const sql = getSql();
   const totalRecords = botReviews.length;
-  let processedRecords = 0;
   
   try {
     // Process in batches
@@ -82,13 +82,105 @@ export async function upsertBotReviewsForDate(botReviews: BotReviewInRepoDate[],
 
       await sql(query);
       
-      processedRecords += batch.length;
-      // console.log(`Upserted batch: ${processedRecords}/${totalRecords} records for ${botReviews[0].event_date}`);
+      // console.log(`Upserted batch: ${batch.length}/${totalRecords} records for ${botReviews[0].event_date}`);
     }
     
     console.log(`Completed upsert of ${totalRecords} bot review records for ${botReviews[0].event_date}`);
   } catch (error) {
     console.error(`Failed to upsert bot reviews for ${botReviews[0].event_date}:`, error);
     throw error;
+  }
+}
+
+/**
+ * Get data from materialized views (weekly or monthly)
+ * @param viewType Type of view to query ('weekly' or 'monthly')
+ * @param startDate Start date for the query (YYYY-MM-DD format)
+ * @param endDate End date for the query (YYYY-MM-DD format)
+ * @returns Promise<MaterializedViewData[]> Array of materialized view data
+ */
+export async function getMaterializedViewData(
+  viewType: MaterializedViewType,
+  startDate: string,
+  endDate: string
+): Promise<MaterializedViewData[]> {
+  const sql = getSql();
+  
+  try {
+    const viewName = viewType === 'weekly' ? 'vw_bot_repo_count_7d' : 'vw_bot_repo_count_30d';
+    
+    const query = `
+      SELECT 
+        event_date,
+        bot_id,
+        repo_count
+      FROM ${viewName}
+      WHERE event_date BETWEEN $1 AND $2
+      ORDER BY event_date DESC, repo_count DESC;
+    `;
+
+    const results = await sql(query, [startDate, endDate]);
+    
+    return results.map((row: Record<string, unknown>) => ({
+      event_date: String(row.event_date),
+      bot_id: Number(row.bot_id),
+      repo_count: Number(row.repo_count)
+    }));
+  } catch (error) {
+    console.error(`Failed to get ${viewType} materialized view data:`, error);
+    throw error;
+  }
+}
+
+/**
+ * Get tool names for bot IDs
+ * @param botIds Array of bot IDs
+ * @returns Promise<Record<number, string>> Mapping of bot ID to tool name
+ */
+export async function getToolNamesForBotIds(botIds: number[]): Promise<Record<number, string>> {
+  try {
+    // Create mapping from devtools.json
+    const toolMapping: Record<number, string> = {};
+    devtools.forEach(tool => {
+      toolMapping[parseInt(tool.id)] = tool.account_login;
+    });
+    
+    const result: Record<number, string> = {};
+    botIds.forEach(botId => {
+      if (toolMapping[botId]) {
+        result[botId] = toolMapping[botId];
+      } else {
+        result[botId] = `bot-${botId}`;
+      }
+    });
+    
+    return result;
+  } catch (error) {
+    console.error('Failed to get tool names for bot IDs:', error);
+    throw error;
+  }
+}
+
+/**
+ * Get active repos count for a date range
+ * @param startDate Start date (YYYY-MM-DD format)
+ * @param endDate End date (YYYY-MM-DD format)
+ * @returns Promise<number> Total active repos count
+ */
+export async function getActiveReposForDateRange(startDate: string, endDate: string): Promise<number> {
+  const sql = getSql();
+  
+  try {
+    const query = `
+      SELECT SUM(active_repos_count) as total_active_repos
+      FROM active_repos_daily
+      WHERE event_date BETWEEN $1 AND $2;
+    `;
+
+    const results = await sql(query, [startDate, endDate]);
+    return results[0]?.total_active_repos || 0;
+  } catch (error) {
+    console.error('Failed to get active repos for date range:', error);
+    return 0;
   }
 }

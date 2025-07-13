@@ -1,6 +1,7 @@
 import { BigQuery } from '@google-cloud/bigquery';
 import devtools from '../devtools.json';
-import { BotReviewInRepoDate } from '@/types/api';
+import { BotReviewInRepoDate, MaterializedViewData, MaterializedViewType } from '@/types/api';
+import { getMaterializedViewData } from './database';
 
 // Type for raw BigQuery row data
 interface BigQueryRow {
@@ -92,6 +93,46 @@ export async function getBotReviewsForDay(
     return convertedRows as BotReviewInRepoDate[];
   } catch (error) {
     console.error('BigQuery bot reviews query failed:', error);
+    throw error;
+  }
+}
+
+/**
+ * Get leaderboard data for a specific day using materialized views
+ * @param targetDate Target date for the query (YYYY-MM-DD format)
+ * @param viewType Type of view to use ('weekly' or 'monthly')
+ * @returns Promise<MaterializedViewData[]> Array of materialized view data
+ */
+export async function getLeaderboardDataForDay(
+  targetDate: string,
+  viewType: MaterializedViewType = 'weekly'
+): Promise<MaterializedViewData[]> {
+  try {
+    const data = await getMaterializedViewData(viewType, targetDate, targetDate);
+    return data;
+  } catch (error) {
+    console.error('Failed to get leaderboard data for day:', error);
+    throw error;
+  }
+}
+
+/**
+ * Get leaderboard data for a date range using materialized views
+ * @param startDate Start date for the query (YYYY-MM-DD format)
+ * @param endDate End date for the query (YYYY-MM-DD format)
+ * @param viewType Type of view to use ('weekly' or 'monthly')
+ * @returns Promise<MaterializedViewData[]> Array of materialized view data
+ */
+export async function getLeaderboardDataForDateRange(
+  startDate: string,
+  endDate: string,
+  viewType: MaterializedViewType = 'weekly'
+): Promise<MaterializedViewData[]> {
+  try {
+    const data = await getMaterializedViewData(viewType, startDate, endDate);
+    return data;
+  } catch (error) {
+    console.error('Failed to get leaderboard data for date range:', error);
     throw error;
   }
 }
