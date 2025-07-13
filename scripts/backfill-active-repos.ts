@@ -1,5 +1,5 @@
-import { getBotReviewsForDay } from '../src/lib/bigquery';
-import { upsertBotReviewsForDate } from '../src/lib/database';
+import { getActiveReposForDay } from '../src/lib/bigquery';
+import { upsertActiveReposForDate } from '../src/lib/database';
 import dotenv from 'dotenv';
 
 dotenv.config({ path: '.env.local' });
@@ -62,18 +62,13 @@ async function processDate(targetDate: string, semaphore: Semaphore): Promise<vo
   try {
     console.log(`\nProcessing date: ${targetDate}`);
     
-    // Fetch bot reviews for the date
-    const botReviews = await getBotReviewsForDay(targetDate);
-    
-    if (botReviews.length === 0) {
-      console.log(`No bot reviews found for ${targetDate}`);
-      return;
-    }
+    // Fetch active repos count for the date
+    const activeRepoCount = await getActiveReposForDay(targetDate);
     
     // Upsert the data
-    await upsertBotReviewsForDate(botReviews);
+    await upsertActiveReposForDate(targetDate, activeRepoCount);
     
-    console.log(`Successfully processed ${targetDate}`);
+    console.log(`Successfully processed ${targetDate} with ${activeRepoCount} active repos`);
   } catch (error) {
     console.error(`Error processing ${targetDate}:`, error);
     throw error;
@@ -82,8 +77,8 @@ async function processDate(targetDate: string, semaphore: Semaphore): Promise<vo
   }
 }
 
-async function backfillBotReviewsDateRange(startDate: Date, endDate: Date, maxConcurrency: number = 4): Promise<void> {
-  console.log(`Starting bot reviews backfill from ${formatDate(startDate)} to ${formatDate(endDate)}`);
+async function backfillActiveReposDateRange(startDate: Date, endDate: Date, maxConcurrency: number = 4): Promise<void> {
+  console.log(`Starting active repos backfill from ${formatDate(startDate)} to ${formatDate(endDate)}`);
   console.log(`Max concurrency: ${maxConcurrency}`);
 
   const semaphore = new Semaphore(maxConcurrency);
@@ -117,7 +112,7 @@ async function backfillBotReviewsDateRange(startDate: Date, endDate: Date, maxCo
   const endTime = Date.now();
   const duration = (endTime - startTime) / 1000;
   
-  console.log(`\nBot reviews backfill completed in ${duration.toFixed(2)} seconds`);
+  console.log(`\nActive repos backfill completed in ${duration.toFixed(2)} seconds`);
   console.log(`Average time per date: ${(duration / allDates.length).toFixed(2)} seconds`);
 }
 
@@ -134,7 +129,7 @@ async function main(): Promise<void> {
   } else if (args.length === 1) {
     const daysBack = parseInt(args[0]);
     if (isNaN(daysBack)) {
-      console.error('Usage: pnpm run backfill-bot-reviews [days_back] [concurrency] or pnpm run backfill-bot-reviews [start_date] [end_date] [concurrency]');
+      console.error('Usage: pnpm run backfill-active-repos [days_back] [concurrency] or pnpm run backfill-active-repos [start_date] [end_date] [concurrency]');
       process.exit(1);
     }
     endDate = new Date();
@@ -146,7 +141,7 @@ async function main(): Promise<void> {
       // Format: [days_back] [concurrency]
       const daysBack = parseInt(args[0]);
       if (isNaN(daysBack)) {
-        console.error('Usage: pnpm run backfill-bot-reviews [days_back] [concurrency] or pnpm run backfill-bot-reviews [start_date] [end_date] [concurrency]');
+        console.error('Usage: pnpm run backfill-active-repos [days_back] [concurrency] or pnpm run backfill-active-repos [start_date] [end_date] [concurrency]');
         process.exit(1);
       }
       endDate = new Date();
@@ -173,7 +168,7 @@ async function main(): Promise<void> {
       process.exit(1);
     }
   } else {
-    console.error('Usage: pnpm run backfill-bot-reviews [days_back] [concurrency] or pnpm run backfill-bot-reviews [start_date] [end_date] [concurrency]');
+    console.error('Usage: pnpm run backfill-active-repos [days_back] [concurrency] or pnpm run backfill-active-repos [start_date] [end_date] [concurrency]');
     process.exit(1);
   }
 
@@ -182,7 +177,7 @@ async function main(): Promise<void> {
     console.warn(`Concurrency limit ${maxConcurrency} seems extreme. Consider using 1-8 for optimal performance.`);
   }
 
-  await backfillBotReviewsDateRange(startDate, endDate, maxConcurrency);
+  await backfillActiveReposDateRange(startDate, endDate, maxConcurrency);
 }
 
 if (require.main === module) {

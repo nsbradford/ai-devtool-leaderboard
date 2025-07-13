@@ -9,6 +9,7 @@
     "lint": "next lint",
     "backfill": "tsx scripts/backfill.ts",
     "backfill-bot-reviews": "tsx scripts/backfill-bot-reviews.ts",
+    "backfill-active-repos": "tsx scripts/backfill-active-repos.ts",
     "setup-db": "tsx scripts/setup-database.ts",
     "test-api": "tsx scripts/test-api.ts"
   },
