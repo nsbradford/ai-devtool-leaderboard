@@ -1,4 +1,5 @@
-import { getLeaderboardDataForDay, getLeaderboardDataForDateRange } from '../src/lib/bigquery';
+import { getLeaderboardDataForDateRange } from '@/lib/database';
+import { getLeaderboardDataForDay } from '@/lib/database';
 
 async function testAPI() {
   console.log('🧪 Testing new API functionality...\n');

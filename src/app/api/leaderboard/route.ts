@@ -1,49 +1,66 @@
 import { NextResponse } from 'next/server';
 import type { LeaderboardData, MaterializedViewType, MaterializedViewData } from '@/types/api';
-import { getLeaderboardDataForDateRange, getLeaderboardDataForDay } from '@/lib/bigquery';
-import { getToolNamesForBotIds } from '@/lib/database';
+import { getLeaderboardDataForDateRange } from '@/lib/database';
 
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const startDate = searchParams.get('startDate');
     const endDate = searchParams.get('endDate');
-    const singleDay = searchParams.get('day');
     const viewType = (searchParams.get('viewType') as MaterializedViewType) || 'weekly';
     
-    const defaultEndDate = new Date().toISOString().split('T')[0];
+    // Validate viewType
+    if (!['weekly', 'monthly'].includes(viewType)) {
+      return NextResponse.json(
+        { error: 'Invalid viewType. Must be "weekly" or "monthly"' },
+        { status: 400 }
+      );
+    }
+    
+    // Set default dates (30 days ago to yesterday)
+    const defaultEndDate = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString().split('T')[0];
     const defaultStartDate = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
     
-    let materializedData: MaterializedViewData[];
+    const queryStartDate = startDate || defaultStartDate;
+    const queryEndDate = endDate || defaultEndDate;
     
-    if (singleDay) {
-      // Single day query
-      console.log(`Fetching ${viewType} leaderboard data for single day: ${singleDay}`);
-      materializedData = await getLeaderboardDataForDay(singleDay, viewType);
-    } else {
-      // Date range query
-      const queryStartDate = startDate || defaultStartDate;
-      const queryEndDate = endDate || defaultEndDate;
-      
-      console.log(`Fetching ${viewType} leaderboard data from ${queryStartDate} to ${queryEndDate}`);
-      materializedData = await getLeaderboardDataForDateRange(queryStartDate, queryEndDate, viewType);
+    // Validate date format and order
+    const startDateObj = new Date(queryStartDate);
+    const endDateObj = new Date(queryEndDate);
+    
+    if (isNaN(startDateObj.getTime()) || isNaN(endDateObj.getTime())) {
+      return NextResponse.json(
+        { error: 'Invalid date format. Use YYYY-MM-DD' },
+        { status: 400 }
+      );
     }
+    
+    if (startDateObj > endDateObj) {
+      return NextResponse.json(
+        { error: 'Start date must be before or equal to end date' },
+        { status: 400 }
+      );
+    }
+    
+    console.log(`Fetching ${viewType} leaderboard data from ${queryStartDate} to ${queryEndDate}`);
+    
+    const materializedData = await getLeaderboardDataForDateRange(queryStartDate, queryEndDate, viewType);
 
-    if (materializedData.length === 0) {
+    // Return empty data structure if no data
+    if (!materializedData || materializedData.length === 0) {
       return NextResponse.json({
         timestamps: [],
-        active_repos: [],
         tools: {}
       });
     }
 
-    // Get unique bot IDs and fetch tool names
-    const botIds = [...new Set(materializedData.map(item => item.bot_id))];
-    const toolNames = await getToolNamesForBotIds(botIds);
-
-    // Group data by date
+    // Group data by date and ensure consistent structure
     const dateGroups = new Map<string, MaterializedViewData[]>();
+    const allBotIds = new Set<number>();
+    
+    // First pass: collect all bot IDs and group by date
     materializedData.forEach(item => {
+      allBotIds.add(item.bot_id);
       const date = item.event_date;
       if (!dateGroups.has(date)) {
         dateGroups.set(date, []);
@@ -51,41 +68,42 @@ export async function GET(request: Request) {
       dateGroups.get(date)!.push(item);
     });
 
-    // Convert to LeaderboardData format
-    const sortedDates = Array.from(dateGroups.keys()).sort();
+    // Get sorted dates (chronological order)
+    const sortedDates = Array.from(dateGroups.keys()).sort((a, b) => {
+      return new Date(a).getTime() - new Date(b).getTime();
+    });
+    
+    // Convert dates to timestamps
     const timestamps = sortedDates.map(date => Math.floor(new Date(date).getTime() / 1000));
     
+    // Initialize tools object with all bot IDs
     const tools: Record<string, number[]> = {};
+    const botIdStrings = Array.from(allBotIds).map(id => id.toString());
     
-    // Initialize tools with empty arrays
-    Object.values(toolNames).forEach(toolName => {
-      tools[toolName] = new Array(sortedDates.length).fill(0);
+    botIdStrings.forEach(botId => {
+      tools[botId] = new Array(sortedDates.length).fill(0);
     });
 
-    // Fill in the data
+    // Fill in the data for each date
     sortedDates.forEach((date, dateIndex) => {
-      const dayData = dateGroups.get(date)!;
+      const dayData = dateGroups.get(date) || [];
       
       dayData.forEach(item => {
-        const toolName = toolNames[item.bot_id] || `bot-${item.bot_id}`;
-        if (!tools[toolName]) {
-          tools[toolName] = new Array(sortedDates.length).fill(0);
+        const toolId = item.bot_id.toString();
+        // Ensure the tool exists in our tools object
+        if (!tools[toolId]) {
+          tools[toolId] = new Array(sortedDates.length).fill(0);
         }
-        tools[toolName][dateIndex] = item.repo_count;
+        tools[toolId][dateIndex] = item.repo_count;
       });
-    });
-
-    // Calculate total active repos (sum of all tools for each day)
-    const active_repos = sortedDates.map((date) => {
-      const dayData = dateGroups.get(date)!;
-      return dayData.reduce((sum, item) => sum + item.repo_count, 0);
     });
 
     const leaderboardData: LeaderboardData = {
       timestamps,
-      active_repos,
       tools
     };
+    
+    console.log(`Returning leaderboard data with ${timestamps.length} timestamps and ${Object.keys(tools).length} tools`);
 
     return NextResponse.json(leaderboardData);
   } catch (error) {

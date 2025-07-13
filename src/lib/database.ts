@@ -116,7 +116,7 @@ export async function getMaterializedViewData(
         repo_count
       FROM ${viewName}
       WHERE event_date BETWEEN $1 AND $2
-      ORDER BY event_date DESC, repo_count DESC;
+      ORDER BY event_date ASC;
     `;
 
     console.log(`Running query against ${viewName} for dates ${startDate} to ${endDate}`);
@@ -133,31 +133,25 @@ export async function getMaterializedViewData(
   }
 }
 
+
 /**
- * Get tool names for bot IDs
- * @param botIds Array of bot IDs
- * @returns Promise<Record<number, string>> Mapping of bot ID to tool name
+ * Get leaderboard data for a date range using materialized views
+ * @param startDate Start date for the query (YYYY-MM-DD format)
+ * @param endDate End date for the query (YYYY-MM-DD format)
+ * @param viewType Type of view to use ('weekly' or 'monthly')
+ * @returns Promise<MaterializedViewData[]> Array of materialized view data
  */
-export async function getToolNamesForBotIds(botIds: number[]): Promise<Record<number, string>> {
+
+export async function getLeaderboardDataForDateRange(
+  startDate: string,
+  endDate: string,
+  viewType: MaterializedViewType = 'weekly'
+): Promise<MaterializedViewData[]> {
   try {
-    // Create mapping from devtools.json
-    const toolMapping: Record<number, string> = {};
-    devtools.forEach(tool => {
-      toolMapping[parseInt(tool.id)] = tool.account_login;
-    });
-    
-    const result: Record<number, string> = {};
-    botIds.forEach(botId => {
-      if (toolMapping[botId]) {
-        result[botId] = toolMapping[botId];
-      } else {
-        result[botId] = `bot-${botId}`;
-      }
-    });
-    
-    return result;
+    const data = await getMaterializedViewData(viewType, startDate, endDate);
+    return data;
   } catch (error) {
-    console.error('Failed to get tool names for bot IDs:', error);
+    console.error('Failed to get leaderboard data for date range:', error);
     throw error;
   }
 }

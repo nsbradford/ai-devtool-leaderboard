@@ -18,12 +18,15 @@ interface ChartDataPoint {
 }
 
 export default function LeaderboardChart() {
+  // Debug: Only show these tools for debugging (using tool IDs)
+  const DEBUG_TOOL_IDS = null; ['65095814', '189301087']; // Ellipsis, Windsurf
+  
   const [stats, setStats] = useState<LeaderboardStats | null>(null);
   const [devtools, setDevtools] = useState<DevTool[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [dateRange, setDateRange] = useState<DateRange>({
-    startDate: '2025-03-18',
+    startDate: '2025-06-01',
     endDate: format(new Date(Date.now() - 24 * 60 * 60 * 1000), 'yyyy-MM-dd')
   });
   const [viewType, setViewType] = useState<MaterializedViewType>('weekly');
@@ -67,40 +70,14 @@ export default function LeaderboardChart() {
         }
         const data: LeaderboardData = await response.json();
         
-        if (data.active_repos.length === 0 || Object.keys(data.tools).length === 0) {
+        if (data.timestamps.length === 0 || Object.keys(data.tools).length === 0) {
           setStats({
-            total_active_repos: 0,
-            rankings: [],
             data
           });
           return;
         }
-        
-        const latestIndex = data.active_repos.length - 1;
-        const totalActiveRepos = data.active_repos[latestIndex] || 0;
-        
-        const rankings: ToolRanking[] = Object.entries(data.tools)
-          .map(([name, counts]) => {
-            const countsArray = counts as number[];
-            const currentCount = countsArray[latestIndex] || 0;
-            const previousCount = countsArray[latestIndex - 1] || currentCount;
-            
-            let trend: 'up' | 'down' | 'stable' = 'stable';
-            if (currentCount > previousCount) trend = 'up';
-            else if (currentCount < previousCount) trend = 'down';
-            
-            return {
-              name,
-              current_count: currentCount,
-              percentage: 0, // No percentage calculation
-              trend
-            };
-          })
-          .sort((a, b) => b.current_count - a.current_count);
 
         setStats({
-          total_active_repos: totalActiveRepos,
-          rankings,
           data
         });
       } catch (err) {
@@ -138,15 +115,15 @@ export default function LeaderboardChart() {
     );
   }
 
-  // Map bot account_logins to display names
-  const getToolDisplayName = (accountLogin: string): string => {
-    const devtool = devtools.find((dt: DevTool) => dt.account_login === accountLogin);
-    const displayName = devtool ? devtool.name : accountLogin;
+  // Map tool IDs to display names
+  const getToolDisplayName = (toolId: string): string => {
+    const devtool = devtools.find((dt: DevTool) => dt.id === toolId);
+    const displayName = devtool ? devtool.name : `Tool ${toolId}`;
     return displayName;
   };
 
   // Generate a random color for each tool
-  const generateToolColors = (toolNames: string[]): Record<string, string> => {
+  const generateToolColors = (toolIds: string[]): Record<string, string> => {
     const colors = [
       '#8884d8', '#82ca9d', '#ffc658', '#ff7300', '#00ff88', '#ff0088', '#8800ff',
       '#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57', '#ff9ff3', '#54a0ff',
@@ -156,8 +133,8 @@ export default function LeaderboardChart() {
     ];
     
     const toolColors: Record<string, string> = {};
-    toolNames.forEach((toolName, index) => {
-      toolColors[toolName] = colors[index % colors.length];
+    toolIds.forEach((toolId, index) => {
+      toolColors[toolId] = colors[index % colors.length];
     });
     
     return toolColors;
@@ -201,19 +178,23 @@ export default function LeaderboardChart() {
       
       const dataPoint: ChartDataPoint = {
         date,
-        timestamp,
-        active_repos: stats.data.active_repos[index]
+        timestamp
       };
 
-      Object.entries(stats.data.tools).forEach(([toolName, counts]) => {
-        const countsArray = counts as number[];
-        const displayName = getToolDisplayName(toolName);
-        dataPoint[displayName] = countsArray[index];
+      Object.entries(stats.data.tools).forEach(([toolId, counts]) => {
+        // Only include debug tools
+        if (DEBUG_TOOL_IDS === null || DEBUG_TOOL_IDS.includes(toolId)) {
+          const countsArray = counts as number[];
+          const displayName = getToolDisplayName(toolId);
+          dataPoint[displayName] = countsArray[index];
+        }
       });
 
       return dataPoint;
     })
     .sort((a, b) => a.timestamp - b.timestamp);
+
+
 
 
   return (
@@ -307,63 +288,15 @@ export default function LeaderboardChart() {
         </CardContent>
       </Card>
 
-      {/* Rankings Section - Commented out
+      {/* Chart Section */}
       <Card>
         <CardHeader>
-          <CardTitle>Current Rankings</CardTitle>
+          <CardTitle>Usage Trends ({viewType === 'weekly' ? '7-Day' : '30-Day'} View)
+            {/* - Debug: {DEBUG_TOOL_IDS.map(id => getToolDisplayName(id)).join(' & ')} only */}</CardTitle>
           <CardDescription>
-            Based on {stats.total_active_repos.toLocaleString()} active repositories (had a PR review in the last {viewType === 'weekly' ? 'week' : 'month'})
+            Number of repositories using each AI code review tool
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b">
-                  <th className="text-left py-2 px-4 font-medium">#</th>
-                  <th className="text-left py-2 px-4 font-medium">Tool</th>
-                  <th className="text-right py-2 px-4 font-medium">Repositories</th>
-                  <th className="text-center py-2 px-4 font-medium">Trend</th>
-                </tr>
-              </thead>
-              <tbody>
-                {stats.rankings.map((tool, index) => (
-                  <tr key={tool.name} className="border-b hover:bg-muted/50">
-                    <td className="py-3 px-4 font-bold text-muted-foreground">
-                      {index + 1}
-                    </td>
-                    <td className="py-3 px-4 font-medium">
-                      {tool.name}
-                    </td>
-                    <td className="py-3 px-4 text-right">
-                      {tool.current_count.toLocaleString()}
-                    </td>
-                    <td className="py-3 px-4 text-center">
-                      <span className={`text-sm font-medium ${
-                        tool.trend === 'up' ? 'text-green-600' : 
-                        tool.trend === 'down' ? 'text-red-600' : 
-                        'text-gray-600'
-                      }`}>
-                        {tool.trend === 'up' ? '↗' : tool.trend === 'down' ? '↘' : '→'}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </CardContent>
-      </Card>
-      */}
-
-      {/* Chart Section */}
-              <Card>
-          <CardHeader>
-            <CardTitle>Usage Trends ({viewType === 'weekly' ? '7-Day' : '30-Day'} View)</CardTitle>
-            <CardDescription>
-              Number of repositories using each AI code review tool
-            </CardDescription>
-          </CardHeader>
         <CardContent>
           <div className="h-96">
             <ResponsiveContainer width="100%" height="100%">
@@ -387,23 +320,84 @@ export default function LeaderboardChart() {
                   labelFormatter={(label) => `Date: ${label}`}
                 />
                 <Legend />
-                {Object.keys(stats.data.tools).map((toolName) => {
-                  const toolColors = generateToolColors(Object.keys(stats.data.tools));
-                  const displayName = getToolDisplayName(toolName);
-                  return (
-                    <Line
-                      key={toolName}
-                      type="monotone"
-                      dataKey={displayName}
-                      stroke={toolColors[toolName] || "#8884d8"}
-                      strokeWidth={2}
-                      name={displayName}
-                      dot={false}
-                    />
-                  );
-                })}
+                {Object.keys(stats.data.tools)
+                  .filter(toolId => DEBUG_TOOL_IDS === null || DEBUG_TOOL_IDS.includes(toolId))
+                  .map((toolId) => {
+                    const toolColors = generateToolColors(DEBUG_TOOL_IDS || []);
+                    const displayName = getToolDisplayName(toolId);
+                    return (
+                      <Line
+                        key={toolId}
+                        type="monotone"
+                        dataKey={displayName}
+                        stroke={toolColors[toolId] || "#8884d8"}
+                        strokeWidth={2}
+                        name={displayName}
+                        dot={false}
+                      />
+                    );
+                  })}
               </LineChart>
             </ResponsiveContainer>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Rankings Section */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">Current Rankings - Debug: {DEBUG_TOOL_IDS === null ? 'all' : DEBUG_TOOL_IDS.map(id => getToolDisplayName(id)).join(' & ')} only</CardTitle>
+          <CardDescription className="text-xs">
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-2">
+            {(() => {
+              const latestIndex = stats.data.timestamps.length - 1;
+              const rankings = Object.entries(stats.data.tools)
+                .filter(([toolId]) => DEBUG_TOOL_IDS === null || DEBUG_TOOL_IDS.includes(toolId))
+                .map(([toolId, counts]) => {
+                  const countsArray = counts as number[];
+                  const currentCount = countsArray[latestIndex] || 0;
+                  
+                  return {
+                    id: toolId,
+                    current_count: currentCount
+                  };
+                })
+                .sort((a, b) => b.current_count - a.current_count);
+
+              return rankings.map((tool, index) => {
+                const devtool = devtools.find((dt: DevTool) => dt.id === tool.id);
+                const avatarUrl = devtool?.avatar_url;
+                const displayName = getToolDisplayName(tool.id);
+                
+                return (
+                  <div key={tool.id} className="flex items-center justify-between p-2 rounded-lg border hover:bg-muted/50 transition-colors">
+                    <div className="flex items-center space-x-2">
+                      <span className="text-xs font-bold text-muted-foreground min-w-[1.5rem]">
+                        {index + 1}
+                      </span>
+                      {avatarUrl && (
+                        <img 
+                          src={avatarUrl} 
+                          alt={`${displayName} avatar`}
+                          className="w-6 h-6 rounded-full"
+                          onError={(e) => {
+                            // Fallback to a placeholder if image fails to load
+                            e.currentTarget.style.display = 'none';
+                          }}
+                        />
+                      )}
+                      <span className="text-sm font-medium">{displayName}</span>
+                    </div>
+                    <span className="text-xs text-muted-foreground">
+                      {tool.current_count.toLocaleString()}
+                    </span>
+                  </div>
+                );
+              });
+            })()}
           </div>
         </CardContent>
       </Card>

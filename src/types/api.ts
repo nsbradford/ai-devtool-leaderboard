@@ -5,10 +5,14 @@ export interface BotReviewInRepoDate {
   bot_id: number;
 }
 
+
+export interface LeaderboardStats {
+  data: LeaderboardData;
+}
+
 export interface LeaderboardData {
   timestamps: number[];
-  active_repos: number[];
-  tools: Record<string, number[]>;
+  tools: Record<string, number[]>; // toolname -> repo_count[]
 }
 
 export interface ToolRanking {
@@ -16,12 +20,6 @@ export interface ToolRanking {
   current_count: number;
   percentage: number;
   trend: 'up' | 'down' | 'stable';
-}
-
-export interface LeaderboardStats {
-  total_active_repos: number;
-  rankings: ToolRanking[];
-  data: LeaderboardData;
 }
 
 export interface DateRange {
@@ -35,7 +33,6 @@ export interface MaterializedViewData {
   event_date: string;
   bot_id: number;
   repo_count: number;
-  tool_name?: string;
 }
 
 export interface DevTool {
@@ -46,9 +43,9 @@ export interface DevTool {
   created_at: string;
 }
 
-export interface LeaderboardQueryParams {
-  startDate?: string;
-  endDate?: string;
-  day?: string;
-  viewType?: MaterializedViewType;
-}
+// export interface LeaderboardQueryParams {
+//   startDate?: string;
+//   endDate?: string;
+//   day?: string;
+//   viewType?: MaterializedViewType;
+// }
