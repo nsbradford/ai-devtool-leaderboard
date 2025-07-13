@@ -32,7 +32,7 @@ export default function LeaderboardChart() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [dateRange, setDateRange] = useState<DateRange>({
-    startDate: '2025-01-01',
+    startDate: '2025-05-01',
     endDate: format(new Date(Date.now() - 24 * 60 * 60 * 1000), 'yyyy-MM-dd')
   });
   const [viewType, setViewType] = useState<MaterializedViewType>('weekly');
@@ -148,26 +148,28 @@ export default function LeaderboardChart() {
     );
   }
 
-  const chartData: ChartDataPoint[] = stats.data.timestamps.map((timestamp, index) => {
-    const date = new Date(timestamp * 1000).toLocaleDateString('en-US', { 
-      month: 'short', 
-      day: 'numeric',
-      year: stats.data.timestamps.length > 365 ? '2-digit' : undefined
-    });
-    
-    const dataPoint: ChartDataPoint = {
-      date,
-      timestamp,
-      active_repos: stats.data.active_repos[index]
-    };
+  const chartData: ChartDataPoint[] = stats.data.timestamps
+    .map((timestamp, index) => {
+      const date = new Date(timestamp * 1000).toLocaleDateString('en-US', { 
+        month: 'short', 
+        day: 'numeric',
+        year: stats.data.timestamps.length > 365 ? '2-digit' : undefined
+      });
+      
+      const dataPoint: ChartDataPoint = {
+        date,
+        timestamp,
+        active_repos: stats.data.active_repos[index]
+      };
 
-    Object.entries(stats.data.tools).forEach(([toolName, counts]) => {
-      const countsArray = counts as number[];
-      dataPoint[toolName] = countsArray[index];
-    });
+      Object.entries(stats.data.tools).forEach(([toolName, counts]) => {
+        const countsArray = counts as number[];
+        dataPoint[toolName] = countsArray[index];
+      });
 
-    return dataPoint;
-  });
+      return dataPoint;
+    })
+    .sort((a, b) => a.timestamp - b.timestamp);
 
   return (
     <div className="container mx-auto p-6 space-y-6">

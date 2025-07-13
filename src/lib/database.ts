@@ -119,6 +119,7 @@ export async function getMaterializedViewData(
       ORDER BY event_date DESC, repo_count DESC;
     `;
 
+    console.log(`Running query against ${viewName} for dates ${startDate} to ${endDate}`);
     const results = await sql(query, [startDate, endDate]);
     
     return results.map((row: Record<string, unknown>) => ({
@@ -161,26 +162,3 @@ export async function getToolNamesForBotIds(botIds: number[]): Promise<Record<nu
   }
 }
 
-/**
- * Get active repos count for a date range
- * @param startDate Start date (YYYY-MM-DD format)
- * @param endDate End date (YYYY-MM-DD format)
- * @returns Promise<number> Total active repos count
- */
-export async function getActiveReposForDateRange(startDate: string, endDate: string): Promise<number> {
-  const sql = getSql();
-  
-  try {
-    const query = `
-      SELECT SUM(active_repos_count) as total_active_repos
-      FROM active_repos_daily
-      WHERE event_date BETWEEN $1 AND $2;
-    `;
-
-    const results = await sql(query, [startDate, endDate]);
-    return results[0]?.total_active_repos || 0;
-  } catch (error) {
-    console.error('Failed to get active repos for date range:', error);
-    return 0;
-  }
-}
