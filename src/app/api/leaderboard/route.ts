@@ -1,82 +1,79 @@
 import { NextResponse } from 'next/server';
 import type { LeaderboardData } from '@/types/api';
-import { getSnapshotsInDateRange } from '@/lib/database';
+import { getLeaderboardDataForDateRange, getLeaderboardDataForDay } from '@/lib/bigquery';
 
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const startDate = searchParams.get('startDate');
     const endDate = searchParams.get('endDate');
+    const singleDay = searchParams.get('day'); // New parameter for single day queries
     
     const defaultEndDate = new Date().toISOString().split('T')[0];
     const defaultStartDate = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
     
-    const queryStartDate = startDate || defaultStartDate;
-    const queryEndDate = endDate || defaultEndDate;
+    let leaderboardData: LeaderboardData;
     
-    let snapshots = [];
-    try {
-      snapshots = await getSnapshotsInDateRange(queryStartDate, queryEndDate);
-    } catch (dbError) {
-      console.warn('Database connection failed, returning empty data:', dbError);
-      return NextResponse.json({
-        timestamps: [],
-        active_repos: [],
-        tools: {}
-      });
-    }
-    
-    if (snapshots.length === 0) {
-      return NextResponse.json({
-        timestamps: [],
-        active_repos: [],
-        tools: {}
-      });
-    }
-
-    const dateMap = new Map<string, Map<string, number>>();
-    const allTools = new Set<string>();
-    
-    for (const snapshot of snapshots) {
-      const dateKey = snapshot.date;
-      if (!dateMap.has(dateKey)) {
-        dateMap.set(dateKey, new Map());
+    if (singleDay) {
+      // Single day query - more efficient
+      console.log(`Fetching leaderboard data for single day: ${singleDay}`);
+      const dayResults = await getLeaderboardDataForDay(singleDay);
+      
+      // Convert to the expected format
+      const timestamp = Math.floor(new Date(singleDay).getTime() / 1000);
+      const tools: Record<string, number[]> = {};
+      
+      // Calculate total active repos from the percentage data
+      let totalActiveRepos = 0;
+      if (dayResults.length > 0) {
+        // Find the tool with the highest percentage to estimate total active repos
+        const maxPercentage = Math.max(...dayResults.map(r => r.pct_of_active_repos));
+        const maxRepoCount = Math.max(...dayResults.map(r => r.repo_count));
+        totalActiveRepos = Math.round((maxRepoCount / maxPercentage) * 100);
       }
       
-      const dayData = dateMap.get(dateKey)!;
-      dayData.set('total_active_repos', snapshot.total_active_repos);
-      dayData.set(snapshot.tool, snapshot.repo_count);
-      allTools.add(snapshot.tool);
-    }
-
-    const sortedDates = Array.from(dateMap.keys()).sort();
-    const timestamps = sortedDates.map(date => Math.floor(new Date(date).getTime() / 1000));
-    
-    const active_repos: number[] = [];
-    const tools: Record<string, number[]> = {};
-    
-    for (const tool of allTools) {
-      tools[tool] = [];
-    }
-    
-    for (const date of sortedDates) {
-      const dayData = dateMap.get(date)!;
-      const totalActiveRepos = dayData.get('total_active_repos') || 0;
-      active_repos.push(totalActiveRepos);
+      dayResults.forEach(result => {
+        tools[result.tool] = [result.repo_count];
+      });
       
-      for (const tool of allTools) {
-        const toolCount = dayData.get(tool) || 0;
-        tools[tool].push(toolCount);
-      }
+      leaderboardData = {
+        timestamps: [timestamp],
+        active_repos: [totalActiveRepos],
+        tools
+      };
+    } else {
+      // Date range query
+      const queryStartDate = startDate || defaultStartDate;
+      const queryEndDate = endDate || defaultEndDate;
+      
+      console.log(`Fetching leaderboard data from ${queryStartDate} to ${queryEndDate}`);
+      const rangeResults = await getLeaderboardDataForDateRange(queryStartDate, queryEndDate);
+      
+      // For date ranges, we need to aggregate the data differently
+      // This is a simplified approach - you might want to enhance this
+      const tools: Record<string, number[]> = {};
+      const allTools = new Set<string>();
+      
+      rangeResults.forEach(result => {
+        allTools.add(result.tool);
+        if (!tools[result.tool]) {
+          tools[result.tool] = [];
+        }
+        tools[result.tool].push(result.repo_count);
+      });
+      
+      // For now, we'll create a single data point representing the aggregated range
+      const midTimestamp = Math.floor((new Date(queryStartDate).getTime() + new Date(queryEndDate).getTime()) / 2000);
+      const totalActiveRepos = rangeResults.reduce((sum, result) => sum + result.repo_count, 0);
+      
+      leaderboardData = {
+        timestamps: [midTimestamp],
+        active_repos: [totalActiveRepos],
+        tools
+      };
     }
 
-    const data: LeaderboardData = {
-      timestamps,
-      active_repos,
-      tools
-    };
-
-    return NextResponse.json(data);
+    return NextResponse.json(leaderboardData);
   } catch (error) {
     console.error('Error fetching leaderboard data:', error);
     return NextResponse.json(
