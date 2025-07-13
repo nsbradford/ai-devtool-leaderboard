@@ -24,8 +24,9 @@ export default function LeaderboardChart() {
   const [devtools, setDevtools] = useState<DevTool[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  // we have fetched back to the start of 2023, but 2023-07-03 is the first date we have a bot review for.
   const [dateRange, setDateRange] = useState<DateRange>({
-    startDate: '2025-03-01',
+    startDate: '2023-07-01',
     endDate: format(new Date(Date.now() - 24 * 60 * 60 * 1000), 'yyyy-MM-dd')
   });
   const [viewType] = useState<MaterializedViewType>('weekly');
