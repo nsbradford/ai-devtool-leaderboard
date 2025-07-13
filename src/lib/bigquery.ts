@@ -2,12 +2,19 @@ import { BigQuery } from '@google-cloud/bigquery';
 import devtools from '../devtools.json';
 import { BotReviewInRepoDate } from '@/types/api';
 
+// Type for raw BigQuery row data
+interface BigQueryRow {
+  event_date: { value: string } | string;
+  repo_name: string;
+  bot_id: number;
+}
+
 
 /**
  * Parse base64-encoded Google Cloud service account credentials
  * @returns Parsed credentials object or undefined if not available
  */
-function parseGoogleCredentials(): any {
+function parseGoogleCredentials(): object | undefined {
   const credentialsBase64 = process.env.GOOGLE_APPLICATION_CREDENTIALS;
   if (!credentialsBase64) {
     return undefined;
@@ -77,8 +84,8 @@ export async function getBotReviewsForDay(
     // console.log(rows);
 
     // Convert BigQueryDate objects to strings in YYYY-MM-DD format
-    const convertedRows = rows.map((row: any) => ({
-      event_date: row.event_date?.value || String(row.event_date),
+    const convertedRows = rows.map((row: BigQueryRow) => ({
+      event_date: typeof row.event_date === 'object' ? row.event_date.value : String(row.event_date),
       repo_name: row.repo_name,
       bot_id: row.bot_id
     }));
