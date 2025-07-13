@@ -105,7 +105,16 @@ export async function GET(request: Request) {
     
     console.log(`Returning leaderboard data with ${timestamps.length} timestamps and ${Object.keys(tools).length} tools`);
 
-    return NextResponse.json(leaderboardData);
+    const now = new Date();
+    const tomorrow = new Date(now);
+    tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
+    tomorrow.setUTCHours(0, 0, 0, 0);
+    const secondsUntilMidnight = Math.floor((tomorrow.getTime() - now.getTime()) / 1000);
+
+    const response = NextResponse.json(leaderboardData);
+    response.headers.set('Cache-Control', `public, max-age=${secondsUntilMidnight}, s-maxage=${secondsUntilMidnight}`);
+    
+    return response;
   } catch (error) {
     console.error('Error fetching leaderboard data:', error);
     return NextResponse.json(

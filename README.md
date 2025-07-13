@@ -1,36 +1,97 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# AI DevTool Leaderboard
 
-## Getting Started
+A real-time leaderboard tracking the adoption of AI code review tools across open-source GitHub repositories. This project analyzes GitHub Archive data to show which AI tools are being used most frequently for code reviews.
 
-First, run the development server:
+## What it shows
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+The leaderboard displays:
+- **Usage trends**: Interactive charts showing AI tool adoption over time
+- **Current rankings**: Real-time rankings of tools by repository count
+- **Tool filtering**: Select specific tools to compare their adoption patterns
+- **Date range selection**: View historical data from July 2023 onwards
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## How it works
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. **Data Collection**: The system processes [GitHub Archive](https://www.gharchive.org/) data daily, analyzing pull request review events to identify AI bot activity
+2. **Bot Detection**: AI code review bots are identified by their GitHub account patterns (e.g., `coderabbitai[bot]`, `ellipsis-dev[bot]`)
+3. **Aggregation**: Data is aggregated into 7-day rolling windows to show repository counts where each AI tool was active
+4. **Visualization**: The frontend displays interactive charts and rankings using the processed data
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+The data pipeline runs daily and covers activity from July 2023 onwards, providing insights into the growing adoption of AI-powered code review tools in the open-source ecosystem.
 
-## Learn More
+## Local development
 
-To learn more about Next.js, take a look at the following resources:
+### Prerequisites
+- Node.js 18+ 
+- pnpm (recommended) or npm
+- PostgreSQL database (for data storage)
+- Google Cloud BigQuery access (for data processing)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Setup
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/nsbradford/ai-devtool-leaderboard.git
+   cd ai-devtool-leaderboard
+   ```
 
-## Deploy on Vercel
+2. **Install dependencies**
+   ```bash
+   pnpm install
+   ```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+3. **Environment configuration**
+   ```bash
+   cp .env.local.example .env.local
+   ```
+   
+   Fill in the required environment variables:
+   - `DATABASE_URL`: PostgreSQL connection string
+   - `GOOGLE_CLOUD_PROJECT_ID`: Your Google Cloud project ID
+   - `GOOGLE_APPLICATION_CREDENTIALS`: Base64-encoded service account JSON
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+4. **Database setup**
+   ```bash
+   pnpm run setup-db
+   ```
+
+5. **Start the development server**
+   ```bash
+   pnpm dev
+   ```
+
+6. **Open the application**
+   Navigate to [http://localhost:3000](http://localhost:3000)
+
+### Available scripts
+
+- `pnpm dev` - Start development server with Turbopack
+- `pnpm build` - Build for production
+- `pnpm start` - Start production server
+- `pnpm lint` - Run ESLint
+- `pnpm backfill` - Backfill historical data
+- `pnpm setup-db` - Initialize database schema
+
+### Development workflow
+
+The application uses:
+- **Next.js 15** with App Router
+- **TypeScript** for type safety
+- **Tailwind CSS** for styling
+- **Recharts** for data visualization
+- **SWR** for data fetching and caching
+- **Radix UI** for accessible components
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Make your changes
+4. Run tests and linting (`pnpm lint`)
+5. Commit your changes (`git commit -m 'Add amazing feature'`)
+6. Push to the branch (`git push origin feature/amazing-feature`)
+7. Open a Pull Request
+
+## License
+
+This project is open source and available under the [MIT License](LICENSE).
