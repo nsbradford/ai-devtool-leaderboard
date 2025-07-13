@@ -1,3 +1,10 @@
+
+export interface BotReviewInRepoDate {
+  event_date: string;
+  repo_name: string;
+  bot_id: number;
+}
+
 export interface LeaderboardData {
   timestamps: number[];
   active_repos: number[];
@@ -20,4 +27,20 @@ export interface LeaderboardStats {
 export interface DateRange {
   startDate: string;
   endDate: string;
+}
+
+export type MaterializedViewType = 'weekly' | 'monthly';
+
+export interface MaterializedViewData {
+  event_date: string;
+  bot_id: number;
+  repo_count: number;
+  tool_name?: string;
+}
+
+export interface LeaderboardQueryParams {
+  startDate?: string;
+  endDate?: string;
+  day?: string;
+  viewType?: MaterializedViewType;
 }

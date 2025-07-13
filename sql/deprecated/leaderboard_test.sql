@@ -8,16 +8,18 @@
 DECLARE lookback_days  INT64   DEFAULT 7;
 DECLARE start_date     DATE    DEFAULT DATE_SUB(CURRENT_DATE(), INTERVAL lookback_days DAY);
 
+-- To get user ID for a login:
+-- $ curl -s -H "Accept: application/vnd.github.v3+json"  "https://api.github.com/users/cubic-dev-ai%5Bbot%5D"
 DECLARE bot_list ARRAY<STRING> DEFAULT [
-  'ellipsis-dev[bot]',
-  'coderabbitai[bot]',
-  'greptile-apps[bot]',
-  'cubic-dev-ai[bot]',
-  'windsurf-bot[bot]',
-  'qodo-merge-pro[bot]',
-  'graphite-app[bot]',
-  'cursor[bot]'
---   'copilot-pull-request-reviewer[bot]' -- TODO doesn't seem to be working?
+  'ellipsis-dev[bot]', -- 65095814
+  'coderabbitai[bot]', -- 136622811
+  'greptile-apps[bot]', -- 165735046
+  'cubic-dev-ai[bot]', -- 191113872
+  'windsurf-bot[bot]', -- 189301087
+  'qodo-merge-pro[bot]', -- 151058649
+  'graphite-app[bot]', -- 96075541
+  'cursor[bot]' -- 206951365
+--   'copilot-pull-request-reviewer[bot]' -- 175728472 -- TODO doesn't seem to be working?
 ];
 
 -- 1️⃣  Pull only the months we need

@@ -1,69 +1,186 @@
 
-export interface Snapshot {
-  date: string;
-  tool: string;
-  repo_count: number;
-  pct_of_active_repos: number;
-  total_active_repos: number;
-}
+import { neon } from '@neondatabase/serverless';
+import { BotReviewInRepoDate, MaterializedViewData, MaterializedViewType } from '@/types/api';
+import devtools from '../devtools.json';
 
-const generateStubData = (): Snapshot[] => {
-  const today = new Date();
-  const data: Snapshot[] = [];
-  
-  for (let i = 6; i >= 0; i--) {
-    const date = new Date(today);
-    date.setDate(date.getDate() - i);
-    const dateStr = date.toISOString().split('T')[0];
-    
-    const baseRepos = 8000 + Math.floor(Math.random() * 400);
-    
-    data.push(
-      {
-        date: dateStr,
-        tool: 'GitHub Copilot',
-        repo_count: Math.floor(baseRepos * 0.25 + Math.random() * 100),
-        pct_of_active_repos: 25.3,
-        total_active_repos: baseRepos
-      },
-      {
-        date: dateStr,
-        tool: 'Cursor',
-        repo_count: Math.floor(baseRepos * 0.16 + Math.random() * 80),
-        pct_of_active_repos: 15.8,
-        total_active_repos: baseRepos
-      },
-      {
-        date: dateStr,
-        tool: 'Claude Dev',
-        repo_count: Math.floor(baseRepos * 0.11 + Math.random() * 60),
-        pct_of_active_repos: 11.4,
-        total_active_repos: baseRepos
-      }
-    );
+function getSql() {
+  if (!process.env.DATABASE_URL) {
+    throw new Error('DATABASE_URL environment variable is not set');
   }
-  
-  return data;
-};
-
-const STUB_DATA: Snapshot[] = generateStubData();
-
-export async function getSnapshotsInDateRange(startDate: string, endDate: string): Promise<Snapshot[]> {
-  console.log(`[STUB] Getting snapshots from ${startDate} to ${endDate}`);
-  
-  const start = new Date(startDate);
-  const end = new Date(endDate);
-  
-  return STUB_DATA.filter(snapshot => {
-    const snapshotDate = new Date(snapshot.date);
-    return snapshotDate >= start && snapshotDate <= end;
-  });
+  return neon(process.env.DATABASE_URL);
 }
 
-export async function initializeDatabase(): Promise<void> {
-  console.log('[STUB] Database initialization (stub mode)');
+/**
+ * Upsert active repos count for a specific date
+ * @param targetDate Date in YYYY-MM-DD format
+ * @param activeRepoCount Number of active repositories
+ * @returns Promise<void>
+ */
+export async function upsertActiveReposForDate(targetDate: string, activeRepoCount: number): Promise<void> {
+  const sql = getSql();
+  
+  try {
+    // First, ensure the active_repos_daily table exists
+    await sql(`
+      CREATE TABLE IF NOT EXISTS active_repos_daily (
+        event_date DATE PRIMARY KEY,
+        active_repos_count INTEGER NOT NULL,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      );
+    `);
+
+    // Upsert the active repos count
+    const query = `
+      INSERT INTO active_repos_daily (event_date, active_repos_count)
+      VALUES ($1, $2)
+      ON CONFLICT (event_date) 
+      DO UPDATE SET 
+        active_repos_count = EXCLUDED.active_repos_count,
+        updated_at = NOW();
+    `;
+
+    await sql(query, [targetDate, activeRepoCount]);
+    
+    console.log(`Upserted active repos data for ${targetDate}: ${activeRepoCount} repos`);
+  } catch (error) {
+    console.error(`Failed to upsert active repos for ${targetDate}:`, error);
+    throw error;
+  }
 }
 
-export async function insertSnapshot(snapshot: Snapshot): Promise<void> {
-  console.log('[STUB] Inserting snapshot:', snapshot);
+/**
+ * Upsert bot review data for a specific date in batches
+ * @param botReviews Array of bot review events to upsert
+ * @param batchSize Size of each batch (default: 1000)
+ * @returns Promise<void>
+ */
+export async function upsertBotReviewsForDate(botReviews: BotReviewInRepoDate[], batchSize: number = 1000): Promise<void> {
+  if (botReviews.length === 0) {
+    console.log('No bot reviews to upsert');
+    return;
+  }
+
+  const sql = getSql();
+  const totalRecords = botReviews.length;
+  
+  try {
+    // Process in batches
+    for (let i = 0; i < botReviews.length; i += batchSize) {
+      const batch = botReviews.slice(i, i + batchSize);
+      
+      // Build batch upsert query
+      const values = batch.map(review => 
+        `('${review.event_date}', ${review.bot_id}, '${review.repo_name.replace(/'/g, "''")}')`
+      ).join(', ');
+
+      const query = `
+        INSERT INTO bot_reviews_daily (event_date, bot_id, repo_name)
+        VALUES ${values}
+        ON CONFLICT (event_date, bot_id, repo_name) DO NOTHING;
+      `;
+
+      await sql(query);
+      
+      // console.log(`Upserted batch: ${batch.length}/${totalRecords} records for ${botReviews[0].event_date}`);
+    }
+    
+    console.log(`Completed upsert of ${totalRecords} bot review records for ${botReviews[0].event_date}`);
+  } catch (error) {
+    console.error(`Failed to upsert bot reviews for ${botReviews[0].event_date}:`, error);
+    throw error;
+  }
+}
+
+/**
+ * Get data from materialized views (weekly or monthly)
+ * @param viewType Type of view to query ('weekly' or 'monthly')
+ * @param startDate Start date for the query (YYYY-MM-DD format)
+ * @param endDate End date for the query (YYYY-MM-DD format)
+ * @returns Promise<MaterializedViewData[]> Array of materialized view data
+ */
+export async function getMaterializedViewData(
+  viewType: MaterializedViewType,
+  startDate: string,
+  endDate: string
+): Promise<MaterializedViewData[]> {
+  const sql = getSql();
+  
+  try {
+    const viewName = viewType === 'weekly' ? 'vw_bot_repo_count_7d' : 'vw_bot_repo_count_30d';
+    
+    const query = `
+      SELECT 
+        event_date,
+        bot_id,
+        repo_count
+      FROM ${viewName}
+      WHERE event_date BETWEEN $1 AND $2
+      ORDER BY event_date DESC, repo_count DESC;
+    `;
+
+    const results = await sql(query, [startDate, endDate]);
+    
+    return results.map((row: Record<string, unknown>) => ({
+      event_date: String(row.event_date),
+      bot_id: Number(row.bot_id),
+      repo_count: Number(row.repo_count)
+    }));
+  } catch (error) {
+    console.error(`Failed to get ${viewType} materialized view data:`, error);
+    throw error;
+  }
+}
+
+/**
+ * Get tool names for bot IDs
+ * @param botIds Array of bot IDs
+ * @returns Promise<Record<number, string>> Mapping of bot ID to tool name
+ */
+export async function getToolNamesForBotIds(botIds: number[]): Promise<Record<number, string>> {
+  try {
+    // Create mapping from devtools.json
+    const toolMapping: Record<number, string> = {};
+    devtools.forEach(tool => {
+      toolMapping[parseInt(tool.id)] = tool.account_login;
+    });
+    
+    const result: Record<number, string> = {};
+    botIds.forEach(botId => {
+      if (toolMapping[botId]) {
+        result[botId] = toolMapping[botId];
+      } else {
+        result[botId] = `bot-${botId}`;
+      }
+    });
+    
+    return result;
+  } catch (error) {
+    console.error('Failed to get tool names for bot IDs:', error);
+    throw error;
+  }
+}
+
+/**
+ * Get active repos count for a date range
+ * @param startDate Start date (YYYY-MM-DD format)
+ * @param endDate End date (YYYY-MM-DD format)
+ * @returns Promise<number> Total active repos count
+ */
+export async function getActiveReposForDateRange(startDate: string, endDate: string): Promise<number> {
+  const sql = getSql();
+  
+  try {
+    const query = `
+      SELECT SUM(active_repos_count) as total_active_repos
+      FROM active_repos_daily
+      WHERE event_date BETWEEN $1 AND $2;
+    `;
+
+    const results = await sql(query, [startDate, endDate]);
+    return results[0]?.total_active_repos || 0;
+  } catch (error) {
+    console.error('Failed to get active repos for date range:', error);
+    return 0;
+  }
 }

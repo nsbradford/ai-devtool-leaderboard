@@ -1,82 +1,93 @@
 import { NextResponse } from 'next/server';
-import type { LeaderboardData } from '@/types/api';
-import { getSnapshotsInDateRange } from '@/lib/database';
+import type { LeaderboardData, MaterializedViewType, MaterializedViewData } from '@/types/api';
+import { getLeaderboardDataForDateRange, getLeaderboardDataForDay } from '@/lib/bigquery';
+import { getToolNamesForBotIds } from '@/lib/database';
 
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const startDate = searchParams.get('startDate');
     const endDate = searchParams.get('endDate');
+    const singleDay = searchParams.get('day');
+    const viewType = (searchParams.get('viewType') as MaterializedViewType) || 'weekly';
     
     const defaultEndDate = new Date().toISOString().split('T')[0];
     const defaultStartDate = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
     
-    const queryStartDate = startDate || defaultStartDate;
-    const queryEndDate = endDate || defaultEndDate;
+    let materializedData: MaterializedViewData[];
     
-    let snapshots = [];
-    try {
-      snapshots = await getSnapshotsInDateRange(queryStartDate, queryEndDate);
-    } catch (dbError) {
-      console.warn('Database connection failed, returning empty data:', dbError);
-      return NextResponse.json({
-        timestamps: [],
-        active_repos: [],
-        tools: {}
-      });
-    }
-    
-    if (snapshots.length === 0) {
-      return NextResponse.json({
-        timestamps: [],
-        active_repos: [],
-        tools: {}
-      });
-    }
-
-    const dateMap = new Map<string, Map<string, number>>();
-    const allTools = new Set<string>();
-    
-    for (const snapshot of snapshots) {
-      const dateKey = snapshot.date;
-      if (!dateMap.has(dateKey)) {
-        dateMap.set(dateKey, new Map());
-      }
+    if (singleDay) {
+      // Single day query
+      console.log(`Fetching ${viewType} leaderboard data for single day: ${singleDay}`);
+      materializedData = await getLeaderboardDataForDay(singleDay, viewType);
+    } else {
+      // Date range query
+      const queryStartDate = startDate || defaultStartDate;
+      const queryEndDate = endDate || defaultEndDate;
       
-      const dayData = dateMap.get(dateKey)!;
-      dayData.set('total_active_repos', snapshot.total_active_repos);
-      dayData.set(snapshot.tool, snapshot.repo_count);
-      allTools.add(snapshot.tool);
+      console.log(`Fetching ${viewType} leaderboard data from ${queryStartDate} to ${queryEndDate}`);
+      materializedData = await getLeaderboardDataForDateRange(queryStartDate, queryEndDate, viewType);
     }
 
-    const sortedDates = Array.from(dateMap.keys()).sort();
+    if (materializedData.length === 0) {
+      return NextResponse.json({
+        timestamps: [],
+        active_repos: [],
+        tools: {}
+      });
+    }
+
+    // Get unique bot IDs and fetch tool names
+    const botIds = [...new Set(materializedData.map(item => item.bot_id))];
+    const toolNames = await getToolNamesForBotIds(botIds);
+
+    // Group data by date
+    const dateGroups = new Map<string, MaterializedViewData[]>();
+    materializedData.forEach(item => {
+      const date = item.event_date;
+      if (!dateGroups.has(date)) {
+        dateGroups.set(date, []);
+      }
+      dateGroups.get(date)!.push(item);
+    });
+
+    // Convert to LeaderboardData format
+    const sortedDates = Array.from(dateGroups.keys()).sort();
     const timestamps = sortedDates.map(date => Math.floor(new Date(date).getTime() / 1000));
     
-    const active_repos: number[] = [];
     const tools: Record<string, number[]> = {};
     
-    for (const tool of allTools) {
-      tools[tool] = [];
-    }
-    
-    for (const date of sortedDates) {
-      const dayData = dateMap.get(date)!;
-      const totalActiveRepos = dayData.get('total_active_repos') || 0;
-      active_repos.push(totalActiveRepos);
-      
-      for (const tool of allTools) {
-        const toolCount = dayData.get(tool) || 0;
-        tools[tool].push(toolCount);
-      }
-    }
+    // Initialize tools with empty arrays
+    Object.values(toolNames).forEach(toolName => {
+      tools[toolName] = new Array(sortedDates.length).fill(0);
+    });
 
-    const data: LeaderboardData = {
+    // Fill in the data
+    sortedDates.forEach((date, dateIndex) => {
+      const dayData = dateGroups.get(date)!;
+      
+      dayData.forEach(item => {
+        const toolName = toolNames[item.bot_id] || `bot-${item.bot_id}`;
+        if (!tools[toolName]) {
+          tools[toolName] = new Array(sortedDates.length).fill(0);
+        }
+        tools[toolName][dateIndex] = item.repo_count;
+      });
+    });
+
+    // Calculate total active repos (sum of all tools for each day)
+    const active_repos = sortedDates.map((date) => {
+      const dayData = dateGroups.get(date)!;
+      return dayData.reduce((sum, item) => sum + item.repo_count, 0);
+    });
+
+    const leaderboardData: LeaderboardData = {
       timestamps,
       active_repos,
       tools
     };
 
-    return NextResponse.json(data);
+    return NextResponse.json(leaderboardData);
   } catch (error) {
     console.error('Error fetching leaderboard data:', error);
     return NextResponse.json(

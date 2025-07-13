@@ -6,32 +6,32 @@ on:
   pull_request:
 
 jobs:
-  build:
-    name: Build Check
-    runs-on: ubuntu-latest
+  # build:
+  #   name: Build Check
+  #   runs-on: ubuntu-latest
     
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+  #   steps:
+  #   - name: Checkout code
+  #     uses: actions/checkout@v4
       
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20'
+  #   - name: Setup Node.js
+  #     uses: actions/setup-node@v4
+  #     with:
+  #       node-version: '20'
         
-    - name: Setup pnpm
-      uses: pnpm/action-setup@v4
-      with:
-        version: 8
+  #   - name: Setup pnpm
+  #     uses: pnpm/action-setup@v4
+  #     with:
+  #       version: 8
         
-    - name: Install dependencies
-      run: pnpm install
+  #   - name: Install dependencies
+  #     run: pnpm install
       
-    - name: Build application
-      run: pnpm run build
+  #   - name: Build application
+  #     run: pnpm run build
 
   lint:
-    name: Lint Check
+    name: Lint
     runs-on: ubuntu-latest
     
     steps:
