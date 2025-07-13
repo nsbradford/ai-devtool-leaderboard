@@ -1,5 +1,6 @@
 import { getBotReviewsForDay } from '../src/lib/bigquery';
 import { upsertBotReviewsForDate } from '../src/lib/database';
+import { processBotReviewsForDate } from '../src/lib/backfill-utils';
 import dotenv from 'dotenv';
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
@@ -62,20 +63,7 @@ async function processDate(targetDate: string, semaphore: Semaphore): Promise<vo
   await semaphore.acquire();
   
   try {
-    console.log(`\nProcessing date: ${targetDate}`);
-    
-    // Fetch bot reviews for the date
-    const botReviews = await getBotReviewsForDay(targetDate);
-    
-    if (botReviews.length === 0) {
-      console.log(`No bot reviews found for ${targetDate}`);
-      return;
-    }
-    
-    // Upsert the data
-    await upsertBotReviewsForDate(botReviews);
-    
-    // console.log(`Successfully processed ${targetDate}`);
+    await processBotReviewsForDate(targetDate);
   } catch (error) {
     console.error(`Error processing ${targetDate}:`, error);
     throw error;
@@ -189,4 +177,4 @@ async function main(): Promise<void> {
 
 if (require.main === module) {
   main().catch(console.error);
-} 
+}  
