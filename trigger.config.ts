@@ -1,7 +1,7 @@
 import { defineConfig } from "@trigger.dev/sdk/v3";
 
 export default defineConfig({
-  project: "ai-devtool-leaderboard",
+  project: "proj_iktgagahkrxzcvwojqhy",
   logLevel: "log",
   maxDuration: 300,
   retries: {
