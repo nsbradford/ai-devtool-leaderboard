@@ -31,7 +31,7 @@ const fetcher = async (url: string) => {
 export default function LeaderboardChart() {
   const [displayDateRange, setDisplayDateRange] = useState<DateRange>({
     startDate: '2023-07-01',
-    endDate: format(new Date(Date.now() - 24 * 60 * 60 * 1000), 'yyyy-MM-dd')
+    endDate: format(new Date(Date.now() - 60 * 60 * 1000), 'yyyy-MM-dd')
   });
   
   const debouncedDisplayDateRange = useDebounce(displayDateRange, 300);
@@ -46,7 +46,7 @@ export default function LeaderboardChart() {
 
   const maxRangeParams = new URLSearchParams({
     startDate: '2023-07-01',
-    endDate: format(new Date(Date.now() - 24 * 60 * 60 * 1000), 'yyyy-MM-dd'),
+    endDate: format(new Date(Date.now() - 60 * 60 * 1000), 'yyyy-MM-dd'),
     viewType: viewType
   });
 
