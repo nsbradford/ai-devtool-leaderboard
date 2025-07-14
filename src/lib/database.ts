@@ -255,3 +255,54 @@ export async function refreshMaterializedViewsConcurrently(): Promise<void> {
   }
   console.log('Materialized views refreshed successfully');
 }
+
+/**
+ * Get repositories that need star count updates from the database
+ * @param daysBack Number of days to look back for repos (default: 30)
+ * @param maxAgeDays Maximum age of existing star count entries in days (default: 7)
+ * @param limit Maximum number of repos to return (default: 1000)
+ * @returns Promise<string[]> Array of repo full names
+ */
+export async function getReposNeedingStarCounts(
+  daysBack: number = 30,
+  maxAgeDays: number = 7,
+  limit: number = 1000
+): Promise<string[]> {
+  const { neon } = await import('@neondatabase/serverless');
+
+  if (!process.env.DATABASE_URL) {
+    throw new Error('DATABASE_URL environment variable is not set');
+  }
+
+  const sql = neon(process.env.DATABASE_URL);
+
+  const query = `
+    SELECT DISTINCT br.repo_name
+    FROM bot_reviews_daily br
+    WHERE br.event_date >= CURRENT_DATE - INTERVAL '${daysBack} days'
+      AND (
+        -- Repo doesn't exist in star counts table
+        NOT EXISTS (
+          SELECT 1 FROM repo_star_counts rsc 
+          WHERE rsc.full_name = br.repo_name
+        )
+        OR
+        -- Repo exists but star count is older than maxAgeDays
+        EXISTS (
+          SELECT 1 FROM repo_star_counts rsc 
+          WHERE rsc.full_name = br.repo_name
+            AND rsc.updated_at < CURRENT_DATE - INTERVAL '${maxAgeDays} days'
+        )
+      )
+    ORDER BY br.repo_name
+    LIMIT ${limit};
+  `;
+
+  try {
+    const results = await sql(query);
+    return results.map((row: Record<string, unknown>) => String(row.repo_name));
+  } catch (error) {
+    console.error('Failed to get repos needing star counts:', error);
+    throw error;
+  }
+}

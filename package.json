@@ -14,12 +14,14 @@
     "backfill": "tsx scripts/backfill.ts",
     "backfill-bot-reviews": "tsx scripts/backfill-bot-reviews.ts",
     "backfill-active-repos": "tsx scripts/backfill-active-repos.ts",
-    "setup-db": "tsx scripts/setup-database.ts",
-    "test-api": "tsx scripts/test-api.ts"
+    "setup-db": "tsx scripts/setup-database.ts"
   },
   "dependencies": {
     "@google-cloud/bigquery": "^7.0.0",
     "@neondatabase/serverless": "^0.9.0",
+    "@octokit/app": "^16.0.1",
+    "@octokit/auth-app": "^8.0.2",
+    "@octokit/core": "^7.0.3",
     "@octokit/graphql": "^9.0.1",
     "@radix-ui/react-collapsible": "^1.1.11",
     "@radix-ui/react-popover": "^1.1.14",
@@ -32,6 +34,7 @@
     "lucide-react": "^0.525.0",
     "next": "15.3.5",
     "next-themes": "^0.4.6",
+    "octokit": "^5.0.3",
     "react": "^19.0.0",
     "react-day-picker": "^9.8.0",
     "react-dom": "^19.0.0",
