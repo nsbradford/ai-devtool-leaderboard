@@ -100,18 +100,21 @@ export default function LeaderboardChart() {
 
   const pageStructure = (
     <div className="container mx-auto p-4 sm:p-6 space-y-6">
-      {/* <div className="text-center relative">
+      <div className="text-center relative">
         <div className="absolute top-0 right-0">
           <ThemeToggle />
         </div>
-        <h1 className="text-2xl sm:text-4xl font-bold mb-2">AI Code Review Leaderboard</h1>
+        <h1 className="text-2xl sm:text-4xl font-bold mb-2">AI Code Review Usage Tracker</h1>
         <p className="text-muted-foreground text-sm sm:text-base">
-          What AI tools are being adopted in open-source repos?
+          Tracking adoption of AI code review tools in active open-source repos.
+        </p>
+        <p className="text-muted-foreground text-xs sm:text-sm">
+          Data sourced from <a href="https://www.gharchive.org/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-400 hover:underline">GH Archive</a> starting 2023-07-01 and updated daily.
         </p>
         <p className="text-muted-foreground text-xs sm:text-sm">
           View source on <a href="https://github.com/nsbradford/ai-devtool-leaderboard" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-400 hover:underline">GitHub</a>. 
         </p>
-      </div> */}
+      </div>
 
       {error ? (
         <Card>
@@ -265,24 +268,7 @@ export default function LeaderboardChart() {
 
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      <div className="text-center relative">
-        <div className="absolute top-0 right-0">
-          <ThemeToggle />
-        </div>
-        <h1 className="text-4xl font-bold mb-2">AI Code Review Usage Tracker</h1>
-        <p className="text-muted-foreground">
-          Tracking adoption of AI code review tools in active open-source repos.
-        </p>
-        <p className="text-muted-foreground">
-          Data sourced from <a href="https://www.gharchive.org/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-400 hover:underline">GH Archive</a> starting 2023-07-01 and updated daily.
-        </p>
-
-        <p className="text-muted-foreground">
-            View source on <a href="https://github.com/nsbradford/ai-devtool-leaderboard" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-400 hover:underline">GitHub</a>. 
-          </p>
-      </div>
-
+    <div className="space-y-6">
       {/* Chart Section */}
       <Card>
         <CardHeader>
