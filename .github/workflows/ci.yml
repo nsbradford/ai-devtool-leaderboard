@@ -2,54 +2,78 @@ name: CI
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
 
 jobs:
   # build:
   #   name: Build Check
   #   runs-on: ubuntu-latest
-    
+
   #   steps:
   #   - name: Checkout code
   #     uses: actions/checkout@v4
-      
+
   #   - name: Setup Node.js
   #     uses: actions/setup-node@v4
   #     with:
   #       node-version: '20'
-        
+
   #   - name: Setup pnpm
   #     uses: pnpm/action-setup@v4
   #     with:
   #       version: 8
-        
+
   #   - name: Install dependencies
   #     run: pnpm install
-      
+
   #   - name: Build application
   #     run: pnpm run build
 
   lint:
     name: Lint
     runs-on: ubuntu-latest
-    
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20'
-        
-    - name: Setup pnpm
-      uses: pnpm/action-setup@v4
-      with:
-        version: 8
-        
-    - name: Install dependencies
-      run: pnpm install
-      
-    - name: Run lint check
-      run: pnpm run lint
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 8
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Run lint check
+        run: pnpm run lint
+
+  format:
+    name: Format Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 8
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Run format check
+        run: pnpm run format:check

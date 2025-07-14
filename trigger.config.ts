@@ -1,8 +1,8 @@
-import { defineConfig } from "@trigger.dev/sdk/v3";
+import { defineConfig } from '@trigger.dev/sdk/v3';
 
 export default defineConfig({
-  project: "proj_iktgagahkrxzcvwojqhy",
-  logLevel: "log",
+  project: 'proj_iktgagahkrxzcvwojqhy',
+  logLevel: 'log',
   maxDuration: 300,
   retries: {
     enabledInDev: true,

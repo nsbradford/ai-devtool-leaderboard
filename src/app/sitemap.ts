@@ -1,8 +1,8 @@
-import { MetadataRoute } from 'next'
+import { MetadataRoute } from 'next';
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = 'https://ai-devtool-leaderboard.vercel.app'
-  
+  const baseUrl = 'https://ai-devtool-leaderboard.vercel.app';
+
   return [
     {
       url: baseUrl,
@@ -23,5 +23,5 @@ export default function sitemap(): MetadataRoute.Sitemap {
     //   changeFrequency: 'weekly',
     //   priority: 0.6,
     // },
-  ]
-} 
+  ];
+}

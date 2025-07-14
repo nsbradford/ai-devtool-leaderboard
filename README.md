@@ -5,6 +5,7 @@ A real-time leaderboard tracking the adoption of AI code review tools across ope
 ## What it shows
 
 The leaderboard displays:
+
 - **Usage trends**: Interactive charts showing AI tool adoption over time
 - **Current rankings**: Real-time rankings of tools by repository count
 - **Tool filtering**: Select specific tools to compare their adoption patterns
@@ -22,7 +23,8 @@ The data pipeline runs daily and covers activity from July 2023 onwards, providi
 ## Local development
 
 ### Prerequisites
-- Node.js 18+ 
+
+- Node.js 18+
 - pnpm (recommended) or npm
 - PostgreSQL database (for data storage)
 - Google Cloud BigQuery access (for data processing)
@@ -30,32 +32,37 @@ The data pipeline runs daily and covers activity from July 2023 onwards, providi
 ### Setup
 
 1. **Clone the repository**
+
    ```bash
    git clone https://github.com/nsbradford/ai-devtool-leaderboard.git
    cd ai-devtool-leaderboard
    ```
 
 2. **Install dependencies**
+
    ```bash
    pnpm install
    ```
 
 3. **Environment configuration**
+
    ```bash
    cp .env.local.example .env.local
    ```
-   
+
    Fill in the required environment variables:
    - `DATABASE_URL`: PostgreSQL connection string
    - `GOOGLE_CLOUD_PROJECT_ID`: Your Google Cloud project ID
    - `GOOGLE_APPLICATION_CREDENTIALS`: Base64-encoded service account JSON
 
 4. **Database setup**
+
    ```bash
    pnpm run setup-db
    ```
 
 5. **Start the development server**
+
    ```bash
    pnpm dev
    ```
@@ -75,6 +82,7 @@ The data pipeline runs daily and covers activity from July 2023 onwards, providi
 ### Development workflow
 
 The application uses:
+
 - **Next.js 15** with App Router
 - **TypeScript** for type safety
 - **Tailwind CSS** for styling

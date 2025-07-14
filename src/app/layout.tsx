@@ -1,25 +1,36 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
-import { ThemeProvider } from "@/components/theme-provider";
+import type { Metadata } from 'next';
+import { Geist, Geist_Mono } from 'next/font/google';
+import './globals.css';
+import { ThemeProvider } from '@/components/theme-provider';
 
 const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
+  variable: '--font-geist-sans',
+  subsets: ['latin'],
 });
 
 const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+  variable: '--font-geist-mono',
+  subsets: ['latin'],
 });
 
 export const metadata: Metadata = {
-  title: "AI Code Review Usage Tracker",
-  description: "Track adoption of AI code review tools in active open-source repositories. Real-time data from GitHub showing which AI tools are being adopted by developers.",
-  keywords: ["AI code review", "GitHub", "open source", "developer tools", "code analysis", "machine learning", "software development"],
-  authors: [{ name: "Nick Bradford", url: "https://www.nsbradford.com/#person" }],
-  creator: "Nick Bradford",
-  publisher: "Nick Bradford",
+  title: 'AI Code Review Usage Tracker',
+  description:
+    'Track adoption of AI code review tools in active open-source repositories. Real-time data from GitHub showing which AI tools are being adopted by developers.',
+  keywords: [
+    'AI code review',
+    'GitHub',
+    'open source',
+    'developer tools',
+    'code analysis',
+    'machine learning',
+    'software development',
+  ],
+  authors: [
+    { name: 'Nick Bradford', url: 'https://www.nsbradford.com/#person' },
+  ],
+  creator: 'Nick Bradford',
+  publisher: 'Nick Bradford',
   robots: {
     index: true,
     follow: true,
@@ -32,33 +43,35 @@ export const metadata: Metadata = {
     },
   },
   openGraph: {
-    type: "website",
-    locale: "en_US",
-    url: "https://ai-devtool-leaderboard.vercel.app",
-    title: "AI Code Review Usage Tracker",
-    description: "Track adoption of AI code review tools in active open-source repositories. Real-time data from GitHub showing which AI tools are being adopted by developers.",
-    siteName: "AI Code Review Usage Tracker",
+    type: 'website',
+    locale: 'en_US',
+    url: 'https://ai-devtool-leaderboard.vercel.app',
+    title: 'AI Code Review Usage Tracker',
+    description:
+      'Track adoption of AI code review tools in active open-source repositories. Real-time data from GitHub showing which AI tools are being adopted by developers.',
+    siteName: 'AI Code Review Usage Tracker',
     images: [
       {
-        url: "/icons/android-chrome-512x512.png",
+        url: '/icons/android-chrome-512x512.png',
         width: 512,
         height: 512,
-        alt: "AI Code Review Usage Tracker",
+        alt: 'AI Code Review Usage Tracker',
       },
     ],
   },
   twitter: {
-    card: "summary_large_image",
-    title: "AI Code Review Usage Tracker",
-    description: "Track adoption of AI code review tools in active open-source repositories. Real-time data from GitHub showing which AI tools are being adopted by developers.",
-    images: ["/icons/android-chrome-512x512.png"],
-    creator: "@nsbradford",
+    card: 'summary_large_image',
+    title: 'AI Code Review Usage Tracker',
+    description:
+      'Track adoption of AI code review tools in active open-source repositories. Real-time data from GitHub showing which AI tools are being adopted by developers.',
+    images: ['/icons/android-chrome-512x512.png'],
+    creator: '@nsbradford',
   },
   alternates: {
-    canonical: "https://ai-devtool-leaderboard.vercel.app",
+    canonical: 'https://ai-devtool-leaderboard.vercel.app',
   },
-  category: "technology",
-  classification: "AI Developer Tools",
+  category: 'technology',
+  classification: 'AI Developer Tools',
   viewport: {
     width: 'device-width',
     initialScale: 1,
@@ -70,12 +83,32 @@ export const metadata: Metadata = {
     apple: '/icons/apple-touch-icon.png',
     other: [
       { rel: 'manifest', url: '/icons/site.webmanifest' },
-      { rel: 'icon', url: '/icons/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
-      { rel: 'icon', url: '/icons/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
-      { rel: 'icon', url: '/icons/android-chrome-192x192.png', sizes: '192x192', type: 'image/png' },
-      { rel: 'icon', url: '/icons/android-chrome-512x512.png', sizes: '512x512', type: 'image/png' }
-    ]
-  }
+      {
+        rel: 'icon',
+        url: '/icons/favicon-16x16.png',
+        sizes: '16x16',
+        type: 'image/png',
+      },
+      {
+        rel: 'icon',
+        url: '/icons/favicon-32x32.png',
+        sizes: '32x32',
+        type: 'image/png',
+      },
+      {
+        rel: 'icon',
+        url: '/icons/android-chrome-192x192.png',
+        sizes: '192x192',
+        type: 'image/png',
+      },
+      {
+        rel: 'icon',
+        url: '/icons/android-chrome-512x512.png',
+        sizes: '512x512',
+        type: 'image/png',
+      },
+    ],
+  },
 };
 
 export default function RootLayout({
@@ -90,37 +123,46 @@ export default function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{
             __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "WebApplication",
-              "name": "AI Code Review Usage Tracker",
-              "description": "Track adoption of AI code review tools in active open-source repositories. Real-time data from GitHub showing which AI tools are being adopted by developers.",
-              "url": "https://ai-devtool-leaderboard.vercel.app",
-              "applicationCategory": "DeveloperApplication",
-              "operatingSystem": "Web",
-              "author": {
-                "@type": "Person",
-                "name": "Nick Bradford",
-                "url": "https://www.nsbradford.com/#person"
+              '@context': 'https://schema.org',
+              '@type': 'WebApplication',
+              name: 'AI Code Review Usage Tracker',
+              description:
+                'Track adoption of AI code review tools in active open-source repositories. Real-time data from GitHub showing which AI tools are being adopted by developers.',
+              url: 'https://ai-devtool-leaderboard.vercel.app',
+              applicationCategory: 'DeveloperApplication',
+              operatingSystem: 'Web',
+              author: {
+                '@type': 'Person',
+                name: 'Nick Bradford',
+                url: 'https://www.nsbradford.com/#person',
               },
-              "creator": {
-                "@type": "Person",
-                "name": "Nick Bradford",
-                "url": "https://www.nsbradford.com/#person"
+              creator: {
+                '@type': 'Person',
+                name: 'Nick Bradford',
+                url: 'https://www.nsbradford.com/#person',
               },
-              "publisher": {
-                "@type": "Person",
-                "name": "Nick Bradford",
-                "url": "https://www.nsbradford.com/#person"
+              publisher: {
+                '@type': 'Person',
+                name: 'Nick Bradford',
+                url: 'https://www.nsbradford.com/#person',
               },
-              "dateCreated": "2024-01-01",
-              "dateModified": new Date().toISOString().split('T')[0],
-              "keywords": ["AI code review", "GitHub", "open source", "developer tools", "code analysis", "machine learning", "software development"],
-              "offers": {
-                "@type": "Offer",
-                "price": "0",
-                "priceCurrency": "USD"
-              }
-            })
+              dateCreated: '2024-01-01',
+              dateModified: new Date().toISOString().split('T')[0],
+              keywords: [
+                'AI code review',
+                'GitHub',
+                'open source',
+                'developer tools',
+                'code analysis',
+                'machine learning',
+                'software development',
+              ],
+              offers: {
+                '@type': 'Offer',
+                price: '0',
+                priceCurrency: 'USD',
+              },
+            }),
           }}
         />
       </head>

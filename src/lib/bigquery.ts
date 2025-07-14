@@ -18,7 +18,7 @@ function parseGoogleCredentials(): object | undefined {
   if (!credentialsBase64) {
     return undefined;
   }
-  
+
   try {
     return JSON.parse(Buffer.from(credentialsBase64, 'base64').toString());
   } catch (error) {
@@ -50,10 +50,10 @@ export async function getBotReviewsForDay(
 ): Promise<BotReviewInRepoDate[]> {
   try {
     const bigquery = getBigQueryClient();
-    
+
     // Use provided bot IDs or default to all devtools
-    const botIdList = botIds || devtools.map(tool => parseInt(tool.id));
-    
+    const botIdList = botIds || devtools.map((tool) => parseInt(tool.id));
+
     const query = `
       DECLARE target_date DATE DEFAULT DATE('${targetDate}');
       DECLARE bot_id_list ARRAY<INT64> DEFAULT [${botIdList.join(', ')}];
@@ -84,9 +84,12 @@ export async function getBotReviewsForDay(
 
     // Convert BigQueryDate objects to strings in YYYY-MM-DD format
     const convertedRows = rows.map((row: BigQueryRow) => ({
-      event_date: typeof row.event_date === 'object' ? row.event_date.value : String(row.event_date),
+      event_date:
+        typeof row.event_date === 'object'
+          ? row.event_date.value
+          : String(row.event_date),
       repo_name: row.repo_name,
-      bot_id: row.bot_id
+      bot_id: row.bot_id,
     }));
 
     return convertedRows as BotReviewInRepoDate[];
@@ -95,5 +98,3 @@ export async function getBotReviewsForDay(
     throw error;
   }
 }
-
-

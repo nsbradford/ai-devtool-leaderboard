@@ -59,9 +59,12 @@ function addDays(date: Date, days: number): Date {
   return result;
 }
 
-async function processDate(targetDate: string, semaphore: Semaphore): Promise<void> {
+async function processDate(
+  targetDate: string,
+  semaphore: Semaphore
+): Promise<void> {
   await semaphore.acquire();
-  
+
   try {
     await processBotReviewsForDate(targetDate);
   } catch (error) {
@@ -72,8 +75,14 @@ async function processDate(targetDate: string, semaphore: Semaphore): Promise<vo
   }
 }
 
-async function backfillBotReviewsDateRange(startDate: Date, endDate: Date, maxConcurrency: number = 4): Promise<void> {
-  console.log(`Starting bot reviews backfill from ${formatDate(startDate)} to ${formatDate(endDate)}`);
+async function backfillBotReviewsDateRange(
+  startDate: Date,
+  endDate: Date,
+  maxConcurrency: number = 4
+): Promise<void> {
+  console.log(
+    `Starting bot reviews backfill from ${formatDate(startDate)} to ${formatDate(endDate)}`
+  );
   console.log(`Max concurrency: ${maxConcurrency}`);
 
   const semaphore = new Semaphore(maxConcurrency);
@@ -94,7 +103,7 @@ async function backfillBotReviewsDateRange(startDate: Date, endDate: Date, maxCo
 
   // Process all dates with controlled concurrency
   const startTime = Date.now();
-  
+
   for (const dateString of allDates) {
     const promise = processDate(dateString, semaphore).catch((error) => {
       console.error(`Failed to process ${dateString}:`, error);
@@ -108,9 +117,13 @@ async function backfillBotReviewsDateRange(startDate: Date, endDate: Date, maxCo
 
   const endTime = Date.now();
   const duration = (endTime - startTime) / 1000;
-  
-  console.log(`\nBot reviews backfill completed in ${duration.toFixed(2)} seconds`);
-  console.log(`Average time per date: ${(duration / allDates.length).toFixed(2)} seconds`);
+
+  console.log(
+    `\nBot reviews backfill completed in ${duration.toFixed(2)} seconds`
+  );
+  console.log(
+    `Average time per date: ${(duration / allDates.length).toFixed(2)} seconds`
+  );
 }
 
 async function main(): Promise<void> {
@@ -118,34 +131,35 @@ async function main(): Promise<void> {
     .option('days', {
       alias: 'd',
       type: 'number',
-      description: 'Number of days to go back from today'
+      description: 'Number of days to go back from today',
     })
     .option('start', {
       alias: 's',
       type: 'string',
-      description: 'Start date (YYYY-MM-DD format)'
+      description: 'Start date (YYYY-MM-DD format)',
     })
     .option('end', {
       alias: 'e',
       type: 'string',
-      description: 'End date (YYYY-MM-DD format)'
+      description: 'End date (YYYY-MM-DD format)',
     })
     .option('concurrency', {
       alias: 'c',
       type: 'number',
       default: 8,
-      description: 'Maximum number of concurrent operations (1-10)'
+      description: 'Maximum number of concurrent operations (1-10)',
     })
     .help()
-    .alias('help', 'h')
-    .argv;
+    .alias('help', 'h').argv;
 
   let startDate: Date, endDate: Date;
   let maxConcurrency = argv.concurrency;
 
   // Validate concurrency limit
   if (maxConcurrency < 1 || maxConcurrency > 10) {
-    console.warn(`Concurrency limit ${maxConcurrency} seems extreme. Consider using 1-8 for optimal performance.`);
+    console.warn(
+      `Concurrency limit ${maxConcurrency} seems extreme. Consider using 1-8 for optimal performance.`
+    );
   }
 
   if (argv.days) {
@@ -156,7 +170,7 @@ async function main(): Promise<void> {
     // Use specific date range
     startDate = new Date(argv.start);
     endDate = new Date(argv.end);
-    
+
     if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
       console.error('Invalid date format. Use YYYY-MM-DD');
       process.exit(1);
@@ -177,4 +191,4 @@ async function main(): Promise<void> {
 
 if (require.main === module) {
   main().catch(console.error);
-}  
+}

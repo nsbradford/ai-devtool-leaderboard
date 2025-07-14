@@ -1,4 +1,4 @@
-import { MetadataRoute } from 'next'
+import { MetadataRoute } from 'next';
 
 export default function robots(): MetadataRoute.Robots {
   return {
@@ -8,5 +8,5 @@ export default function robots(): MetadataRoute.Robots {
       disallow: ['/api/'], // Disallow API routes from being indexed
     },
     sitemap: 'https://ai-devtool-leaderboard.vercel.app/sitemap.xml',
-  }
-} 
+  };
+}

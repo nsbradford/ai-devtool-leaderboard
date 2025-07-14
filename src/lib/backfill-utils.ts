@@ -6,20 +6,24 @@ import { upsertBotReviewsForDate } from './database';
  * @param targetDate Date in YYYY-MM-DD format
  * @returns Promise<void>
  */
-export async function processBotReviewsForDate(targetDate: string): Promise<void> {
+export async function processBotReviewsForDate(
+  targetDate: string
+): Promise<void> {
   console.log(`Processing bot reviews for date: ${targetDate}`);
-  
+
   try {
     const botReviews = await getBotReviewsForDay(targetDate);
-    
+
     if (botReviews.length === 0) {
       console.log(`No bot reviews found for ${targetDate}`);
       return;
     }
-    
+
     await upsertBotReviewsForDate(botReviews);
-    
-    console.log(`Successfully processed ${botReviews.length} bot reviews for ${targetDate}`);
+
+    console.log(
+      `Successfully processed ${botReviews.length} bot reviews for ${targetDate}`
+    );
   } catch (error) {
     console.error(`Error processing bot reviews for ${targetDate}:`, error);
     throw error;

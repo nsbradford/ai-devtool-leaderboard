@@ -1,18 +1,18 @@
-"use client"
+'use client';
 
-import * as React from "react"
-import { Moon, Sun, Monitor } from "lucide-react"
-import { useTheme } from "next-themes"
+import * as React from 'react';
+import { Moon, Sun, Monitor } from 'lucide-react';
+import { useTheme } from 'next-themes';
 
-import { Button } from "@/components/ui/button"
+import { Button } from '@/components/ui/button';
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover"
+} from '@/components/ui/popover';
 
 export function ThemeToggle() {
-  const { setTheme, theme } = useTheme()
+  const { setTheme, theme } = useTheme();
 
   return (
     <Popover>
@@ -26,27 +26,27 @@ export function ThemeToggle() {
       <PopoverContent className="w-40" align="end">
         <div className="grid gap-1">
           <Button
-            variant={theme === "light" ? "default" : "ghost"}
+            variant={theme === 'light' ? 'default' : 'ghost'}
             size="sm"
-            onClick={() => setTheme("light")}
+            onClick={() => setTheme('light')}
             className="justify-start"
           >
             <Sun className="mr-2 h-4 w-4" />
             Light
           </Button>
           <Button
-            variant={theme === "dark" ? "default" : "ghost"}
+            variant={theme === 'dark' ? 'default' : 'ghost'}
             size="sm"
-            onClick={() => setTheme("dark")}
+            onClick={() => setTheme('dark')}
             className="justify-start"
           >
             <Moon className="mr-2 h-4 w-4" />
             Dark
           </Button>
           <Button
-            variant={theme === "system" ? "default" : "ghost"}
+            variant={theme === 'system' ? 'default' : 'ghost'}
             size="sm"
-            onClick={() => setTheme("system")}
+            onClick={() => setTheme('system')}
             className="justify-start"
           >
             <Monitor className="mr-2 h-4 w-4" />
@@ -55,5 +55,5 @@ export function ThemeToggle() {
         </div>
       </PopoverContent>
     </Popover>
-  )
+  );
 }

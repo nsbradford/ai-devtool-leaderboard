@@ -1,6 +1,9 @@
-
 import { neon } from '@neondatabase/serverless';
-import { BotReviewInRepoDate, MaterializedViewData, MaterializedViewType } from '@/types/api';
+import {
+  BotReviewInRepoDate,
+  MaterializedViewData,
+  MaterializedViewType,
+} from '@/types/api';
 
 function getSql() {
   if (!process.env.DATABASE_URL) {
@@ -15,9 +18,12 @@ function getSql() {
  * @param activeRepoCount Number of active repositories
  * @returns Promise<void>
  */
-export async function upsertActiveReposForDate(targetDate: string, activeRepoCount: number): Promise<void> {
+export async function upsertActiveReposForDate(
+  targetDate: string,
+  activeRepoCount: number
+): Promise<void> {
   const sql = getSql();
-  
+
   try {
     // First, ensure the active_repos_daily table exists
     await sql(`
@@ -40,8 +46,10 @@ export async function upsertActiveReposForDate(targetDate: string, activeRepoCou
     `;
 
     await sql(query, [targetDate, activeRepoCount]);
-    
-    console.log(`Upserted active repos data for ${targetDate}: ${activeRepoCount} repos`);
+
+    console.log(
+      `Upserted active repos data for ${targetDate}: ${activeRepoCount} repos`
+    );
   } catch (error) {
     console.error(`Failed to upsert active repos for ${targetDate}:`, error);
     throw error;
@@ -54,7 +62,10 @@ export async function upsertActiveReposForDate(targetDate: string, activeRepoCou
  * @param batchSize Size of each batch (default: 1000)
  * @returns Promise<void>
  */
-export async function upsertBotReviewsForDate(botReviews: BotReviewInRepoDate[], batchSize: number = 1000): Promise<void> {
+export async function upsertBotReviewsForDate(
+  botReviews: BotReviewInRepoDate[],
+  batchSize: number = 1000
+): Promise<void> {
   if (botReviews.length === 0) {
     console.log('No bot reviews to upsert');
     return;
@@ -62,16 +73,19 @@ export async function upsertBotReviewsForDate(botReviews: BotReviewInRepoDate[],
 
   const sql = getSql();
   const totalRecords = botReviews.length;
-  
+
   try {
     // Process in batches
     for (let i = 0; i < botReviews.length; i += batchSize) {
       const batch = botReviews.slice(i, i + batchSize);
-      
+
       // Build batch upsert query
-      const values = batch.map(review => 
-        `('${review.event_date}', ${review.bot_id}, '${review.repo_name.replace(/'/g, "''")}')`
-      ).join(', ');
+      const values = batch
+        .map(
+          (review) =>
+            `('${review.event_date}', ${review.bot_id}, '${review.repo_name.replace(/'/g, "''")}')`
+        )
+        .join(', ');
 
       const query = `
         INSERT INTO bot_reviews_daily (event_date, bot_id, repo_name)
@@ -80,13 +94,18 @@ export async function upsertBotReviewsForDate(botReviews: BotReviewInRepoDate[],
       `;
 
       await sql(query);
-      
+
       // console.log(`Upserted batch: ${batch.length}/${totalRecords} records for ${botReviews[0].event_date}`);
     }
-    
-    console.log(`Completed upsert of ${totalRecords} bot review records for ${botReviews[0].event_date}`);
+
+    console.log(
+      `Completed upsert of ${totalRecords} bot review records for ${botReviews[0].event_date}`
+    );
   } catch (error) {
-    console.error(`Failed to upsert bot reviews for ${botReviews[0].event_date}:`, error);
+    console.error(
+      `Failed to upsert bot reviews for ${botReviews[0].event_date}:`,
+      error
+    );
     throw error;
   }
 }
@@ -104,10 +123,11 @@ export async function getMaterializedViewData(
   endDate: string
 ): Promise<MaterializedViewData[]> {
   const sql = getSql();
-  
+
   try {
-    const viewName = viewType === 'weekly' ? 'vw_bot_repo_count_7d' : 'vw_bot_repo_count_30d';
-    
+    const viewName =
+      viewType === 'weekly' ? 'vw_bot_repo_count_7d' : 'vw_bot_repo_count_30d';
+
     const query = `
       SELECT 
         event_date,
@@ -118,20 +138,21 @@ export async function getMaterializedViewData(
       ORDER BY event_date ASC;
     `;
 
-    console.log(`Running query against ${viewName} for dates ${startDate} to ${endDate}`);
+    console.log(
+      `Running query against ${viewName} for dates ${startDate} to ${endDate}`
+    );
     const results = await sql(query, [startDate, endDate]);
-    
+
     return results.map((row: Record<string, unknown>) => ({
       event_date: String(row.event_date),
       bot_id: Number(row.bot_id),
-      repo_count: Number(row.repo_count)
+      repo_count: Number(row.repo_count),
     }));
   } catch (error) {
     console.error(`Failed to get ${viewType} materialized view data:`, error);
     throw error;
   }
 }
-
 
 /**
  * Get leaderboard data for a date range using materialized views
@@ -154,4 +175,3 @@ export async function getLeaderboardDataForDateRange(
     throw error;
   }
 }
-

@@ -2,8 +2,8 @@ import devtoolsData from '@/devtools.json';
 import { getSecondsUntilCacheReset } from '@/lib/utils';
 
 export async function GET() {
-  const ttlSeconds = getSecondsUntilCacheReset();          // e.g. 86 400-now()
-  const swrSeconds = 60;                                   // how long to serve stale while revalidating
+  const ttlSeconds = getSecondsUntilCacheReset(); // e.g. 86 400-now()
+  const swrSeconds = 60; // how long to serve stale while revalidating
 
   return new Response(JSON.stringify(devtoolsData), {
     status: 200,
@@ -15,4 +15,4 @@ export async function GET() {
       'Cache-Control': `public, max-age=0, s-maxage=${ttlSeconds}, stale-while-revalidate=${swrSeconds}`,
     },
   });
-}   
+}
