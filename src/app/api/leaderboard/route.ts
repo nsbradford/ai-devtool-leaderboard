@@ -6,8 +6,6 @@ import { getSecondsUntilCacheReset } from '@/lib/utils';
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
-    const startDate = searchParams.get('startDate');
-    const endDate = searchParams.get('endDate');
     const viewType = (searchParams.get('viewType') as MaterializedViewType) || 'weekly';
     
     // Validate viewType
@@ -18,32 +16,11 @@ export async function GET(request: Request) {
       );
     }
     
-    // Set default dates (30 days ago to yesterday)
-    const defaultEndDate = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-    const defaultStartDate = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+    console.log(`Fetching ${viewType} leaderboard data for all available dates`);
     
-    const queryStartDate = startDate || defaultStartDate;
-    const queryEndDate = endDate || defaultEndDate;
-    
-    // Validate date format and order
-    const startDateObj = new Date(queryStartDate);
-    const endDateObj = new Date(queryEndDate);
-    
-    if (isNaN(startDateObj.getTime()) || isNaN(endDateObj.getTime())) {
-      return NextResponse.json(
-        { error: 'Invalid date format. Use YYYY-MM-DD' },
-        { status: 400 }
-      );
-    }
-    
-    if (startDateObj > endDateObj) {
-      return NextResponse.json(
-        { error: 'Start date must be before or equal to end date' },
-        { status: 400 }
-      );
-    }
-    
-    console.log(`Fetching ${viewType} leaderboard data from ${queryStartDate} to ${queryEndDate}`);
+    // Always fetch all available data - use a very wide date range
+    const queryStartDate = '2023-01-01'; // Start from beginning of 2023
+    const queryEndDate = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]; // Future date to get all data
     
     const materializedData = await getLeaderboardDataForDateRange(queryStartDate, queryEndDate, viewType);
 
@@ -112,7 +89,7 @@ export async function GET(request: Request) {
       status: 200,
       headers: {
         'Content-Type': 'application/json',
-        // Browser never caches (max-age=0), Vercel’s edge caches for `ttlSeconds`,
+        // Browser never caches (max-age=0), Vercel's edge caches for `ttlSeconds`,
         // and during the last `swrSeconds` it will serve the stale copy while
         // fetching a fresh one in the background.
         'Cache-Control': `public, max-age=0, s-maxage=${ttlSeconds}, stale-while-revalidate=${swrSeconds}`,
