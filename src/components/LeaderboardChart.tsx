@@ -206,138 +206,155 @@ export default function LeaderboardChart() {
 
 
 
-    return (
-      <>
-        {/* Chart Section */}
-        <Card>
-          <CardHeader>
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-4">
-              <div>
-                <CardTitle>Usage Trends</CardTitle>
-                <CardDescription className="text-xs sm:text-sm">
-                  Number of repositories with an AI code review, {viewType === 'weekly' ? '7-day' : '30-day'} rolling window. Data sourced from <a href="https://www.gharchive.org/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-400 hover:underline">GH Archive</a> starting 2023-07-01 and updated daily.
-                </CardDescription>
-              </div>
-              <div className="flex flex-col sm:flex-row gap-2">
-                <Button
-                  variant={scaleType === 'linear' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setScaleType('linear')}
-                  className="text-xs"
-                >
-                  Linear
-                </Button>
-                <Button
-                  variant={scaleType === 'log' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setScaleType('log')}
-                  className="text-xs"
-                >
-                  <BarChart3 className="h-3 w-3 mr-1" />
-                  Log
-                </Button>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button variant="outline" size="sm" className="flex items-center gap-2 text-xs">
-                      <ChevronDown className="h-3 w-3" />
-                      Tools ({selectedTools.size === 0 ? 'All' : selectedTools.size})
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-72 p-0">
-                    <div className="flex flex-col space-y-3 p-4 border-b rounded-t-lg bg-muted/50">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium">
-                          {selectedTools.size === 0 ? 'All tools selected' : `${selectedTools.size} of ${Object.keys(stats.tools).length} tools selected`}
-                        </span>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => {
-                            if (selectedTools.size === Object.keys(stats.tools).length) {
-                              setSelectedTools(new Set()); // Clear all
-                            } else {
-                              setSelectedTools(new Set(Object.keys(stats.tools))); // Select all
-                            }
-                          }}
-                        >
-                          {selectedTools.size === Object.keys(stats.tools).length ? 'Clear All' : 'Select All'}
-                        </Button>
-                      </div>
-                      <div className="space-y-1">
-                        {Object.keys(stats.tools)
-                          .map((toolId) => ({
-                            toolId,
-                            displayName: getToolDisplayName(toolId),
-                            devtool: devtools.find((dt: DevTool) => dt.id === toolId),
-                          }))
-                          .sort((a, b) => a.displayName.localeCompare(b.displayName))
-                          .map(({ toolId, displayName, devtool }) => {
-                            const isSelected = selectedTools.has(toolId);
-                            const avatarUrl = devtool?.avatar_url;
-                            return (
-                              <div
-                                key={toolId}
-                                className={`flex items-center space-x-2 p-2 rounded-md border cursor-pointer transition-colors ${
-                                  isSelected 
-                                    ? 'bg-primary/10 border-primary/20' 
-                                    : 'bg-background border-border hover:bg-muted'
-                                }`}
-                                onClick={() => {
-                                  const newSelected = new Set(selectedTools);
-                                  if (isSelected) {
-                                    newSelected.delete(toolId);
-                                  } else {
-                                    newSelected.add(toolId);
-                                  }
-                                  setSelectedTools(newSelected);
-                                }}
-                              >
-                                {avatarUrl && (
-                                  <Image 
-                                    src={avatarUrl} 
-                                    alt={`${displayName} avatar`}
-                                    width={16}
-                                    height={16}
-                                    className="w-4 h-4 rounded-full"
-                                    onError={(e) => {
-                                      e.currentTarget.style.display = 'none';
-                                    }}
-                                  />
-                                )}
-                                <span className="text-sm font-medium truncate">{displayName}</span>
-                                {isSelected && (
-                                  <Check className="w-4 h-4 text-primary ml-auto" />
-                                )}
-                              </div>
-                            );
-                          })}
-                      </div>
+  return (
+    <div className="container mx-auto p-6 space-y-6">
+      <div className="text-center relative">
+        <div className="absolute top-0 right-0">
+          <ThemeToggle />
+        </div>
+        <h1 className="text-4xl font-bold mb-2">AI Code Review Leaderboard</h1>
+        {/* <p className="text-muted-foreground">
+          {viewType === 'weekly' ? '7-day' : '30-day'} rolling view of AI code review tool usage across active GitHub repositories
+        </p> */}
+        <p className="text-muted-foreground">
+            Tracking adoption of AI code review tools in open-source repos.
+        </p>
+
+        <p className="text-muted-foreground">
+            View source on <a href="https://github.com/nsbradford/ai-devtool-leaderboard" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-400 hover:underline">GitHub</a>. 
+          </p>
+      </div>
+
+      {/* Chart Section */}
+      <Card>
+        <CardHeader>
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-4">
+            <div>
+              <CardTitle>Usage Trends</CardTitle>
+              <CardDescription className="text-xs sm:text-sm">
+                Number of repositories with an AI code review, {viewType === 'weekly' ? '7-day' : '30-day'} rolling window. Data sourced from <a href="https://www.gharchive.org/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-400 hover:underline">GH Archive</a> starting 2023-07-01 and updated daily.
+              </CardDescription>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-2">
+              <Button
+                variant={scaleType === 'linear' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setScaleType('linear')}
+                className="text-xs"
+              >
+                Linear
+              </Button>
+              <Button
+                variant={scaleType === 'log' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setScaleType('log')}
+                className="text-xs"
+              >
+                <BarChart3 className="h-3 w-3 mr-1" />
+                Log
+              </Button>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" size="sm" className="flex items-center gap-2 text-xs">
+                    <ChevronDown className="h-3 w-3" />
+                    Tools ({selectedTools.size === 0 ? 'All' : selectedTools.size})
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-72 p-0">
+                  <div className="flex flex-col space-y-3 p-4 border-b rounded-t-lg bg-muted/50">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium">
+                        {selectedTools.size === 0 ? 'All tools selected' : `${selectedTools.size} of ${Object.keys(stats.tools).length} tools selected`}
+                      </span>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          if (selectedTools.size === Object.keys(stats.tools).length) {
+                            setSelectedTools(new Set()); // Clear all
+                          } else {
+                            setSelectedTools(new Set(Object.keys(stats.tools))); // Select all
+                          }
+                        }}
+                      >
+                        {selectedTools.size === Object.keys(stats.tools).length ? 'Clear All' : 'Select All'}
+                      </Button>
                     </div>
-                  </PopoverContent>
-                </Popover>
-              </div>
+                    <div className="space-y-1">
+                      {Object.keys(stats.tools)
+                        .map((toolId) => ({
+                          toolId,
+                          displayName: getToolDisplayName(toolId),
+                          devtool: devtools.find((dt: DevTool) => dt.id === toolId),
+                        }))
+                        .sort((a, b) => a.displayName.localeCompare(b.displayName))
+                        .map(({ toolId, displayName, devtool }) => {
+                          const isSelected = selectedTools.has(toolId);
+                          const avatarUrl = devtool?.avatar_url;
+                          return (
+                            <div
+                              key={toolId}
+                              className={`flex items-center space-x-2 p-2 rounded-md border cursor-pointer transition-colors ${
+                                isSelected 
+                                  ? 'bg-primary/10 border-primary/20' 
+                                  : 'bg-background border-border hover:bg-muted'
+                              }`}
+                              onClick={() => {
+                                const newSelected = new Set(selectedTools);
+                                if (isSelected) {
+                                  newSelected.delete(toolId);
+                                } else {
+                                  newSelected.add(toolId);
+                                }
+                                setSelectedTools(newSelected);
+                              }}
+                            >
+                              {avatarUrl && (
+                                <Image 
+                                  src={avatarUrl} 
+                                  alt={`${displayName} avatar`}
+                                  width={16}
+                                  height={16}
+                                  className="w-4 h-4 rounded-full"
+                                  onError={(e) => {
+                                    e.currentTarget.style.display = 'none';
+                                  }}
+                                />
+                              )}
+                              <span className="text-sm font-medium truncate">{displayName}</span>
+                              {isSelected && (
+                                <Check className="w-4 h-4 text-primary ml-auto" />
+                              )}
+                            </div>
+                          );
+                        })}
+                    </div>
+                  </div>
+                </PopoverContent>
+              </Popover>
             </div>
-            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
-              <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-2">
-                <label className="text-sm font-medium">Start Date:</label>
-                <input
-                  type="date"
-                  value={dateRange.startDate}
-                  onChange={(e) => setDateRange(prev => ({ ...prev, startDate: e.target.value }))}
-                  className="px-3 py-2 border border-input bg-background rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
-                />
-              </div>
-              <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-2">
-                <label className="text-sm font-medium">End Date:</label>
-                <input
-                  type="date"
-                  value={dateRange.endDate}
-                  onChange={(e) => setDateRange(prev => ({ ...prev, endDate: e.target.value }))}
-                  className="px-3 py-2 border border-input bg-background rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
-                />
-              </div>
+          </div>
+          <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-2">
+              <label className="text-sm font-medium">Start Date:</label>
+              <input
+                type="date"
+                value={dateRange.startDate}
+                onChange={(e) => setDateRange(prev => ({ ...prev, startDate: e.target.value }))}
+                className="px-3 py-2 border border-input bg-background rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
+              />
             </div>
-          </CardHeader>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-2">
+              <label className="text-sm font-medium">End Date:</label>
+              <input
+                type="date"
+                value={dateRange.endDate}
+                onChange={(e) => setDateRange(prev => ({ ...prev, endDate: e.target.value }))}
+                className="px-3 py-2 border border-input bg-background rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
+              />
+            </div>
+          </div>
+        </CardHeader>
           <CardContent>
             <div className="h-64 sm:h-96">
               <ResponsiveContainer width="100%" height="100%">
@@ -455,7 +472,7 @@ export default function LeaderboardChart() {
             </div>
           </CardContent>
         </Card>
-      </>
+      </div>
     );
   }
 
