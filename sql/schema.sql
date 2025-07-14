@@ -71,3 +71,53 @@ JOIN bot_reviews_daily br
                       AND     c.event_date
 GROUP BY c.event_date, br.bot_id
 ORDER BY c.event_date DESC, repo_count DESC;
+
+
+
+/* -----------------------------------------------------------------
+   Switching to materialized views for performance
+   ----------------------------------------------------------------- */
+CREATE MATERIALIZED VIEW mv_bot_repo_count_7d AS
+WITH calendar AS (
+  SELECT generate_series(
+           (SELECT MIN(event_date) FROM bot_reviews_daily),
+           (SELECT MAX(event_date) FROM bot_reviews_daily),
+           '1 day'
+         )::date AS event_date
+)
+SELECT
+  c.event_date,
+  br.bot_id,
+  COUNT(DISTINCT br.repo_name) AS repo_count
+FROM calendar c
+JOIN bot_reviews_daily br
+  ON br.event_date BETWEEN c.event_date - INTERVAL '6 days'
+                      AND     c.event_date
+GROUP BY c.event_date, br.bot_id;
+
+-- Needed only if you want CONCURRENTLY refreshes (highly recommended):
+CREATE UNIQUE INDEX mv_bot_repo_count_7d_pk
+  ON mv_bot_repo_count_7d (event_date, bot_id);
+
+
+
+CREATE MATERIALIZED VIEW mv_bot_repo_count_30d AS
+WITH calendar AS (
+  SELECT generate_series(
+           (SELECT MIN(event_date) FROM bot_reviews_daily),
+           (SELECT MAX(event_date) FROM bot_reviews_daily),
+           '1 day'
+         )::date AS event_date
+)
+SELECT
+  c.event_date,
+  br.bot_id,
+  COUNT(DISTINCT br.repo_name) AS repo_count    -- absolute, 30-day window
+FROM calendar c
+JOIN bot_reviews_daily br
+  ON br.event_date BETWEEN c.event_date - INTERVAL '29 days'
+                      AND     c.event_date
+GROUP BY c.event_date, br.bot_id;
+
+CREATE UNIQUE INDEX mv_bot_repo_count_30d_pk
+  ON mv_bot_repo_count_30d (event_date, bot_id);

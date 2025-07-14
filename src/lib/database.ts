@@ -126,7 +126,7 @@ export async function getMaterializedViewData(
 
   try {
     const viewName =
-      viewType === 'weekly' ? 'vw_bot_repo_count_7d' : 'vw_bot_repo_count_30d';
+      viewType === 'weekly' ? 'mv_bot_repo_count_7d' : 'mv_bot_repo_count_30d';
 
     const query = `
       SELECT 
