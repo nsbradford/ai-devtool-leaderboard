@@ -1,5 +1,8 @@
 import { getBotReviewsForDay } from './bigquery';
-import { upsertBotReviewsForDate } from './database';
+import {
+  upsertBotReviewsForDate,
+  refreshMaterializedViewsConcurrently,
+} from './database';
 
 /**
  * Process bot reviews for a single date
@@ -20,6 +23,9 @@ export async function processBotReviewsForDate(
     }
 
     await upsertBotReviewsForDate(botReviews);
+
+    // Refresh materialized views after upsert
+    await refreshMaterializedViewsConcurrently();
 
     console.log(
       `Successfully processed ${botReviews.length} bot reviews for ${targetDate}`

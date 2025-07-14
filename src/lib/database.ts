@@ -175,3 +175,25 @@ export async function getLeaderboardDataForDateRange(
     throw error;
   }
 }
+
+/**
+ * Refresh both materialized views (7d and 30d) concurrently
+ * @returns Promise<void>
+ */
+export async function refreshMaterializedViewsConcurrently(): Promise<void> {
+  const sql = getSql();
+  try {
+    // Refresh 7d view
+    console.log('Refreshing materialized view: mv_bot_repo_count_7d...');
+    await sql('REFRESH MATERIALIZED VIEW CONCURRENTLY mv_bot_repo_count_7d;');
+    console.log('Finished refreshing: mv_bot_repo_count_7d');
+
+    // Refresh 30d view
+    console.log('Refreshing materialized view: mv_bot_repo_count_30d...');
+    await sql('REFRESH MATERIALIZED VIEW CONCURRENTLY mv_bot_repo_count_30d;');
+    console.log('Finished refreshing: mv_bot_repo_count_30d');
+  } catch (error) {
+    console.error('Failed to refresh materialized views:', error);
+    throw error;
+  }
+}
