@@ -36,7 +36,7 @@ export default function LeaderboardChart() {
   
   const debouncedDisplayDateRange = useDebounce(displayDateRange, 300);
   
-  const [viewType] = useState<MaterializedViewType>('weekly');
+  const [viewType, setViewType] = useState<MaterializedViewType>('monthly');
   const [selectedTools, setSelectedTools] = useState<Set<string>>(new Set());
   const [scaleType, setScaleType] = useState<'linear' | 'log'>('linear');
 
@@ -44,9 +44,9 @@ export default function LeaderboardChart() {
     ? window.location.origin 
     : '';
 
-  const maxRangeParams = new URLSearchParams({
-    viewType: viewType
-  });
+  const maxRangeParams = useMemo(() => new URLSearchParams({
+    viewType
+  }), [viewType]);
 
   const { data: stats, error: statsError, isLoading: statsLoading } = useSWR<LeaderboardData>(
     `${baseUrl}/api/leaderboard?${maxRangeParams}`,
@@ -134,6 +134,27 @@ export default function LeaderboardChart() {
                   </CardDescription>
                 </div>
                 <div className="flex flex-col sm:flex-row gap-2">
+                  {/* Rolling window toggle */}
+                  <div className="flex gap-1" role="group" aria-label="Rolling window selector">
+                    <Button
+                      variant={viewType === 'weekly' ? 'default' : 'outline'}
+                      size="sm"
+                      className="text-xs"
+                      aria-pressed={viewType === 'weekly'}
+                      onClick={() => setViewType('weekly')}
+                    >
+                      7-day
+                    </Button>
+                    <Button
+                      variant={viewType === 'monthly' ? 'default' : 'outline'}
+                      size="sm"
+                      className="text-xs"
+                      aria-pressed={viewType === 'monthly'}
+                      onClick={() => setViewType('monthly')}
+                    >
+                      30-day
+                    </Button>
+                  </div>
                   <Button variant="outline" size="sm" className="text-xs" disabled>
                     Linear
                   </Button>
@@ -278,6 +299,27 @@ export default function LeaderboardChart() {
               </CardDescription>
             </div>
             <div className="flex flex-col sm:flex-row gap-2">
+              {/* Rolling window toggle */}
+              <div className="flex gap-1" role="group" aria-label="Rolling window selector">
+                <Button
+                  variant={viewType === 'weekly' ? 'default' : 'outline'}
+                  size="sm"
+                  className="text-xs"
+                  aria-pressed={viewType === 'weekly'}
+                  onClick={() => setViewType('weekly')}
+                >
+                  7-day
+                </Button>
+                <Button
+                  variant={viewType === 'monthly' ? 'default' : 'outline'}
+                  size="sm"
+                  className="text-xs"
+                  aria-pressed={viewType === 'monthly'}
+                  onClick={() => setViewType('monthly')}
+                >
+                  30-day
+                </Button>
+              </div>
               <Button
                 variant={scaleType === 'linear' ? 'default' : 'outline'}
                 size="sm"
