@@ -168,6 +168,57 @@ export async function upsertRepoStarCounts(
 }
 
 /**
+ * Upsert error status for repositories that failed to fetch star counts
+ * @param errorRepos Array of repository full names that had errors
+ * @param batchSize Size of each batch (default: 1000)
+ * @returns Promise<void>
+ */
+export async function upsertRepoStarCountErrors(
+  errorRepos: string[],
+  batchSize: number = 1000
+): Promise<void> {
+  if (errorRepos.length === 0) {
+    console.log('No error repos to upsert');
+    return;
+  }
+
+  const sql = getSql();
+  const totalRecords = errorRepos.length;
+
+  try {
+    // Process in batches
+    for (let i = 0; i < errorRepos.length; i += batchSize) {
+      const batch = errorRepos.slice(i, i + batchSize);
+
+      // Build batch upsert query for error repos
+      const values = batch
+        .map((fullName) => `('${fullName.replace(/'/g, "''")}', 0, true)`)
+        .join(', ');
+
+      const query = `
+        INSERT INTO repo_star_counts (full_name, star_count, is_error)
+        VALUES ${values}
+        ON CONFLICT (full_name) 
+        DO UPDATE SET 
+          is_error = true,
+          updated_at = NOW();
+      `;
+
+      await sql(query);
+
+      console.log(
+        `Upserted error batch: ${batch.length}/${totalRecords} repo error records`
+      );
+    }
+
+    console.log(`Completed upsert of ${totalRecords} repo error records`);
+  } catch (error) {
+    console.error('Failed to upsert repo star count errors:', error);
+    throw error;
+  }
+}
+
+/**
  * Get data from materialized views (weekly or monthly)
  * @param viewType Type of view to query ('weekly' or 'monthly')
  * @param startDate Start date for the query (YYYY-MM-DD format)
@@ -268,13 +319,7 @@ export async function getReposNeedingStarCounts(
   maxAgeDays: number = 7,
   limit: number = 1000
 ): Promise<string[]> {
-  const { neon } = await import('@neondatabase/serverless');
-
-  if (!process.env.DATABASE_URL) {
-    throw new Error('DATABASE_URL environment variable is not set');
-  }
-
-  const sql = neon(process.env.DATABASE_URL);
+  const sql = getSql();
 
   const query = `
     SELECT DISTINCT br.repo_name

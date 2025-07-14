@@ -129,7 +129,8 @@ CREATE UNIQUE INDEX mv_bot_repo_count_30d_pk
 CREATE TABLE IF NOT EXISTS repo_star_counts (
   full_name   TEXT        PRIMARY KEY,                         -- e.g. "vercel/next.js"
   star_count  INTEGER     NOT NULL CHECK (star_count >= 0),    -- latest stargazer tally
-  updated_at  TIMESTAMPTZ NOT NULL DEFAULT now()               -- last refresh
+  updated_at  TIMESTAMPTZ NOT NULL DEFAULT now(),              -- last refresh
+  is_error    BOOLEAN     NOT NULL DEFAULT false               -- true if star count fetch failed
 );
 
 -- Keep `updated_at` current on every insert or update

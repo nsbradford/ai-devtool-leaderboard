@@ -13,6 +13,7 @@
     "trigger:deploy": "npx trigger.dev@latest deploy",
     "backfill": "tsx scripts/backfill.ts",
     "backfill-bot-reviews": "tsx scripts/backfill-bot-reviews.ts",
+    "backfill-star-counts": "tsx scripts/backfill-star-counts.ts",
     "backfill-active-repos": "tsx scripts/backfill-active-repos.ts",
     "setup-db": "tsx scripts/setup-database.ts"
   },

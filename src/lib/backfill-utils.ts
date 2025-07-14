@@ -3,6 +3,7 @@ import {
   getReposNeedingStarCounts,
   upsertBotReviewsForDate,
   upsertRepoStarCounts,
+  upsertRepoStarCountErrors,
 } from './database';
 import { GitHubApi } from './github-api';
 
@@ -78,34 +79,30 @@ export async function processStarCountUpdates(
 
     // Fetch star counts from GitHub API
     console.log('Fetching star counts from GitHub API...');
-    const starCounts = await githubApi.fetchStarCounts(
+    const { starCounts, errorRepos } = await githubApi.fetchStarCounts(
       repos as `${string}/${string}`[]
     );
 
-    // Filter out null results (repos that couldn't be fetched)
-    const validStarCounts: Record<string, number> = {};
-    let nullCount = 0;
-
-    for (const [repo, count] of Object.entries(starCounts)) {
-      if (count !== null) {
-        validStarCounts[repo] = count;
-      } else {
-        nullCount++;
-      }
-    }
-
     console.log(
-      `Successfully fetched star counts for ${Object.keys(validStarCounts).length} repos`
+      `Successfully fetched star counts for ${Object.keys(starCounts).length} repos`
     );
-    if (nullCount > 0) {
-      console.log(`Failed to fetch star counts for ${nullCount} repos`);
+    if (errorRepos.length > 0) {
+      console.log(`Failed to fetch star counts for ${errorRepos.length} repos`);
     }
 
-    // Upsert star counts to database
-    if (Object.keys(validStarCounts).length > 0) {
-      await upsertRepoStarCounts(validStarCounts);
+    // Upsert successful star counts to database
+    if (Object.keys(starCounts).length > 0) {
+      await upsertRepoStarCounts(starCounts);
       console.log(
-        `Successfully upserted star counts for ${Object.keys(validStarCounts).length} repos`
+        `Successfully upserted star counts for ${Object.keys(starCounts).length} repos`
+      );
+    }
+
+    // Upsert error repos to database
+    if (errorRepos.length > 0) {
+      await upsertRepoStarCountErrors(errorRepos);
+      console.log(
+        `Successfully marked ${errorRepos.length} repos as having errors`
       );
     }
   } catch (error) {
