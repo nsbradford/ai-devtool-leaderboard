@@ -43,6 +43,15 @@ export interface DevTool {
   created_at: string;
 }
 
+export interface TopRepo {
+  repo_name: string;
+  star_count: number;
+}
+
+export interface TopReposByDevtool {
+  [devtoolId: string]: TopRepo[];
+}
+
 // export interface LeaderboardQueryParams {
 //   startDate?: string;
 //   endDate?: string;

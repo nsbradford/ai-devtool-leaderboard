@@ -32,6 +32,7 @@ import type {
   DateRange,
   MaterializedViewType,
   DevTool,
+  TopReposByDevtool,
 } from '@/types/api';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { useDebounce } from '@/lib/client-utils';
@@ -92,6 +93,12 @@ export default function LeaderboardChart() {
     isLoading: devtoolsLoading,
   } = useSWR<DevTool[]>(`${baseUrl}/api/devtools`, fetcher);
 
+  const {
+    data: topRepos,
+    error: topReposError,
+    isLoading: topReposLoading,
+  } = useSWR<TopReposByDevtool>(`${baseUrl}/api/top-repos?limit=5&daysBack=30`, fetcher);
+
   const filteredStats = useMemo(() => {
     if (!stats) return null;
 
@@ -145,8 +152,8 @@ export default function LeaderboardChart() {
     }
   }, [stats, viewType, baseUrl]);
 
-  const loading = statsLoading || devtoolsLoading;
-  const error = statsError || devtoolsError;
+  const loading = statsLoading || devtoolsLoading || topReposLoading;
+  const error = statsError || devtoolsError || topReposError;
 
   const pageStructure = (
     <div className="container mx-auto p-4 sm:p-6 space-y-6">
@@ -682,42 +689,64 @@ export default function LeaderboardChart() {
                   return (
                     <div
                       key={tool.id}
-                      className="flex items-center justify-between p-2 rounded-lg border hover:bg-muted/50 transition-colors"
+                      className="flex flex-col p-2 rounded-lg border hover:bg-muted/50 transition-colors"
                     >
-                      <div className="flex items-center space-x-2">
-                        <span className="text-xs font-bold text-muted-foreground min-w-[1.5rem]">
-                          {index + 1}
-                        </span>
-                        {avatarUrl && (
-                          <Image
-                            src={avatarUrl}
-                            alt={`${displayName} avatar`}
-                            width={24}
-                            height={24}
-                            className="w-6 h-6 rounded-full"
-                            onError={(e) => {
-                              e.currentTarget.style.display = 'none';
-                            }}
-                          />
-                        )}
-                        {websiteUrl ? (
-                          <a
-                            href={websiteUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-sm font-medium hover:text-blue-600 hover:underline transition-colors"
-                          >
-                            {displayName}
-                          </a>
-                        ) : (
-                          <span className="text-sm font-medium">
-                            {displayName}
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-2">
+                          <span className="text-xs font-bold text-muted-foreground min-w-[1.5rem]">
+                            {index + 1}
                           </span>
-                        )}
+                          {avatarUrl && (
+                            <Image
+                              src={avatarUrl}
+                              alt={`${displayName} avatar`}
+                              width={24}
+                              height={24}
+                              className="w-6 h-6 rounded-full"
+                              onError={(e) => {
+                                e.currentTarget.style.display = 'none';
+                              }}
+                            />
+                          )}
+                          {websiteUrl ? (
+                            <a
+                              href={websiteUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-sm font-medium hover:text-blue-600 hover:underline transition-colors"
+                            >
+                              {displayName}
+                            </a>
+                          ) : (
+                            <span className="text-sm font-medium">
+                              {displayName}
+                            </span>
+                          )}
+                        </div>
+                        <span className="text-xs text-muted-foreground">
+                          {tool.current_count.toLocaleString()}
+                        </span>
                       </div>
-                      <span className="text-xs text-muted-foreground">
-                        {tool.current_count.toLocaleString()}
-                      </span>
+                      {topRepos && topRepos[tool.id] && topRepos[tool.id].length > 0 && (
+                        <div className="mt-1 ml-8 flex flex-wrap gap-1 text-xs text-muted-foreground">
+                          {topRepos[tool.id].slice(0, 3).map((repo, repoIndex) => (
+                            <span key={repo.repo_name}>
+                              <a
+                                href={`https://github.com/${repo.repo_name}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="hover:text-blue-600 hover:underline transition-colors"
+                              >
+                                {repo.repo_name}
+                              </a>
+                              <span className="ml-1">({repo.star_count.toLocaleString()}⭐)</span>
+                              {repoIndex < Math.min(topRepos[tool.id].length, 3) - 1 && (
+                                <span className="mx-1">•</span>
+                              )}
+                            </span>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   );
                 });

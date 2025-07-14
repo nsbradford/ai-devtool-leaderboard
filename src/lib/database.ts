@@ -351,3 +351,77 @@ export async function getReposNeedingStarCounts(
     throw error;
   }
 }
+
+/**
+ * Get top N starred repositories for each devtool based on 30-day activity window
+ * @param limit Number of top repos to return per devtool (default: 5)
+ * @param daysBack Number of days to look back for activity (default: 30)
+ * @returns Promise<Record<string, Array<{repo_name: string, star_count: number}>>>
+ */
+export async function getTopStarredReposByDevtool(
+  limit: number = 5,
+  daysBack: number = 30
+): Promise<Record<string, Array<{repo_name: string, star_count: number}>>> {
+  const sql = getSql();
+  
+  try {
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - daysBack);
+    const cutoffDateStr = cutoffDate.toISOString().split('T')[0];
+    
+    const query = `
+      WITH recent_bot_activity AS (
+        SELECT DISTINCT 
+          br.bot_id,
+          br.repo_name
+        FROM bot_reviews_daily br
+        WHERE br.event_date >= $1
+      ),
+      ranked_repos AS (
+        SELECT 
+          rba.bot_id,
+          rba.repo_name,
+          rsc.star_count,
+          ROW_NUMBER() OVER (
+            PARTITION BY rba.bot_id 
+            ORDER BY rsc.star_count DESC NULLS LAST
+          ) as rank
+        FROM recent_bot_activity rba
+        LEFT JOIN repo_star_counts rsc ON rba.repo_name = rsc.full_name
+        WHERE rsc.star_count IS NOT NULL 
+          AND rsc.is_error = false
+      )
+      SELECT 
+        bot_id,
+        repo_name,
+        star_count
+      FROM ranked_repos
+      WHERE rank <= $2
+      ORDER BY bot_id, rank;
+    `;
+
+    const results = await sql(query, [cutoffDateStr, limit]);
+    
+    const groupedResults: Record<string, Array<{repo_name: string, star_count: number}>> = {};
+    
+    results.forEach((row: Record<string, unknown>) => {
+      const botId = String(row.bot_id);
+      const repoName = String(row.repo_name);
+      const starCount = Number(row.star_count);
+      
+      if (!groupedResults[botId]) {
+        groupedResults[botId] = [];
+      }
+      
+      groupedResults[botId].push({
+        repo_name: repoName,
+        star_count: starCount
+      });
+    });
+    
+    return groupedResults;
+  } catch (error) {
+    console.error('Failed to get top starred repos by devtool:', error);
+    throw error;
+  }
+}
