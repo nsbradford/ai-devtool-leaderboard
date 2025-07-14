@@ -69,7 +69,7 @@ export default function LeaderboardChart() {
 
   const pageStructure = (
     <div className="container mx-auto p-4 sm:p-6 space-y-6">
-      <div className="text-center relative">
+      {/* <div className="text-center relative">
         <div className="absolute top-0 right-0">
           <ThemeToggle />
         </div>
@@ -80,7 +80,7 @@ export default function LeaderboardChart() {
         <p className="text-muted-foreground text-xs sm:text-sm">
           View source on <a href="https://github.com/nsbradford/ai-devtool-leaderboard" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-400 hover:underline">GitHub</a>. 
         </p>
-      </div>
+      </div> */}
 
       {error ? (
         <Card>
@@ -145,34 +145,6 @@ export default function LeaderboardChart() {
       return devtool?.website_url;
     };
 
-  // if (stats.data.timestamps.length === 0) {
-  //   return (
-  //     <div className="container mx-auto p-6 space-y-6">
-  //       <div className="text-center">
-  //         <h1 className="text-4xl font-bold mb-2">AI Code Review Tools Leaderboard</h1>
-  //         <p className="text-muted-foreground">
-  //           7-day rolling view of AI code review tool usage across active GitHub repositories
-  //         </p>
-  //       </div>
-  //       <Card>
-  //         <CardContent className="p-6">
-  //           <div className="text-center text-muted-foreground">
-  //             <p className="text-lg mb-2">No data available for the selected date range</p>
-  //             <p className="text-sm">
-  //               This could be because:
-  //             </p>
-  //             <ul className="text-sm mt-2 space-y-1">
-  //               <li>• No data has been backfilled yet</li>
-  //               <li>• The database connection is not configured</li>
-  //               <li>• The selected date range has no data</li>
-  //             </ul>
-  //           </div>
-  //         </CardContent>
-  //       </Card>
-  //     </div>
-  //   );
-  // }
-
     const chartData: ChartDataPoint[] = stats.timestamps
       .map((timestamp, index) => {
         const date = new Date(timestamp * 1000).toLocaleDateString('en-US', { 
@@ -212,12 +184,12 @@ export default function LeaderboardChart() {
         <div className="absolute top-0 right-0">
           <ThemeToggle />
         </div>
-        <h1 className="text-4xl font-bold mb-2">AI Code Review Leaderboard</h1>
-        {/* <p className="text-muted-foreground">
-          {viewType === 'weekly' ? '7-day' : '30-day'} rolling view of AI code review tool usage across active GitHub repositories
-        </p> */}
+        <h1 className="text-4xl font-bold mb-2">AI Code Review Usage Tracker</h1>
         <p className="text-muted-foreground">
-            Tracking adoption of AI code review tools in open-source repos.
+          Tracking adoption of AI code review tools in active open-source repos.
+        </p>
+        <p className="text-muted-foreground">
+          Data sourced from <a href="https://www.gharchive.org/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-400 hover:underline">GH Archive</a> starting 2023-07-01 and updated daily.
         </p>
 
         <p className="text-muted-foreground">
@@ -232,7 +204,7 @@ export default function LeaderboardChart() {
             <div>
               <CardTitle>Usage Trends</CardTitle>
               <CardDescription className="text-xs sm:text-sm">
-                Number of repositories with an AI code review, {viewType === 'weekly' ? '7-day' : '30-day'} rolling window. Data sourced from <a href="https://www.gharchive.org/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-400 hover:underline">GH Archive</a> starting 2023-07-01 and updated daily.
+                Number of repositories with an AI code review, {viewType === 'weekly' ? '7-day' : '30-day'} rolling window. 
               </CardDescription>
             </div>
             <div className="flex flex-col sm:flex-row gap-2">

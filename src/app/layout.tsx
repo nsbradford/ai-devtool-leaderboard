@@ -14,8 +14,56 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "AI Code Review Tools Leaderboard",
-  description: "A leaderboard comparing AI code review tools and their performance metrics",
+  title: "AI Code Review Usage Tracker",
+  description: "Track adoption of AI code review tools in active open-source repositories. Real-time data from GitHub showing which AI tools are being adopted by developers.",
+  keywords: ["AI code review", "GitHub", "open source", "developer tools", "code analysis", "machine learning", "software development"],
+  authors: [{ name: "Nick Bradford", url: "https://www.nsbradford.com/#person" }],
+  creator: "Nick Bradford",
+  publisher: "Nick Bradford",
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: "https://ai-devtool-leaderboard.vercel.app",
+    title: "AI Code Review Usage Tracker",
+    description: "Track adoption of AI code review tools in active open-source repositories. Real-time data from GitHub showing which AI tools are being adopted by developers.",
+    siteName: "AI Code Review Usage Tracker",
+    images: [
+      {
+        url: "/icons/android-chrome-512x512.png",
+        width: 512,
+        height: 512,
+        alt: "AI Code Review Usage Tracker",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "AI Code Review Usage Tracker",
+    description: "Track adoption of AI code review tools in active open-source repositories. Real-time data from GitHub showing which AI tools are being adopted by developers.",
+    images: ["/icons/android-chrome-512x512.png"],
+    creator: "@nsbradford",
+  },
+  alternates: {
+    canonical: "https://ai-devtool-leaderboard.vercel.app",
+  },
+  category: "technology",
+  classification: "AI Developer Tools",
+  viewport: {
+    width: 'device-width',
+    initialScale: 1,
+    maximumScale: 1,
+  },
   icons: {
     icon: '/icons/favicon.ico',
     shortcut: '/icons/favicon.ico',
@@ -37,6 +85,45 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "WebApplication",
+              "name": "AI Code Review Usage Tracker",
+              "description": "Track adoption of AI code review tools in active open-source repositories. Real-time data from GitHub showing which AI tools are being adopted by developers.",
+              "url": "https://ai-devtool-leaderboard.vercel.app",
+              "applicationCategory": "DeveloperApplication",
+              "operatingSystem": "Web",
+              "author": {
+                "@type": "Person",
+                "name": "Nick Bradford",
+                "url": "https://www.nsbradford.com/#person"
+              },
+              "creator": {
+                "@type": "Person",
+                "name": "Nick Bradford",
+                "url": "https://www.nsbradford.com/#person"
+              },
+              "publisher": {
+                "@type": "Person",
+                "name": "Nick Bradford",
+                "url": "https://www.nsbradford.com/#person"
+              },
+              "dateCreated": "2024-01-01",
+              "dateModified": new Date().toISOString().split('T')[0],
+              "keywords": ["AI code review", "GitHub", "open source", "developer tools", "code analysis", "machine learning", "software development"],
+              "offers": {
+                "@type": "Offer",
+                "price": "0",
+                "priceCurrency": "USD"
+              }
+            })
+          }}
+        />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
