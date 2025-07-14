@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import useSWR from 'swr';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,6 +10,7 @@ import { Check, ChevronDown, BarChart3 } from 'lucide-react';
 import { format } from 'date-fns';
 import type { LeaderboardData, DateRange, MaterializedViewType, DevTool } from '@/types/api';
 import { ThemeToggle } from '@/components/theme-toggle';
+import { useDebounce } from '@/lib/utils';
 import Image from 'next/image';
 // Removed Collapsible import, using Popover instead
 
@@ -28,10 +29,13 @@ const fetcher = async (url: string) => {
 };
 
 export default function LeaderboardChart() {
-  const [dateRange, setDateRange] = useState<DateRange>({
+  const [displayDateRange, setDisplayDateRange] = useState<DateRange>({
     startDate: '2023-07-01',
     endDate: format(new Date(Date.now() - 24 * 60 * 60 * 1000), 'yyyy-MM-dd')
   });
+  
+  const debouncedDisplayDateRange = useDebounce(displayDateRange, 300);
+  
   const [viewType] = useState<MaterializedViewType>('weekly');
   const [selectedTools, setSelectedTools] = useState<Set<string>>(new Set());
   const [scaleType, setScaleType] = useState<'linear' | 'log'>('linear');
@@ -40,14 +44,14 @@ export default function LeaderboardChart() {
     ? window.location.origin 
     : '';
 
-  const leaderboardParams = new URLSearchParams({
-    startDate: dateRange.startDate,
-    endDate: dateRange.endDate,
+  const maxRangeParams = new URLSearchParams({
+    startDate: '2023-07-01',
+    endDate: format(new Date(Date.now() - 24 * 60 * 60 * 1000), 'yyyy-MM-dd'),
     viewType: viewType
   });
 
   const { data: stats, error: statsError, isLoading: statsLoading } = useSWR<LeaderboardData>(
-    `${baseUrl}/api/leaderboard?${leaderboardParams}`,
+    `${baseUrl}/api/leaderboard?${maxRangeParams}`,
     fetcher
   );
 
@@ -55,6 +59,33 @@ export default function LeaderboardChart() {
     `${baseUrl}/api/devtools`,
     fetcher
   );
+
+  const filteredStats = useMemo(() => {
+    if (!stats) return null;
+    
+    const startTimestamp = Math.floor(new Date(debouncedDisplayDateRange.startDate).getTime() / 1000);
+    const endTimestamp = Math.floor(new Date(debouncedDisplayDateRange.endDate).getTime() / 1000);
+    
+    const filteredIndices: number[] = [];
+    const filteredTimestamps: number[] = [];
+    
+    stats.timestamps.forEach((timestamp, index) => {
+      if (timestamp >= startTimestamp && timestamp <= endTimestamp) {
+        filteredIndices.push(index);
+        filteredTimestamps.push(timestamp);
+      }
+    });
+    
+    const filteredTools: Record<string, number[]> = {};
+    Object.entries(stats.tools).forEach(([toolId, counts]) => {
+      filteredTools[toolId] = filteredIndices.map(index => (counts as number[])[index]);
+    });
+    
+    return {
+      timestamps: filteredTimestamps,
+      tools: filteredTools
+    };
+  }, [stats, debouncedDisplayDateRange]);
 
   // Initialize selected tools when stats data is loaded
   useEffect(() => {
@@ -94,22 +125,75 @@ export default function LeaderboardChart() {
         <>
           <Card>
             <CardHeader>
-              <CardTitle>Usage Trends</CardTitle>
-              <CardDescription>Loading chart data...</CardDescription>
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-4">
+                <div>
+                  <CardTitle>Usage Trends</CardTitle>
+                  <CardDescription className="text-xs sm:text-sm">
+                    Number of repositories with an AI code review, {viewType === 'weekly' ? '7-day' : '30-day'} rolling window. 
+                  </CardDescription>
+                </div>
+                <div className="flex flex-col sm:flex-row gap-2">
+                  <Button variant="outline" size="sm" className="text-xs" disabled>
+                    Linear
+                  </Button>
+                  <Button variant="outline" size="sm" className="text-xs" disabled>
+                    <BarChart3 className="h-3 w-3 mr-1" />
+                    Log
+                  </Button>
+                  <Button variant="outline" size="sm" className="flex items-center gap-2 text-xs" disabled>
+                    <ChevronDown className="h-3 w-3" />
+                    Tools (Loading...)
+                  </Button>
+                </div>
+              </div>
+              <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-2">
+                  <label className="text-sm font-medium">Start Date:</label>
+                  <input
+                    type="date"
+                    value={displayDateRange.startDate}
+                    onChange={(e) => setDisplayDateRange(prev => ({ ...prev, startDate: e.target.value }))}
+                    className="px-3 py-2 border border-input bg-background rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
+                  />
+                </div>
+                <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-2">
+                  <label className="text-sm font-medium">End Date:</label>
+                  <input
+                    type="date"
+                    value={displayDateRange.endDate}
+                    onChange={(e) => setDisplayDateRange(prev => ({ ...prev, endDate: e.target.value }))}
+                    className="px-3 py-2 border border-input bg-background rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
+                  />
+                </div>
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="h-96 flex items-center justify-center">
+              <div className="h-64 sm:h-96 flex items-center justify-center bg-muted/20 rounded-md">
                 <div className="text-muted-foreground">Loading chart...</div>
               </div>
             </CardContent>
           </Card>
+          
           <Card>
             <CardHeader>
-              <CardTitle>Current Rankings</CardTitle>
-              <CardDescription>Loading rankings...</CardDescription>
+              <CardTitle className="text-lg">Current Rankings</CardTitle>
+              <CardDescription className="text-xs">
+                All tools ranked by current repository count
+              </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="text-center text-muted-foreground">Loading rankings...</div>
+              <div className="grid gap-2">
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <div key={i} className="flex items-center justify-between p-2 rounded-lg border bg-muted/20">
+                    <div className="flex items-center space-x-2">
+                      <span className="text-xs font-bold text-muted-foreground min-w-[1.5rem]">{i}</span>
+                      <div className="w-6 h-6 rounded-full bg-muted animate-pulse"></div>
+                      <div className="h-4 w-24 bg-muted rounded animate-pulse"></div>
+                    </div>
+                    <div className="h-4 w-12 bg-muted rounded animate-pulse"></div>
+                  </div>
+                ))}
+              </div>
             </CardContent>
           </Card>
         </>
@@ -126,7 +210,7 @@ export default function LeaderboardChart() {
   );
 
   function renderChartAndRankings() {
-    if (!stats || !devtools) return null;
+    if (!filteredStats || !devtools) return null;
 
     // Map tool IDs to display names
     const getToolDisplayName = (toolId: string): string => {
@@ -145,12 +229,12 @@ export default function LeaderboardChart() {
       return devtool?.website_url;
     };
 
-    const chartData: ChartDataPoint[] = stats.timestamps
+    const chartData: ChartDataPoint[] = filteredStats.timestamps
       .map((timestamp, index) => {
         const date = new Date(timestamp * 1000).toLocaleDateString('en-US', { 
           month: 'short', 
           day: 'numeric',
-          year: stats.timestamps.length > 365 ? '2-digit' : undefined
+          year: filteredStats.timestamps.length > 365 ? '2-digit' : undefined
         });
         
         const dataPoint: ChartDataPoint = {
@@ -158,7 +242,7 @@ export default function LeaderboardChart() {
           timestamp
         };
 
-        Object.entries(stats.tools).forEach(([toolId, counts]) => {
+        Object.entries(filteredStats.tools).forEach(([toolId, counts]) => {
           // Only include selected tools (or all if none selected)
           if (selectedTools.size === 0 || selectedTools.has(toolId)) {
             const countsArray = counts as number[];
@@ -238,24 +322,24 @@ export default function LeaderboardChart() {
                   <div className="flex flex-col space-y-3 p-4 border-b rounded-t-lg bg-muted/50">
                     <div className="flex items-center justify-between">
                       <span className="text-sm font-medium">
-                        {selectedTools.size === 0 ? 'All tools selected' : `${selectedTools.size} of ${Object.keys(stats.tools).length} tools selected`}
+                        {selectedTools.size === 0 ? 'All tools selected' : `${selectedTools.size} of ${Object.keys(stats?.tools || {}).length} tools selected`}
                       </span>
                       <Button
                         variant="outline"
                         size="sm"
                         onClick={() => {
-                          if (selectedTools.size === Object.keys(stats.tools).length) {
+                          if (stats && selectedTools.size === Object.keys(stats.tools).length) {
                             setSelectedTools(new Set()); // Clear all
-                          } else {
+                          } else if (stats) {
                             setSelectedTools(new Set(Object.keys(stats.tools))); // Select all
                           }
                         }}
                       >
-                        {selectedTools.size === Object.keys(stats.tools).length ? 'Clear All' : 'Select All'}
+                        {stats && selectedTools.size === Object.keys(stats.tools).length ? 'Clear All' : 'Select All'}
                       </Button>
                     </div>
                     <div className="space-y-1">
-                      {Object.keys(stats.tools)
+                      {Object.keys(stats?.tools || {})
                         .map((toolId) => ({
                           toolId,
                           displayName: getToolDisplayName(toolId),
@@ -313,8 +397,8 @@ export default function LeaderboardChart() {
               <label className="text-sm font-medium">Start Date:</label>
               <input
                 type="date"
-                value={dateRange.startDate}
-                onChange={(e) => setDateRange(prev => ({ ...prev, startDate: e.target.value }))}
+                value={displayDateRange.startDate}
+                onChange={(e) => setDisplayDateRange(prev => ({ ...prev, startDate: e.target.value }))}
                 className="px-3 py-2 border border-input bg-background rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
               />
             </div>
@@ -322,8 +406,8 @@ export default function LeaderboardChart() {
               <label className="text-sm font-medium">End Date:</label>
               <input
                 type="date"
-                value={dateRange.endDate}
-                onChange={(e) => setDateRange(prev => ({ ...prev, endDate: e.target.value }))}
+                value={displayDateRange.endDate}
+                onChange={(e) => setDisplayDateRange(prev => ({ ...prev, endDate: e.target.value }))}
                 className="px-3 py-2 border border-input bg-background rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
               />
             </div>
@@ -352,7 +436,7 @@ export default function LeaderboardChart() {
                     labelFormatter={(label) => `Date: ${label}`}
                   />
                   <Legend />
-                  {Object.keys(stats.tools)
+                  {Object.keys(stats?.tools || {})
                     .filter(toolId => selectedTools.size === 0 ? false : selectedTools.has(toolId))
                     .map((toolId) => {
                       const displayName = getToolDisplayName(toolId);
@@ -386,8 +470,8 @@ export default function LeaderboardChart() {
           <CardContent>
             <div className="grid gap-2">
               {(() => {
-                const latestIndex = stats.timestamps.length - 1;
-                const rankings = Object.entries(stats.tools)
+                const latestIndex = filteredStats.timestamps.length - 1;
+                const rankings = Object.entries(filteredStats.tools)
                   .map(([toolId, counts]) => {
                     const countsArray = counts as number[];
                     const currentCount = countsArray[latestIndex] || 0;
