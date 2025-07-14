@@ -196,4 +196,5 @@ export async function refreshMaterializedViewsConcurrently(): Promise<void> {
     console.error('Failed to refresh materialized views:', error);
     throw error;
   }
+  console.log('Materialized views refreshed successfully');
 }

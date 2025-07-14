@@ -1,5 +1,8 @@
 import { getBotReviewsForDay } from '../src/lib/bigquery';
-import { upsertBotReviewsForDate } from '../src/lib/database';
+import {
+  refreshMaterializedViewsConcurrently,
+  upsertBotReviewsForDate,
+} from '../src/lib/database';
 import { processBotReviewsForDate } from '../src/lib/backfill-utils';
 import dotenv from 'dotenv';
 import yargs from 'yargs';
@@ -124,6 +127,9 @@ async function backfillBotReviewsDateRange(
   console.log(
     `Average time per date: ${(duration / allDates.length).toFixed(2)} seconds`
   );
+
+  // Refresh materialized views after upsert
+  await refreshMaterializedViewsConcurrently();
 }
 
 async function main(): Promise<void> {

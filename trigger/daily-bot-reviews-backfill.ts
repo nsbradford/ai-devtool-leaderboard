@@ -3,6 +3,7 @@ import {
   processBotReviewsForDate,
   getYesterdayDateString,
 } from '../src/lib/backfill-utils';
+import { refreshMaterializedViewsConcurrently } from '@/lib/database';
 
 export const dailyBotReviewsBackfill = schedules.task({
   id: 'daily-bot-reviews-backfill',
@@ -16,6 +17,9 @@ export const dailyBotReviewsBackfill = schedules.task({
       console.log(`Processing bot reviews for ${targetDate}`);
 
       await processBotReviewsForDate(targetDate);
+
+      // Refresh materialized views after upsert
+      await refreshMaterializedViewsConcurrently();
 
       console.log(
         `Daily bot reviews backfill completed successfully for ${targetDate}`
