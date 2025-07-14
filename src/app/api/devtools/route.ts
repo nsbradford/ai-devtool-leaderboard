@@ -1,15 +1,18 @@
-import { NextResponse } from 'next/server';
 import devtoolsData from '@/devtools.json';
+import { getSecondsUntilCacheReset } from '@/lib/utils';
 
 export async function GET() {
-  const now = new Date();
-  const tomorrow = new Date(now);
-  tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
-  tomorrow.setUTCHours(0, 0, 0, 0);
-  const secondsUntilMidnight = Math.floor((tomorrow.getTime() - now.getTime()) / 1000);
+  const ttlSeconds = getSecondsUntilCacheReset();          // e.g. 86 400-now()
+  const swrSeconds = 60;                                   // how long to serve stale while revalidating
 
-  const response = NextResponse.json(devtoolsData);
-  response.headers.set('Cache-Control', `public, max-age=${secondsUntilMidnight}, s-maxage=${secondsUntilMidnight}`);
-  
-  return response;
+  return new Response(JSON.stringify(devtoolsData), {
+    status: 200,
+    headers: {
+      'Content-Type': 'application/json',
+      // Browser never caches (max-age=0), Vercel’s edge caches for `ttlSeconds`,
+      // and during the last `swrSeconds` it will serve the stale copy while
+      // fetching a fresh one in the background.
+      'Cache-Control': `public, max-age=0, s-maxage=${ttlSeconds}, stale-while-revalidate=${swrSeconds}`,
+    },
+  });
 }   

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import type { LeaderboardData, MaterializedViewType, MaterializedViewData } from '@/types/api';
 import { getLeaderboardDataForDateRange } from '@/lib/database';
+import { getSecondsUntilCacheReset } from '@/lib/utils';
 
 export async function GET(request: Request) {
   try {
@@ -105,24 +106,18 @@ export async function GET(request: Request) {
     
     console.log(`Returning leaderboard data with ${timestamps.length} timestamps and ${Object.keys(tools).length} tools`);
 
-    const now = new Date();
-    const next6AM = new Date(now);
-    
-    // If it's currently between 0-6 AM, set to 6 AM today
-    // If it's after 6 AM, set to 6 AM tomorrow
-    if (now.getUTCHours() < 6) {
-      next6AM.setUTCHours(6, 0, 0, 0);
-    } else {
-      next6AM.setUTCDate(next6AM.getUTCDate() + 1);
-      next6AM.setUTCHours(6, 0, 0, 0);
-    }
-    
-    const secondsUntil6AM = Math.floor((next6AM.getTime() - now.getTime()) / 1000);
-
-    const response = NextResponse.json(leaderboardData);
-    response.headers.set('Cache-Control', `public, max-age=${secondsUntil6AM}, s-maxage=${secondsUntil6AM}`);
-    
-    return response;
+    const ttlSeconds = getSecondsUntilCacheReset();          // e.g. 86 400-now()
+    const swrSeconds = 60;                                   // how long to serve stale while revalidating
+    return new Response(JSON.stringify(leaderboardData), {
+      status: 200,
+      headers: {
+        'Content-Type': 'application/json',
+        // Browser never caches (max-age=0), Vercel’s edge caches for `ttlSeconds`,
+        // and during the last `swrSeconds` it will serve the stale copy while
+        // fetching a fresh one in the background.
+        'Cache-Control': `public, max-age=0, s-maxage=${ttlSeconds}, stale-while-revalidate=${swrSeconds}`,
+      },
+    });
   } catch (error) {
     console.error('Error fetching leaderboard data:', error);
     return NextResponse.json(

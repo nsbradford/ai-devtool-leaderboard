@@ -10,7 +10,7 @@ import { Check, ChevronDown, BarChart3 } from 'lucide-react';
 import { format } from 'date-fns';
 import type { LeaderboardData, DateRange, MaterializedViewType, DevTool } from '@/types/api';
 import { ThemeToggle } from '@/components/theme-toggle';
-import { useDebounce } from '@/lib/utils';
+import { useDebounce } from '@/lib/client-utils';
 import Image from 'next/image';
 // Removed Collapsible import, using Popover instead
 
