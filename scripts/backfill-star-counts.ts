@@ -50,7 +50,8 @@ async function main(): Promise<void> {
       alias: 'a',
       type: 'number',
       default: 7,
-      description: 'Maximum age of existing star count entries in days (default: 7)',
+      description:
+        'Maximum age of existing star count entries in days (default: 7)',
     })
     .help()
     .alias('help', 'h').argv;
@@ -83,4 +84,4 @@ async function main(): Promise<void> {
 
 if (require.main === module) {
   main().catch(console.error);
-} 
+}

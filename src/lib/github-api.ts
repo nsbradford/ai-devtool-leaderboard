@@ -36,9 +36,7 @@ export class GitHubApi {
    * @param repos List of "owner/name" repositories to fetch star counts for.
    * @returns Object with successful star counts and array of repos that had errors
    */
-  async fetchStarCounts(
-    repos: RepoFullName[]
-  ): Promise<{
+  async fetchStarCounts(repos: RepoFullName[]): Promise<{
     starCounts: Record<RepoFullName, number>;
     errorRepos: RepoFullName[];
   }> {
@@ -68,26 +66,37 @@ export class GitHubApi {
 
         batch.forEach((full, j) => {
           const result = data[`r${j}`];
-          if (result && result.stargazerCount !== null && result.stargazerCount !== undefined) {
+          if (
+            result &&
+            result.stargazerCount !== null &&
+            result.stargazerCount !== undefined
+          ) {
             starCounts[full] = result.stargazerCount;
           } else {
             // console.log(`[GitHubApi] Repo ${full} returned null/undefined result:`, result);
             errorRepos.push(full);
           }
         });
-              } catch (error: any) {
-          const errorMessage = error.message || 'Unknown error';
-          const errorCode = error.status || error.code || 'No code';
-          console.error(
-            `[GitHubApi] GraphQL query failed for chunk ${chunkIndex} (${errorCode}): ${errorMessage}`
-          );
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } catch (error: any) {
+        const errorMessage = error.message || 'Unknown error';
+        const errorCode = error.status || error.code || 'No code';
+        console.error(
+          `[GitHubApi] GraphQL query failed for chunk ${chunkIndex} (${errorCode}): ${errorMessage}`
+        );
 
         // Try to extract any successful results from the error response
         if (error.data) {
-          console.log(`[GitHubApi] Attempting to extract partial results from error response`);
+          console.log(
+            `[GitHubApi] Attempting to extract partial results from error response`
+          );
           batch.forEach((full, j) => {
             const result = error.data[`r${j}`];
-            if (result && result.stargazerCount !== null && result.stargazerCount !== undefined) {
+            if (
+              result &&
+              result.stargazerCount !== null &&
+              result.stargazerCount !== undefined
+            ) {
               starCounts[full] = result.stargazerCount;
               // console.log(`[GitHubApi] Successfully extracted star count for ${full}: ${result.stargazerCount}`);
             } else {
@@ -97,7 +106,9 @@ export class GitHubApi {
           });
         } else {
           // When the entire query fails and we can't extract partial results
-          console.log(`[GitHubApi] No partial results available, marking all repos in chunk as errors`);
+          console.log(
+            `[GitHubApi] No partial results available, marking all repos in chunk as errors`
+          );
           errorRepos.push(...batch);
         }
       }
