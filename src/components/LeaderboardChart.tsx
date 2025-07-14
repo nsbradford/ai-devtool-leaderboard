@@ -97,7 +97,10 @@ export default function LeaderboardChart() {
     data: topRepos,
     error: topReposError,
     isLoading: topReposLoading,
-  } = useSWR<TopReposByDevtool>(`${baseUrl}/api/top-repos?limit=5&daysBack=30`, fetcher);
+  } = useSWR<TopReposByDevtool>(
+    `${baseUrl}/api/top-repos?limit=5&daysBack=30`,
+    fetcher
+  );
 
   const filteredStats = useMemo(() => {
     if (!stats) return null;
@@ -727,26 +730,32 @@ export default function LeaderboardChart() {
                           {tool.current_count.toLocaleString()}
                         </span>
                       </div>
-                      {topRepos && topRepos[tool.id] && topRepos[tool.id].length > 0 && (
-                        <div className="mt-1 ml-8 flex flex-wrap gap-1 text-xs text-muted-foreground">
-                          {topRepos[tool.id].slice(0, 3).map((repo, repoIndex) => (
-                            <span key={repo.repo_name}>
-                              <a
-                                href={`https://github.com/${repo.repo_name}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="hover:text-blue-600 hover:underline transition-colors"
-                              >
-                                {repo.repo_name}
-                              </a>
-                              <span className="ml-1">({repo.star_count.toLocaleString()}⭐)</span>
-                              {repoIndex < Math.min(topRepos[tool.id].length, 3) - 1 && (
-                                <span className="mx-1">•</span>
-                              )}
-                            </span>
-                          ))}
-                        </div>
-                      )}
+                      {topRepos &&
+                        topRepos[tool.id] &&
+                        topRepos[tool.id].length > 0 && (
+                          <div className="mt-1 ml-8 flex flex-wrap gap-1 text-xs text-muted-foreground">
+                            {topRepos[tool.id]
+                              .slice(0, 3)
+                              .map((repo, repoIndex) => (
+                                <span key={repo.repo_name}>
+                                  <a
+                                    href={`https://github.com/${repo.repo_name}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="hover:text-blue-600 hover:underline transition-colors"
+                                  >
+                                    {repo.repo_name}
+                                  </a>
+                                  <span className="ml-1">
+                                    ({repo.star_count.toLocaleString()}⭐)
+                                  </span>
+                                  {repoIndex <
+                                    Math.min(topRepos[tool.id].length, 3) -
+                                      1 && <span className="mx-1">•</span>}
+                                </span>
+                              ))}
+                          </div>
+                        )}
                     </div>
                   );
                 });

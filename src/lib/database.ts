@@ -361,14 +361,14 @@ export async function getReposNeedingStarCounts(
 export async function getTopStarredReposByDevtool(
   limit: number = 5,
   daysBack: number = 30
-): Promise<Record<string, Array<{repo_name: string, star_count: number}>>> {
+): Promise<Record<string, Array<{ repo_name: string; star_count: number }>>> {
   const sql = getSql();
-  
+
   try {
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - daysBack);
     const cutoffDateStr = cutoffDate.toISOString().split('T')[0];
-    
+
     const query = `
       WITH recent_bot_activity AS (
         SELECT DISTINCT 
@@ -401,24 +401,27 @@ export async function getTopStarredReposByDevtool(
     `;
 
     const results = await sql(query, [cutoffDateStr, limit]);
-    
-    const groupedResults: Record<string, Array<{repo_name: string, star_count: number}>> = {};
-    
+
+    const groupedResults: Record<
+      string,
+      Array<{ repo_name: string; star_count: number }>
+    > = {};
+
     results.forEach((row: Record<string, unknown>) => {
       const botId = String(row.bot_id);
       const repoName = String(row.repo_name);
       const starCount = Number(row.star_count);
-      
+
       if (!groupedResults[botId]) {
         groupedResults[botId] = [];
       }
-      
+
       groupedResults[botId].push({
         repo_name: repoName,
-        star_count: starCount
+        star_count: starCount,
       });
     });
-    
+
     return groupedResults;
   } catch (error) {
     console.error('Failed to get top starred repos by devtool:', error);

@@ -23,13 +23,17 @@ export async function GET(request: Request) {
       );
     }
 
-    console.log(`Fetching top ${limit} starred repos for each devtool (${daysBack} days back)`);
+    console.log(
+      `Fetching top ${limit} starred repos for each devtool (${daysBack} days back)`
+    );
 
     const topRepos = await getTopStarredReposByDevtool(limit, daysBack);
 
     const response: TopReposByDevtool = topRepos;
 
-    console.log(`Returning top repos data for ${Object.keys(topRepos).length} devtools`);
+    console.log(
+      `Returning top repos data for ${Object.keys(topRepos).length} devtools`
+    );
 
     const ttlSeconds = getSecondsUntilCacheReset();
     const swrSeconds = 60;
