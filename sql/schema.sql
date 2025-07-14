@@ -121,3 +121,26 @@ GROUP BY c.event_date, br.bot_id;
 
 CREATE UNIQUE INDEX mv_bot_repo_count_30d_pk
   ON mv_bot_repo_count_30d (event_date, bot_id);
+
+
+/* -----------------------------------------------------------------
+   One row per GitHub repository (full “owner/name” string)
+   ----------------------------------------------------------------- */
+CREATE TABLE IF NOT EXISTS repo_star_counts (
+  full_name   TEXT        PRIMARY KEY,                         -- e.g. "vercel/next.js"
+  star_count  INTEGER     NOT NULL CHECK (star_count >= 0),    -- latest stargazer tally
+  updated_at  TIMESTAMPTZ NOT NULL DEFAULT now()               -- last refresh
+);
+
+-- Keep `updated_at` current on every insert or update
+CREATE OR REPLACE FUNCTION touch_repo_star_counts()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at := now();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_touch_repo_star_counts
+BEFORE INSERT OR UPDATE ON repo_star_counts
+FOR EACH ROW EXECUTE FUNCTION touch_repo_star_counts();
