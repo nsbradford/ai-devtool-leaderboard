@@ -344,3 +344,7 @@ poetry.toml
 pyrightconfig.json
 
 # End of https://www.toptal.com/developers/gitignore/api/macos,node,python
+
+
+## Trigger.dev
+.trigger
