@@ -164,8 +164,10 @@ export default function LeaderboardChart() {
             const countsArray = counts as number[];
             const displayName = getToolDisplayName(toolId);
             let value = countsArray[index];
+            // For log scale, we need to handle zero values carefully
+            // We'll use a small positive value (0.5) to represent zero
             if (scaleType === 'log' && value === 0) {
-              value = 0.1;
+              value = 0.5;
             }
             dataPoint[displayName] = value;
           }
@@ -340,11 +342,11 @@ export default function LeaderboardChart() {
                     label={{ value: 'Repository Count', angle: -90, position: 'insideLeft' }}
                     tick={{ fontSize: 12 }}
                     scale={scaleType}
-                    domain={scaleType === 'log' ? [0.1, 'dataMax'] : ['dataMin', 'dataMax']}
+                    domain={scaleType === 'log' ? [0.5, 'dataMax'] : ['dataMin', 'dataMax']}
                   />
                   <Tooltip 
                     formatter={(value: number, name: string) => [
-                      value.toLocaleString(),
+                      scaleType === 'log' && value === 0.5 ? '0' : value.toLocaleString(),
                       name
                     ]}
                     labelFormatter={(label) => `Date: ${label}`}
