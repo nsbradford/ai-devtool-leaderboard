@@ -111,6 +111,63 @@ export async function upsertBotReviewsForDate(
 }
 
 /**
+ * Bulk upsert repository star counts in batches
+ * @param repoStarCounts Map of repository full names to star counts
+ * @param batchSize Size of each batch (default: 1000)
+ * @returns Promise<void>
+ */
+export async function upsertRepoStarCounts(
+  repoStarCounts: Record<string, number>,
+  batchSize: number = 1000
+): Promise<void> {
+  if (Object.keys(repoStarCounts).length === 0) {
+    console.log('No repo star counts to upsert');
+    return;
+  }
+
+  const sql = getSql();
+  const totalRecords = Object.keys(repoStarCounts).length;
+
+  try {
+    // Convert map to array of entries for easier batching
+    const entries = Object.entries(repoStarCounts);
+
+    // Process in batches
+    for (let i = 0; i < entries.length; i += batchSize) {
+      const batch = entries.slice(i, i + batchSize);
+
+      // Build batch upsert query
+      const values = batch
+        .map(
+          ([fullName, starCount]) =>
+            `('${fullName.replace(/'/g, "''")}', ${starCount})`
+        )
+        .join(', ');
+
+      const query = `
+        INSERT INTO repo_star_counts (full_name, star_count)
+        VALUES ${values}
+        ON CONFLICT (full_name) 
+        DO UPDATE SET 
+          star_count = EXCLUDED.star_count,
+          updated_at = NOW();
+      `;
+
+      await sql(query);
+
+      console.log(
+        `Upserted batch: ${batch.length}/${totalRecords} repo star count records`
+      );
+    }
+
+    console.log(`Completed upsert of ${totalRecords} repo star count records`);
+  } catch (error) {
+    console.error('Failed to upsert repo star counts:', error);
+    throw error;
+  }
+}
+
+/**
  * Get data from materialized views (weekly or monthly)
  * @param viewType Type of view to query ('weekly' or 'monthly')
  * @param startDate Start date for the query (YYYY-MM-DD format)
