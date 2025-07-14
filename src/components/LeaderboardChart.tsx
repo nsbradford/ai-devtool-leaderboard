@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
-import useSWR from 'swr';
+import useSWR, { mutate } from 'swr';
 import {
   LineChart,
   Line,
@@ -132,6 +132,18 @@ export default function LeaderboardChart() {
       setSelectedTools(new Set(Object.keys(stats.tools)));
     }
   }, [stats]);
+
+  // TODO not sure if this is working properly
+  // After the main stats load, prefetch the other window type in the background
+  useEffect(() => {
+    if (stats) {
+      const otherViewType: MaterializedViewType =
+        viewType === 'monthly' ? 'weekly' : 'monthly';
+      const otherParams = new URLSearchParams({ viewType: otherViewType });
+      const otherUrl = `${baseUrl}/api/leaderboard?${otherParams}`;
+      mutate(otherUrl, fetcher(otherUrl));
+    }
+  }, [stats, viewType, baseUrl]);
 
   const loading = statsLoading || devtoolsLoading;
   const error = statsError || devtoolsError;
