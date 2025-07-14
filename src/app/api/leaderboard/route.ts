@@ -105,7 +105,24 @@ export async function GET(request: Request) {
     
     console.log(`Returning leaderboard data with ${timestamps.length} timestamps and ${Object.keys(tools).length} tools`);
 
-    return NextResponse.json(leaderboardData);
+    const now = new Date();
+    const next6AM = new Date(now);
+    
+    // If it's currently between 0-6 AM, set to 6 AM today
+    // If it's after 6 AM, set to 6 AM tomorrow
+    if (now.getUTCHours() < 6) {
+      next6AM.setUTCHours(6, 0, 0, 0);
+    } else {
+      next6AM.setUTCDate(next6AM.getUTCDate() + 1);
+      next6AM.setUTCHours(6, 0, 0, 0);
+    }
+    
+    const secondsUntil6AM = Math.floor((next6AM.getTime() - now.getTime()) / 1000);
+
+    const response = NextResponse.json(leaderboardData);
+    response.headers.set('Cache-Control', `public, max-age=${secondsUntil6AM}, s-maxage=${secondsUntil6AM}`);
+    
+    return response;
   } catch (error) {
     console.error('Error fetching leaderboard data:', error);
     return NextResponse.json(
