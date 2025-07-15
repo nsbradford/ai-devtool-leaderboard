@@ -37,6 +37,7 @@ import type {
 import { ThemeToggle } from '@/components/theme-toggle';
 import { useDebounce } from '@/lib/client-utils';
 import Image from 'next/image';
+import { useTheme } from 'next-themes';
 // Removed Collapsible import, using Popover instead
 
 interface ChartDataPoint {
@@ -157,6 +158,8 @@ export default function LeaderboardChart() {
 
   const loading = statsLoading || devtoolsLoading || topReposLoading;
   const error = statsError || devtoolsError || topReposError;
+
+  const { theme } = useTheme();
 
   const pageStructure = (
     <div className="container mx-auto p-4 sm:p-6 space-y-6">
@@ -338,7 +341,7 @@ export default function LeaderboardChart() {
           </Card>
         </>
       ) : (
-        renderChartAndRankings()
+        renderChartAndRankings(theme)
       )}
 
       <br />
@@ -358,7 +361,7 @@ export default function LeaderboardChart() {
     </div>
   );
 
-  function renderChartAndRankings() {
+  function renderChartAndRankings(theme: string | undefined) {
     if (!filteredStats || !devtools) return null;
 
     // Map tool IDs to display names
@@ -370,7 +373,11 @@ export default function LeaderboardChart() {
 
     const getToolColor = (toolId: string): string => {
       const devtool = devtools.find((dt: DevTool) => dt.id === toolId);
-      return devtool?.brand_color || '#8884d8';
+      if (!devtool) return '#8884d8';
+      if (theme === 'dark' && devtool.brand_color_dark) {
+        return devtool.brand_color_dark;
+      }
+      return devtool.brand_color;
     };
 
     const getToolWebsiteUrl = (toolId: string): string | undefined => {

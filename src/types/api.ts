@@ -40,6 +40,7 @@ export interface DevTool {
   avatar_url: string;
   website_url: string;
   brand_color: string;
+  brand_color_dark?: string;
   created_at: string;
 }
 
