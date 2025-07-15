@@ -79,5 +79,37 @@
     "avatar_url": "https://avatars.githubusercontent.com/in/1210556?v=4",
     "website_url": "https://cursor.com",
     "brand_color": "#dc2626"
+  },
+  {
+    "id": 62050782,
+    "account_login": "deepsource-autofix[bot]",
+    "name": "DeepSource",
+    "avatar_url": "https://avatars.githubusercontent.com/in/57168?v=4",
+    "website_url": "https://deepsource.io",
+    "brand_color": "#000000"
+  },
+  {
+    "id": 176961590,
+    "account_login": "gemini-code-assist[bot]",
+    "name": "Gemini Code Assist",
+    "avatar_url": "https://avatars.githubusercontent.com/in/956858?v=4",
+    "website_url": "https://developers.google.com/gemini-code-assist",
+    "brand_color": "#000000"
+  },
+  {
+    "id": 58596630,
+    "account_login": "sourcery-ai[bot]",
+    "name": "Sourcery",
+    "avatar_url": "https://avatars.githubusercontent.com/in/48477?v=4",
+    "website_url": "https://sourcery.ai/",
+    "brand_color": "#000000"
+  },
+  {
+    "id": 188872107,
+    "account_login": "bito-code-review[bot]",
+    "name": "Bito",
+    "avatar_url": "https://avatars.githubusercontent.com/in/1061978?v=4",
+    "website_url": "https://bito.ai/",
+    "brand_color": "#000000"
   }
 ]
