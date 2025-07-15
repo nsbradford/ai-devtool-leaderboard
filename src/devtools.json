@@ -111,5 +111,13 @@
     "avatar_url": "https://avatars.githubusercontent.com/in/1061978?v=4",
     "website_url": "https://bito.ai/",
     "brand_color": "#000000"
+  },
+  {
+    "id": 131444098,
+    "account_login": "korbit-ai[bot]",
+    "name": "Korbit",
+    "avatar_url": "https://avatars.githubusercontent.com/in/322216?v=4",
+    "website_url": "https://www.korbit.ai/",
+    "brand_color": "#000000"
   }
 ]
