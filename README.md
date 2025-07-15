@@ -4,7 +4,14 @@ A dashboard tracking the adoption of AI developer tools across open-source GitHu
 
 Currently tracks only Code Review bots, tracking for code generation bots is coming soon.
 
+View at [https://www.aitooltracker.dev](https://www.aitooltracker.dev).
+
+![Dashboard Screenshot](docs/media/2025-07-15_dashboard.png)
+
 ## How it works
+
+⚠️ **Warning**: Work in progress. This project was vibecoded and should not be used as an example of good engineering practices. It has not been thoroughly validated. Do not make any important life decisions based on this dashboard.
+
 
 The data pipeline runs daily for the previous day, and has been backfilled from July 2023 onwards.
 
