@@ -22,11 +22,11 @@ import type {
   MaterializedViewType,
   TopReposByDevtool,
 } from '@/types/api';
-import { format, subDays, startOfYear, endOfYear, subYears } from 'date-fns';
-import { BarChart3, Check, ChevronDown, Star } from 'lucide-react';
+import { format, subDays } from 'date-fns';
+import { BarChart3, Calendar, Check, ChevronDown, Star } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import Image from 'next/image';
-import { useEffect, useMemo, useState, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   CartesianGrid,
   Legend,
@@ -62,9 +62,25 @@ function formatStarCount(n: number): string {
   return Math.floor(n / 100000) / 10 + 'M'; // 1.0M+
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function CustomLegend({ payload }: { payload?: any[] }) {
-  if (!payload) return null;
+function CustomLegend({
+  payload,
+  selectedTools,
+  setSelectedTools,
+  devtools,
+}: {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  payload?: any[];
+  selectedTools: Set<string>;
+  setSelectedTools: (tools: Set<string>) => void;
+  devtools?: DevTool[];
+}) {
+  if (!payload || !devtools) return null;
+
+  const getToolIdFromDisplayName = (displayName: string): string | null => {
+    const devtool = devtools.find((dt: DevTool) => dt.name === displayName);
+    return devtool ? devtool.id : null;
+  };
+
   return (
     <div
       style={{
@@ -77,27 +93,52 @@ function CustomLegend({ payload }: { payload?: any[] }) {
         width: '100%',
       }}
     >
-      {payload.map((entry) => (
-        <div
-          key={entry.value}
-          style={{ display: 'flex', alignItems: 'center', gap: 1 }}
-        >
-          <span
+      {payload.map((entry) => {
+        const toolId = getToolIdFromDisplayName(entry.value);
+        const isSelected = toolId ? selectedTools.has(toolId) : true;
+        const opacity = isSelected ? 1 : 0.5;
+
+        return (
+          <div
+            key={entry.value}
             style={{
-              display: 'inline-block',
-              width: 14,
-              height: 14,
-              backgroundColor: entry.color,
-              borderRadius: 3,
-              marginRight: 2,
-              border: '1px solid #ccc',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1,
+              cursor: 'pointer',
+              opacity,
+              transition: 'opacity 0.2s ease',
             }}
-          />
-          <span style={{ fontSize: 13, color: entry.color }}>
-            {entry.value}
-          </span>
-        </div>
-      ))}
+            onClick={() => {
+              if (toolId) {
+                const newSelected = new Set(selectedTools);
+                if (isSelected) {
+                  newSelected.delete(toolId);
+                } else {
+                  newSelected.add(toolId);
+                }
+                setSelectedTools(newSelected);
+              }
+            }}
+            title={`Click to ${isSelected ? 'hide' : 'show'} ${entry.value}`}
+          >
+            <span
+              style={{
+                display: 'inline-block',
+                width: 14,
+                height: 14,
+                backgroundColor: entry.color,
+                borderRadius: 3,
+                marginRight: 2,
+                border: '1px solid #ccc',
+              }}
+            />
+            <span style={{ fontSize: 13, color: entry.color }}>
+              {entry.value}
+            </span>
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -115,6 +156,8 @@ export default function LeaderboardChart() {
   const prevToolKeysRef = useRef<string[]>([]);
   const [scaleType, setScaleType] = useState<'linear' | 'log'>('linear');
   const [openRepoPopover, setOpenRepoPopover] = useState<string | null>(null);
+  const [datePickerOpen, setDatePickerOpen] = useState(false);
+  const [toolSearchQuery, setToolSearchQuery] = useState('');
 
   const baseUrl =
     typeof window !== 'undefined' && window.location.hostname !== 'localhost'
@@ -222,13 +265,6 @@ export default function LeaderboardChart() {
   const today = new Date();
   const presets = [
     {
-      label: 'Last 30 days',
-      getRange: () => ({
-        startDate: format(subDays(today, 29), 'yyyy-MM-dd'),
-        endDate: format(today, 'yyyy-MM-dd'),
-      }),
-    },
-    {
       label: 'Last 90 days',
       getRange: () => ({
         startDate: format(subDays(today, 89), 'yyyy-MM-dd'),
@@ -236,21 +272,11 @@ export default function LeaderboardChart() {
       }),
     },
     {
-      label: 'Year to date',
+      label: 'Last 365 days',
       getRange: () => ({
-        startDate: format(startOfYear(today), 'yyyy-MM-dd'),
+        startDate: format(subDays(today, 364), 'yyyy-MM-dd'),
         endDate: format(today, 'yyyy-MM-dd'),
       }),
-    },
-    {
-      label: 'Last year',
-      getRange: () => {
-        const lastYear = subYears(today, 1);
-        return {
-          startDate: format(startOfYear(lastYear), 'yyyy-MM-dd'),
-          endDate: format(endOfYear(lastYear), 'yyyy-MM-dd'),
-        };
-      },
     },
     {
       label: 'All time',
@@ -543,7 +569,7 @@ export default function LeaderboardChart() {
         {/* Chart Section */}
         <Card>
           <CardHeader>
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-4">
+            <div className="flex flex-col gap-4">
               <div>
                 <CardTitle>Active Repositories</CardTitle>
                 <CardDescription className="text-xs sm:text-sm">
@@ -551,200 +577,278 @@ export default function LeaderboardChart() {
                   {viewType === 'weekly' ? '7-day' : '30-day'} rolling window.
                 </CardDescription>
               </div>
-              <div className="flex flex-col sm:flex-row gap-2">
-                {/* Rolling window toggle */}
-                <div
-                  className="flex gap-1"
-                  role="group"
-                  aria-label="Rolling window selector"
-                >
-                  <Button
-                    variant={viewType === 'weekly' ? 'default' : 'outline'}
-                    size="sm"
-                    className="text-xs"
-                    aria-pressed={viewType === 'weekly'}
-                    onClick={() => setViewType('weekly')}
-                  >
-                    7-day
-                  </Button>
-                  <Button
-                    variant={viewType === 'monthly' ? 'default' : 'outline'}
-                    size="sm"
-                    className="text-xs"
-                    aria-pressed={viewType === 'monthly'}
-                    onClick={() => setViewType('monthly')}
-                  >
-                    30-day
-                  </Button>
-                </div>
-                <Button
-                  variant={scaleType === 'linear' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setScaleType('linear')}
-                  className="text-xs"
-                >
-                  Linear
-                </Button>
-                <Button
-                  variant={scaleType === 'log' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setScaleType('log')}
-                  className="text-xs"
-                >
-                  <BarChart3 className="h-3 w-3 mr-1" />
-                  Log
-                </Button>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="flex items-center gap-2 text-xs"
+
+              {/* Single Horizontal Control Bar */}
+              <div className="flex flex-wrap items-center gap-4">
+                {/* Time Scope Section */}
+                <div className="flex items-center gap-2">
+                  {/* <span className="text-sm font-medium text-muted-foreground">Time scope</span> */}
+                  <div className="flex items-center gap-1">
+                    {/* Time preset buttons - horizontal scroll if > 5 */}
+                    <div className="flex gap-1 overflow-x-auto">
+                      {presets.map((preset) => (
+                        <button
+                          key={preset.label}
+                          type="button"
+                          className={`px-2 py-1 rounded text-xs border border-input bg-background hover:bg-muted transition-colors whitespace-nowrap ${
+                            displayDateRange.startDate ===
+                              preset.getRange().startDate &&
+                            displayDateRange.endDate ===
+                              preset.getRange().endDate
+                              ? 'bg-primary/10 border-primary/20 font-semibold'
+                              : ''
+                          }`}
+                          onClick={() => setDisplayDateRange(preset.getRange())}
+                        >
+                          {preset.label}
+                        </button>
+                      ))}
+                    </div>
+                    {/* Date range picker icon */}
+                    <Popover
+                      open={datePickerOpen}
+                      onOpenChange={setDatePickerOpen}
                     >
-                      <ChevronDown className="h-3 w-3" />
-                      Tools (
-                      {selectedTools.size === 0 ? 'All' : selectedTools.size})
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-72 p-0">
-                    <div className="flex flex-col space-y-3 p-4 border-b rounded-t-lg bg-muted/50">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium">
-                          {selectedTools.size === 0
-                            ? 'All tools selected'
-                            : `${selectedTools.size} of ${Object.keys(stats?.tools || {}).length} tools selected`}
-                        </span>
+                      <PopoverTrigger asChild>
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => {
-                            if (
-                              stats &&
-                              selectedTools.size ===
-                                Object.keys(stats.tools).length
-                            ) {
-                              setSelectedTools(new Set()); // Clear all
-                            } else if (stats) {
-                              setSelectedTools(
-                                new Set(Object.keys(stats.tools))
-                              ); // Select all
-                            }
-                          }}
+                          className="h-7 w-7 p-0"
                         >
-                          {stats &&
-                          selectedTools.size === Object.keys(stats.tools).length
-                            ? 'Clear All'
-                            : 'Select All'}
+                          <Calendar className="h-3 w-3" />
                         </Button>
-                      </div>
-                      <div className="space-y-1">
-                        {Object.keys(stats?.tools || {})
-                          .map((toolId) => ({
-                            toolId,
-                            displayName: getToolDisplayName(toolId),
-                            devtool: devtools.find(
-                              (dt: DevTool) => dt.id === toolId
-                            ),
-                          }))
-                          .sort((a, b) =>
-                            a.displayName.localeCompare(b.displayName)
-                          )
-                          .map(({ toolId, displayName, devtool }) => {
-                            const isSelected = selectedTools.has(toolId);
-                            const avatarUrl = devtool?.avatar_url;
-                            return (
-                              <div
-                                key={toolId}
-                                className={`flex items-center space-x-2 p-2 rounded-md border cursor-pointer transition-colors ${
-                                  isSelected
-                                    ? 'bg-primary/10 border-primary/20'
-                                    : 'bg-background border-border hover:bg-muted'
-                                }`}
-                                onClick={() => {
-                                  const newSelected = new Set(selectedTools);
-                                  if (isSelected) {
-                                    newSelected.delete(toolId);
-                                  } else {
-                                    newSelected.add(toolId);
-                                  }
-                                  setSelectedTools(newSelected);
-                                }}
-                              >
-                                {avatarUrl && (
-                                  <Image
-                                    src={avatarUrl}
-                                    alt={`${displayName} avatar`}
-                                    width={16}
-                                    height={16}
-                                    className="w-4 h-4 rounded-full"
-                                    onError={(e) => {
-                                      e.currentTarget.style.display = 'none';
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <div className="p-4">
+                          <div className="space-y-4">
+                            <div className="flex flex-col gap-2">
+                              <label className="text-xs font-medium">
+                                Start Date
+                              </label>
+                              <input
+                                type="date"
+                                value={displayDateRange.startDate}
+                                onChange={(e) =>
+                                  setDisplayDateRange((prev) => ({
+                                    ...prev,
+                                    startDate: e.target.value,
+                                  }))
+                                }
+                                className="px-3 py-2 border border-input bg-background rounded-md text-xs focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
+                              />
+                            </div>
+                            <div className="flex flex-col gap-2">
+                              <label className="text-xs font-medium">
+                                End Date
+                              </label>
+                              <input
+                                type="date"
+                                value={displayDateRange.endDate}
+                                onChange={(e) =>
+                                  setDisplayDateRange((prev) => ({
+                                    ...prev,
+                                    endDate: e.target.value,
+                                  }))
+                                }
+                                className="px-3 py-2 border border-input bg-background rounded-md text-xs focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+                </div>
+
+                {/* Vertical divider */}
+                <div className="h-6 w-px bg-border" />
+
+                {/* Window Size Section */}
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-medium text-muted-foreground">
+                    Window
+                  </span>
+                  <div
+                    className="flex gap-1"
+                    role="group"
+                    aria-label="Rolling window selector"
+                  >
+                    <Button
+                      variant={viewType === 'weekly' ? 'default' : 'outline'}
+                      size="sm"
+                      className="text-xs h-7"
+                      aria-pressed={viewType === 'weekly'}
+                      onClick={() => setViewType('weekly')}
+                    >
+                      7-day
+                    </Button>
+                    <Button
+                      variant={viewType === 'monthly' ? 'default' : 'outline'}
+                      size="sm"
+                      className="text-xs h-7"
+                      aria-pressed={viewType === 'monthly'}
+                      onClick={() => setViewType('monthly')}
+                    >
+                      30-day
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Scale Section */}
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-medium text-muted-foreground">
+                    Scale
+                  </span>
+                  <div
+                    className="flex gap-1"
+                    role="group"
+                    aria-label="Scale selector"
+                  >
+                    <Button
+                      variant={scaleType === 'linear' ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setScaleType('linear')}
+                      className="text-xs h-7"
+                    >
+                      Linear
+                    </Button>
+                    <Button
+                      variant={scaleType === 'log' ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setScaleType('log')}
+                      className="text-xs h-7"
+                    >
+                      Log
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Vertical divider */}
+                <div className="h-6 w-px bg-border" />
+
+                {/* Series Filter Section */}
+                <div className="flex items-center gap-2">
+                  {/* <span className="text-sm font-medium text-muted-foreground">Series filter</span> */}
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="flex items-center gap-2 text-xs h-7 rounded-full"
+                      >
+                        <ChevronDown className="h-3 w-3" />
+                        Series (
+                        {selectedTools.size === 0 ? 'All' : selectedTools.size})
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-72 p-0">
+                      <div className="flex flex-col space-y-3 p-4 border-b rounded-t-lg bg-muted/50">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-medium">
+                            {selectedTools.size === 0
+                              ? 'All tools selected'
+                              : `${selectedTools.size} of ${Object.keys(stats?.tools || {}).length} tools selected`}
+                          </span>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              if (
+                                stats &&
+                                selectedTools.size ===
+                                  Object.keys(stats.tools).length
+                              ) {
+                                setSelectedTools(new Set()); // Clear all
+                              } else if (stats) {
+                                setSelectedTools(
+                                  new Set(Object.keys(stats.tools))
+                                ); // Select all
+                              }
+                            }}
+                          >
+                            {stats &&
+                            selectedTools.size ===
+                              Object.keys(stats.tools).length
+                              ? 'Clear All'
+                              : 'Select All'}
+                          </Button>
+                        </div>
+                        <div className="space-y-2">
+                          <input
+                            type="text"
+                            placeholder="Search tools..."
+                            value={toolSearchQuery}
+                            onChange={(e) => setToolSearchQuery(e.target.value)}
+                            className="w-full px-3 py-2 border border-input bg-background rounded-md text-xs focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
+                          />
+                          <div className="space-y-1 max-h-64 overflow-y-auto">
+                            {Object.keys(stats?.tools || {})
+                              .map((toolId) => ({
+                                toolId,
+                                displayName: getToolDisplayName(toolId),
+                                devtool: devtools.find(
+                                  (dt: DevTool) => dt.id === toolId
+                                ),
+                              }))
+                              .filter(({ displayName }) =>
+                                displayName
+                                  .toLowerCase()
+                                  .includes(toolSearchQuery.toLowerCase())
+                              )
+                              .sort((a, b) =>
+                                a.displayName.localeCompare(b.displayName)
+                              )
+                              .map(({ toolId, displayName, devtool }) => {
+                                const isSelected = selectedTools.has(toolId);
+                                const avatarUrl = devtool?.avatar_url;
+                                return (
+                                  <div
+                                    key={toolId}
+                                    className={`flex items-center space-x-2 p-2 rounded-md border cursor-pointer transition-colors ${
+                                      isSelected
+                                        ? 'bg-primary/10 border-primary/20'
+                                        : 'bg-background border-border hover:bg-muted'
+                                    }`}
+                                    onClick={() => {
+                                      const newSelected = new Set(
+                                        selectedTools
+                                      );
+                                      if (isSelected) {
+                                        newSelected.delete(toolId);
+                                      } else {
+                                        newSelected.add(toolId);
+                                      }
+                                      setSelectedTools(newSelected);
                                     }}
-                                  />
-                                )}
-                                <span className="text-sm font-medium truncate">
-                                  {displayName}
-                                </span>
-                                {isSelected && (
-                                  <Check className="w-4 h-4 text-primary ml-auto" />
-                                )}
-                              </div>
-                            );
-                          })}
+                                  >
+                                    {avatarUrl && (
+                                      <Image
+                                        src={avatarUrl}
+                                        alt={`${displayName} avatar`}
+                                        width={16}
+                                        height={16}
+                                        className="w-4 h-4 rounded-full"
+                                        onError={(e) => {
+                                          e.currentTarget.style.display =
+                                            'none';
+                                        }}
+                                      />
+                                    )}
+                                    <span className="text-sm font-medium truncate">
+                                      {displayName}
+                                    </span>
+                                    {isSelected && (
+                                      <Check className="w-4 h-4 text-primary ml-auto" />
+                                    )}
+                                  </div>
+                                );
+                              })}
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  </PopoverContent>
-                </Popover>
-              </div>
-            </div>
-            {/* Date Presets Row */}
-            <div className="flex flex-wrap gap-1 mb-1">
-              {presets.map((preset) => (
-                <button
-                  key={preset.label}
-                  type="button"
-                  className={`px-2 py-1 rounded text-xs border border-input bg-background hover:bg-muted transition-colors ${
-                    displayDateRange.startDate ===
-                      preset.getRange().startDate &&
-                    displayDateRange.endDate === preset.getRange().endDate
-                      ? 'bg-primary/10 border-primary/20 font-semibold'
-                      : ''
-                  }`}
-                  onClick={() => setDisplayDateRange(preset.getRange())}
-                >
-                  {preset.label}
-                </button>
-              ))}
-            </div>
-            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
-              <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-2">
-                {/* <label className="text-xs font-medium">Start Date:</label> */}
-                <input
-                  type="date"
-                  value={displayDateRange.startDate}
-                  onChange={(e) =>
-                    setDisplayDateRange((prev) => ({
-                      ...prev,
-                      startDate: e.target.value,
-                    }))
-                  }
-                  className="px-3 py-2 border border-input bg-background rounded-md text-xs focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
-                />
-              </div>
-              <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-2">
-                {/* <label className="text-xs font-medium">End Date:</label> */}
-                <label className="text-xs font-medium">→</label>
-                <input
-                  type="date"
-                  value={displayDateRange.endDate}
-                  onChange={(e) =>
-                    setDisplayDateRange((prev) => ({
-                      ...prev,
-                      endDate: e.target.value,
-                    }))
-                  }
-                  className="px-3 py-2 border border-input bg-background rounded-md text-xs focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
-                />
+                    </PopoverContent>
+                  </Popover>
+                </div>
               </div>
             </div>
           </CardHeader>
@@ -779,7 +883,15 @@ export default function LeaderboardChart() {
                     labelFormatter={(label) => `Date: ${label}`}
                     wrapperStyle={{ zIndex: 1000 }}
                   />
-                  <Legend content={<CustomLegend />} />
+                  <Legend
+                    content={
+                      <CustomLegend
+                        selectedTools={selectedTools}
+                        setSelectedTools={setSelectedTools}
+                        devtools={devtools}
+                      />
+                    }
+                  />
                   {Object.keys(stats?.tools || {})
                     .filter((toolId) =>
                       selectedTools.size === 0

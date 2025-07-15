@@ -2,9 +2,24 @@ CREATE TABLE IF NOT EXISTS bot_reviews_daily (
   event_date  DATE    NOT NULL,
   bot_id      BIGINT  NOT NULL,
   repo_name   TEXT    NOT NULL,
-  -- composite key avoids duplicates and gives you a natural clustering order
   PRIMARY KEY (event_date, bot_id, repo_name)
 );
+
+-- CREATE TABLE IF NOT EXISTS daily_bot_reviews_repo (
+--   event_date  DATE    NOT NULL,
+--   bot_id      BIGINT  NOT NULL,
+--   repo_id     BIGINT  NOT NULL,
+--   reviews     INTEGER NOT NULL,
+--   PRIMARY KEY (event_date, bot_id, repo_id)
+-- );
+
+-- CREATE TABLE IF NOT EXISTS daily_bot_reviews_user (
+--   event_date  DATE    NOT NULL,
+--   bot_id      BIGINT  NOT NULL,
+--   user_id     BIGINT  NOT NULL,
+--   reviews     INTEGER NOT NULL,
+--   PRIMARY KEY (event_date, bot_id, user_id)
+-- );
 
 
 /* -----------------------------------------------------------------
