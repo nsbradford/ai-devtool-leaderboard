@@ -114,6 +114,7 @@ export default function LeaderboardChart() {
   const [selectedTools, setSelectedTools] = useState<Set<string>>(new Set());
   const prevToolKeysRef = useRef<string[]>([]);
   const [scaleType, setScaleType] = useState<'linear' | 'log'>('linear');
+  const [openRepoPopover, setOpenRepoPopover] = useState<string | null>(null);
 
   const baseUrl =
     typeof window !== 'undefined' && window.location.hostname !== 'localhost'
@@ -776,6 +777,7 @@ export default function LeaderboardChart() {
                       name,
                     ]}
                     labelFormatter={(label) => `Date: ${label}`}
+                    wrapperStyle={{ zIndex: 1000 }}
                   />
                   <Legend content={<CustomLegend />} />
                   {Object.keys(stats?.tools || {})
@@ -877,14 +879,66 @@ export default function LeaderboardChart() {
                             </span>
                           )}
                         </div>
-                        <span className="text-xs text-muted-foreground">
-                          {tool.current_count.toLocaleString()}
-                        </span>
+                        <div className="flex items-center space-x-2">
+                          <span className="text-xs text-muted-foreground">
+                            {tool.current_count.toLocaleString()}
+                          </span>
+                          {/* Mobile toggle button */}
+                          {topRepos &&
+                            topRepos[tool.id] &&
+                            topRepos[tool.id].length > 0 && (
+                              <Popover
+                                open={openRepoPopover === tool.id}
+                                onOpenChange={(open) => {
+                                  setOpenRepoPopover(open ? tool.id : null);
+                                }}
+                              >
+                                <PopoverTrigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="h-6 w-6 p-0 md:hidden"
+                                  >
+                                    <ChevronDown className="h-3 w-3" />
+                                  </Button>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-64 p-0">
+                                  <div className="p-3">
+                                    <div className="text-xs font-medium mb-2">
+                                      Top Repositories
+                                    </div>
+                                    <div className="space-y-2">
+                                      {topRepos[tool.id].map((repo) => (
+                                        <div
+                                          key={repo.repo_name}
+                                          className="flex items-center justify-between"
+                                        >
+                                          <a
+                                            href={`https://github.com/${repo.repo_name}`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="text-xs hover:text-blue-600 hover:underline transition-colors truncate max-w-[180px]"
+                                          >
+                                            {repo.repo_name}
+                                          </a>
+                                          <span className="text-xs text-muted-foreground flex items-center">
+                                            {formatStarCount(repo.star_count)}
+                                            <Star className="inline w-3 h-3 ml-1 text-muted-foreground" />
+                                          </span>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                </PopoverContent>
+                              </Popover>
+                            )}
+                        </div>
                       </div>
+                      {/* Desktop inline display */}
                       {topRepos &&
                         topRepos[tool.id] &&
                         topRepos[tool.id].length > 0 && (
-                          <div className="mt-1 ml-8 flex flex-wrap gap-1 text-xs text-muted-foreground">
+                          <div className="mt-1 ml-8 flex-wrap gap-1 text-xs text-muted-foreground hidden md:flex">
                             {topRepos[tool.id]
                               .slice(0, 3)
                               .map((repo, repoIndex) => (
