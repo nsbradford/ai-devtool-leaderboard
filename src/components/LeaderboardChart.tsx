@@ -15,6 +15,7 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import { DEFAULT_START_DATE } from '@/lib/constants';
 import { useDebounce } from '@/lib/client-utils';
 import { cn } from '@/lib/utils';
 import type {
@@ -203,7 +204,7 @@ function CustomLegend({
 
 export default function LeaderboardChart() {
   const [displayDateRange, setDisplayDateRange] = useState<DateRange>({
-    startDate: '2023-07-01',
+    startDate: DEFAULT_START_DATE,
     endDate: format(new Date(), 'yyyy-MM-dd'),
   });
 
@@ -339,7 +340,7 @@ export default function LeaderboardChart() {
     {
       label: 'All time',
       getRange: () => ({
-        startDate: '2023-07-01',
+        startDate: DEFAULT_START_DATE,
         endDate: format(today, 'yyyy-MM-dd'),
       }),
     },

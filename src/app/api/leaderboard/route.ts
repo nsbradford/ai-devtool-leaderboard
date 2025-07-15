@@ -6,6 +6,7 @@ import type {
 } from '@/types/api';
 import { getLeaderboardDataForDateRange } from '@/lib/database';
 import { getSecondsUntilCacheReset } from '@/lib/utils';
+import { DEFAULT_START_DATE } from '@/lib/constants';
 
 export async function GET(request: Request) {
   try {
@@ -26,7 +27,7 @@ export async function GET(request: Request) {
     );
 
     // Always fetch all available data - use a very wide date range
-    const queryStartDate = '2023-01-01'; // Start from beginning of 2023
+    const queryStartDate = DEFAULT_START_DATE;
     const queryEndDate = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000)
       .toISOString()
       .split('T')[0]; // Future date to get all data
