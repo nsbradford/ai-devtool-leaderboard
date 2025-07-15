@@ -18,7 +18,34 @@ async function backfillStarCounts(
   const startTime = Date.now();
 
   try {
-    await processStarCountUpdates(daysBack, maxAgeDays, repos);
+    // Get all repos needing star count updates
+    const { getReposNeedingStarCounts } = await import('../src/lib/database');
+    const allRepos: string[] = await getReposNeedingStarCounts(
+      daysBack,
+      maxAgeDays,
+      repos
+    );
+    if (allRepos.length === 0) {
+      console.log('No repos found needing star count updates');
+      return;
+    }
+    console.log(`Found ${allRepos.length} repos needing star count updates`);
+
+    // Process in chunks of 100
+    const chunkSize = 100;
+    for (let i = 0; i < allRepos.length; i += chunkSize) {
+      const batch = allRepos.slice(i, i + chunkSize);
+      console.log(
+        `\nProcessing chunk ${Math.floor(i / chunkSize) + 1} (${batch.length} repos)...`
+      );
+      // Call processStarCountUpdates for this batch
+      await processStarCountUpdates(daysBack, maxAgeDays, batch.length);
+      // Wait 6 seconds between chunks, except after the last chunk
+      if (i + chunkSize < allRepos.length) {
+        console.log('Waiting 6 seconds before next chunk...');
+        await new Promise((resolve) => setTimeout(resolve, 6000));
+      }
+    }
   } catch (error) {
     console.error('Error during star counts backfill:', error);
     throw error;
