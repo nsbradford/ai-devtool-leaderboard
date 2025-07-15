@@ -168,10 +168,10 @@ export default function LeaderboardChart() {
           <ThemeToggle />
         </div>
         <h1 className="text-2xl sm:text-4xl font-bold mb-2">
-          AI Code Review Usage Tracker
+          AI Code Review Adoption Tracker
         </h1>
         <p className="text-muted-foreground text-sm sm:text-base">
-          Tracking adoption of AI code review tools in active open-source repos.
+          Tracking usage of AI code review tools in active open-source repos.
         </p>
         <p className="text-muted-foreground text-xs sm:text-sm">
           Data sourced from{' '}
@@ -179,7 +179,7 @@ export default function LeaderboardChart() {
             href="https://www.gharchive.org/"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-blue-600 hover:text-blue-400 hover:underline"
+            className="text-blue-400 hover:text-blue-600 hover:underline"
           >
             GH Archive
           </a>{' '}
@@ -191,7 +191,7 @@ export default function LeaderboardChart() {
             href="https://github.com/nsbradford/ai-devtool-leaderboard"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-blue-600 hover:text-blue-400 hover:underline"
+            className="text-blue-400 hover:text-blue-600 hover:underline"
           >
             GitHub
           </a>
@@ -318,7 +318,7 @@ export default function LeaderboardChart() {
               <CardDescription className="text-xs">
                 All tools ranked by current repository count
               </CardDescription>
-            </CardHeader>
+            </CardHeader> so, 
             <CardContent>
               <div className="grid gap-2">
                 {[1, 2, 3, 4, 5].map((i) => (
@@ -346,7 +346,7 @@ export default function LeaderboardChart() {
 
       <br />
       <hr className="border-border" />
-      <p className="text-muted-foreground text-xs">
+      <p className="text-muted-foreground text-xs mb-24">
         Vibe coded by{' '}
         <a
           href="https://www.nsbradford.com"
