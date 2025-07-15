@@ -507,12 +507,13 @@ export default function LeaderboardChart() {
 
     const chartData: ChartDataPoint[] = filteredStats.timestamps
       .map((timestamp, index) => {
-        const date = new Date(timestamp * 1000).toLocaleDateString('en-US', {
-          month: 'short',
-          day: 'numeric',
-          year: filteredStats.timestamps.length > 365 ? '2-digit' : undefined,
-        });
-
+        const dt = new Date(timestamp * 1000);
+        let date: string;
+        if (filteredStats.timestamps.length > 365) {
+          date = format(dt, 'MMM d, yy'); // e.g. 'Apr 6, 24'
+        } else {
+          date = format(dt, 'MMM d'); // e.g. 'Apr 6'
+        }
         const dataPoint: ChartDataPoint = {
           date,
           timestamp,
