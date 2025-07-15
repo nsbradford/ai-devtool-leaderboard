@@ -378,7 +378,7 @@ export default function LeaderboardChart() {
           Tracking usage of AI code review tools in active open-source repos.
         </p> */}
         <p className="text-muted-foreground text-xs sm:text-sm">
-          Public repo data sourced from{' '}
+          Public repo data fetched from{' '}
           <a
             href="https://www.gharchive.org/"
             target="_blank"
