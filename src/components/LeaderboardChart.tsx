@@ -416,7 +416,7 @@ export default function LeaderboardChart() {
         <div className="mx-4 sm:mx-6 space-y-6">
           <Card>
             <CardHeader>
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-4">
+              <div className="flex flex-col gap-4">
                 <div>
                   <CardTitle>Active Repositories</CardTitle>
                   <CardDescription className="text-xs sm:text-sm">
@@ -424,74 +424,73 @@ export default function LeaderboardChart() {
                     {viewType === 'weekly' ? '7-day' : '30-day'} rolling window.
                   </CardDescription>
                 </div>
-                <div className="flex flex-col sm:flex-row gap-2">
-                  {/* Rolling window toggle */}
-                  <WindowToggle value={viewType} onChange={setViewType} />
-                  <ScaleToggle value={scaleType} onChange={setScaleType} />
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="flex items-center gap-2 text-xs"
-                    disabled
-                  >
-                    <ChevronDown className="h-3 w-3" />
-                    Tools (Loading...)
-                  </Button>
-                </div>
-              </div>
-              {/* Date Presets Row */}
-              <div className="flex flex-wrap gap-1 mb-1">
-                {presets.map((preset) => (
-                  <button
-                    key={preset.label}
-                    type="button"
-                    className={`px-2 py-1 rounded text-xs border border-input bg-background hover:bg-muted transition-colors ${
-                      displayDateRange.startDate ===
-                        preset.getRange().startDate &&
-                      displayDateRange.endDate === preset.getRange().endDate
-                        ? 'bg-primary/10 border-primary/20 font-semibold'
-                        : ''
-                    }`}
-                    onClick={() => setDisplayDateRange(preset.getRange())}
-                  >
-                    {preset.label}
-                  </button>
-                ))}
-              </div>
-              <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
-                <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-2">
-                  {/* <label className="text-xs font-medium">Start Date:</label> */}
-                  <input
-                    type="date"
-                    value={displayDateRange.startDate}
-                    onChange={(e) =>
-                      setDisplayDateRange((prev) => ({
-                        ...prev,
-                        startDate: e.target.value,
-                      }))
-                    }
-                    className="px-3 py-2 border border-input bg-background rounded-md text-xs focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
-                  />
-                </div>
-                <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-2">
-                  {/* <label className="text-xs font-medium">End Date:</label> */}
-                  <label className="text-xs font-medium">→</label>
-                  <input
-                    type="date"
-                    value={displayDateRange.endDate}
-                    onChange={(e) =>
-                      setDisplayDateRange((prev) => ({
-                        ...prev,
-                        endDate: e.target.value,
-                      }))
-                    }
-                    className="px-3 py-2 border border-input bg-background rounded-md text-xs focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
-                  />
+
+                {/* Control Bar Skeleton */}
+                <div className="flex flex-wrap items-center gap-1 sm:gap-4">
+                  {/* Time Scope Section */}
+                  <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1">
+                      {/* Time preset buttons skeleton */}
+                      <div className="flex gap-1 overflow-x-auto">
+                        {presets.map((preset) => (
+                          <button
+                            key={preset.label}
+                            type="button"
+                            className={`px-2 py-1 rounded text-xs border border-input bg-background hover:bg-muted transition-colors whitespace-nowrap ${
+                              displayDateRange.startDate ===
+                                preset.getRange().startDate &&
+                              displayDateRange.endDate ===
+                                preset.getRange().endDate
+                                ? 'bg-primary/10 border-primary/20 font-semibold'
+                                : ''
+                            }`}
+                            onClick={() =>
+                              setDisplayDateRange(preset.getRange())
+                            }
+                          >
+                            {preset.label}
+                          </button>
+                        ))}
+                      </div>
+                      {/* Date range picker skeleton */}
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-7 w-7 p-0"
+                        disabled
+                      >
+                        <Calendar className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Window Size Section */}
+                  <div className="flex items-center gap-2">
+                    <WindowToggle value={viewType} onChange={setViewType} />
+                  </div>
+
+                  {/* Scale Section */}
+                  <div className="flex items-center gap-2">
+                    <ScaleToggle value={scaleType} onChange={setScaleType} />
+                  </div>
+
+                  {/* Series Filter Section */}
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex items-center gap-2 text-xs h-7 rounded-full"
+                      disabled
+                    >
+                      <ChevronDown className="h-3 w-3" />
+                      Series (Loading...)
+                    </Button>
+                  </div>
                 </div>
               </div>
             </CardHeader>
-            <CardContent>
-              <div className="h-64 sm:h-96 flex items-center justify-center bg-muted/20 rounded-md">
+            <CardContent className="px-0 pr-6">
+              <div className="h-82 sm:h-128 flex items-center justify-center bg-muted/20 rounded-md">
                 <div className="text-muted-foreground">Loading chart...</div>
               </div>
             </CardContent>
@@ -499,26 +498,40 @@ export default function LeaderboardChart() {
 
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">Current Rankings</CardTitle>
-              <CardDescription className="text-xs">
-                All tools ranked by current repository count
-              </CardDescription>
-            </CardHeader>{' '}
+              <div className="flex items-center justify-between w-full">
+                <CardTitle className="text-lg m-0">Current Rankings</CardTitle>
+                <span className="text-xs text-muted-foreground pr-2">
+                  Active Repos
+                </span>
+              </div>
+            </CardHeader>
             <CardContent>
               <div className="grid gap-2">
                 {[1, 2, 3, 4, 5].map((i) => (
                   <div
                     key={i}
-                    className="flex items-center justify-between p-2 rounded-lg border bg-muted/20"
+                    className="flex flex-col p-2 rounded-lg border bg-muted/20 transition-colors"
                   >
-                    <div className="flex items-center space-x-2">
-                      <span className="text-xs font-bold text-muted-foreground min-w-[1.5rem]">
-                        {i}
-                      </span>
-                      <div className="w-6 h-6 rounded-full bg-muted animate-pulse"></div>
-                      <div className="h-4 w-24 bg-muted rounded animate-pulse"></div>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-2">
+                        <span className="text-xs font-bold text-muted-foreground min-w-[1.5rem]">
+                          {i}
+                        </span>
+                        <div className="w-6 h-6 rounded-full bg-muted animate-pulse"></div>
+                        <div className="h-4 w-24 bg-muted rounded animate-pulse"></div>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <div className="h-4 w-12 bg-muted rounded animate-pulse"></div>
+                        {/* Mobile toggle button skeleton */}
+                        <div className="h-6 w-6 rounded bg-muted animate-pulse md:hidden"></div>
+                      </div>
                     </div>
-                    <div className="h-4 w-12 bg-muted rounded animate-pulse"></div>
+                    {/* Desktop inline display skeleton */}
+                    <div className="mt-1 ml-8 flex-wrap gap-1 text-xs text-muted-foreground hidden md:flex">
+                      <div className="h-3 w-20 bg-muted rounded animate-pulse"></div>
+                      <div className="h-3 w-16 bg-muted rounded animate-pulse"></div>
+                      <div className="h-3 w-24 bg-muted rounded animate-pulse"></div>
+                    </div>
                   </div>
                 ))}
               </div>
