@@ -854,12 +854,17 @@ export default function LeaderboardChart() {
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis
                     dataKey="date"
-                    tick={{ fontSize: 12 }}
+                    tick={{ fontSize: 11 }}
                     ticks={getXAxisTicks(chartData)}
                     tickFormatter={xAxisTickFormatter}
                   />
                   <YAxis
-                    tick={{ fontSize: 12 }}
+                    // label={{
+                    //   value: 'Repositories',
+                    //   angle: -90,
+                    //   position: 'insideLeft',
+                    // }}
+                    tick={{ fontSize: 11 }}
                     scale={scaleType}
                     domain={
                       scaleType === 'log'
