@@ -756,6 +756,7 @@ export default function LeaderboardChart() {
                           strokeWidth={2}
                           name={displayName}
                           dot={false}
+                          animationDuration={400}
                         />
                       );
                     })}
