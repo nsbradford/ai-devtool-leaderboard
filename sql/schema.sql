@@ -13,11 +13,11 @@ CREATE TABLE IF NOT EXISTS bot_reviews_daily (
 --   PRIMARY KEY (event_date, bot_id, repo_id)
 -- );
 
+-- we don't track # of reviews in the user table because it's a much larger table.
 -- CREATE TABLE IF NOT EXISTS daily_bot_reviews_user (
 --   event_date  DATE    NOT NULL,
 --   bot_id      BIGINT  NOT NULL,
 --   user_id     BIGINT  NOT NULL,
---   reviews     INTEGER NOT NULL,
 --   PRIMARY KEY (event_date, bot_id, user_id)
 -- );
 

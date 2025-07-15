@@ -15,7 +15,7 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
-import { DEFAULT_START_DATE } from '@/lib/constants';
+import { DEFAULT_START_DATE, ACTIVE_REPOS_MONTHLY } from '@/lib/constants';
 import { useDebounce } from '@/lib/client-utils';
 import { cn } from '@/lib/utils';
 import type {
@@ -404,8 +404,8 @@ export default function LeaderboardChart() {
             <CardHeader>
               <div className="flex flex-col gap-4">
                 <div>
-                  <CardTitle>Active Repositories</CardTitle>
-                  <CardDescription className="text-xs sm:text-sm">
+                  <CardTitle className="mb-2">Active Repositories</CardTitle>
+                  <CardDescription className="text-xs">
                     Repos with an AI code review,{' '}
                     {viewType === 'weekly' ? '7-day' : '30-day'} rolling window.
                   </CardDescription>
@@ -485,11 +485,15 @@ export default function LeaderboardChart() {
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between w-full">
-                <CardTitle className="text-lg m-0">Current Rankings</CardTitle>
+                <CardTitle className="">Current Rankings</CardTitle>
                 <span className="text-xs text-muted-foreground pr-2">
                   Active Repos
                 </span>
               </div>
+              <CardDescription className="text-xs">
+                There were {ACTIVE_REPOS_MONTHLY} public repos with pull
+                requests last month.
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid gap-2">
@@ -609,10 +613,10 @@ export default function LeaderboardChart() {
         {/* Chart Section */}
         <Card>
           <CardHeader>
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-2">
               <div>
-                <CardTitle>Active Repositories</CardTitle>
-                <CardDescription className="text-xs sm:text-sm">
+                <CardTitle className="mb-2">Active Repositories</CardTitle>
+                <CardDescription className="text-xs">
                   Repos with an AI code review,{' '}
                   {viewType === 'weekly' ? '7-day' : '30-day'} rolling window.
                 </CardDescription>
@@ -931,12 +935,17 @@ export default function LeaderboardChart() {
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between w-full">
-              <CardTitle className="text-lg m-0">Current Rankings</CardTitle>
+              <CardTitle className="">Current Rankings</CardTitle>
               <span className="text-xs text-muted-foreground pr-2">
                 Active Repos
               </span>
             </div>
+            <CardDescription className="text-xs">
+              Note: there are {ACTIVE_REPOS_MONTHLY} public repos with pull
+              requests per month.
+            </CardDescription>
           </CardHeader>
+
           <CardContent>
             <div className="grid gap-2">
               {(() => {
