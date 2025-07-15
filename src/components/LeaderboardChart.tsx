@@ -25,7 +25,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import { Check, ChevronDown, BarChart3 } from 'lucide-react';
+import { Check, ChevronDown, BarChart3, Star } from 'lucide-react';
 import { format } from 'date-fns';
 import type {
   LeaderboardData,
@@ -318,7 +318,8 @@ export default function LeaderboardChart() {
               <CardDescription className="text-xs">
                 All tools ranked by current repository count
               </CardDescription>
-            </CardHeader> so, 
+            </CardHeader>{' '}
+            so,
             <CardContent>
               <div className="grid gap-2">
                 {[1, 2, 3, 4, 5].map((i) => (
@@ -754,7 +755,12 @@ export default function LeaderboardChart() {
                                     {repo.repo_name}
                                   </a>
                                   <span className="ml-1">
-                                    ({repo.star_count.toLocaleString()}⭐)
+                                    ({repo.star_count.toLocaleString()}
+                                    <Star
+                                      className="inline w-3 h-3 text-muted-foreground"
+                                      style={{ verticalAlign: '-0.125em' }}
+                                    />
+                                    )
                                   </span>
                                   {repoIndex <
                                     Math.min(topRepos[tool.id].length, 3) -
