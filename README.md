@@ -1,12 +1,12 @@
-# AI DevTool Adoption Tracker
+# ✨ AI DevTool Adoption Tracker
 
-A dashboard tracking the adoption of AI code review tools across open-source GitHub repositories.
+A dashboard tracking the adoption of AI developer tools across open-source GitHub repositories.
 
-Currently indexes Code Review bots, indexing for code generation bots is coming soon.
-
-The data pipeline runs daily for the previous day, and has been backfilled from July 2023 onwards.
+Currently tracks only Code Review bots, tracking for code generation bots is coming soon.
 
 ## How it works
+
+The data pipeline runs daily for the previous day, and has been backfilled from July 2023 onwards.
 
 - List of tracked devtools is in [devtools.json](/src/devtools.json)
 - Data source: [GH Archive](https://www.gharchive.org/)'s BigQuery dataset. We currently only search over PR Review events.
