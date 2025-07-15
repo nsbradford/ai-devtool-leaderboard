@@ -735,10 +735,10 @@ export default function LeaderboardChart() {
                         {selectedTools.size === 0 ? 'All' : selectedTools.size})
                       </Button>
                     </PopoverTrigger>
-                    <PopoverContent className="w-72 p-0">
-                      <div className="flex flex-col space-y-3 p-4 border-b rounded-t-lg bg-muted/50">
+                    <PopoverContent className="w-80 p-0">
+                      <div className="flex flex-col space-y-2 p-2 border-b rounded-t-lg bg-muted/50">
                         <div className="flex items-center justify-between">
-                          <span className="text-sm font-medium">
+                          <span className="text-xs font-medium">
                             {selectedTools.size === 0
                               ? 'All tools selected'
                               : `${selectedTools.size} of ${Object.keys(stats?.tools || {}).length} tools selected`}
@@ -746,6 +746,7 @@ export default function LeaderboardChart() {
                           <Button
                             variant="outline"
                             size="sm"
+                            className="h-6 px-2 text-xs"
                             onClick={() => {
                               if (
                                 stats &&
@@ -767,15 +768,15 @@ export default function LeaderboardChart() {
                               : 'Select All'}
                           </Button>
                         </div>
-                        <div className="space-y-2">
+                        <div className="space-y-1">
                           <input
                             type="text"
                             placeholder="Search tools..."
                             value={toolSearchQuery}
                             onChange={(e) => setToolSearchQuery(e.target.value)}
-                            className="w-full px-3 py-2 border border-input bg-background rounded-md text-xs focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
+                            className="w-full px-2 py-1 border border-input bg-background rounded-md text-xs focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
                           />
-                          <div className="space-y-1 max-h-64 overflow-y-auto">
+                          <div className="space-y-0.5 max-h-64 overflow-y-auto">
                             {Object.keys(stats?.tools || {})
                               .map((toolId) => ({
                                 toolId,
@@ -798,7 +799,7 @@ export default function LeaderboardChart() {
                                 return (
                                   <div
                                     key={toolId}
-                                    className={`flex items-center space-x-2 p-2 rounded-md border cursor-pointer transition-colors ${
+                                    className={`flex items-center space-x-1.5 p-1.5 rounded-md border cursor-pointer transition-colors ${
                                       isSelected
                                         ? 'bg-primary/10 border-primary/20'
                                         : 'bg-background border-border hover:bg-muted'
@@ -819,20 +820,20 @@ export default function LeaderboardChart() {
                                       <Image
                                         src={avatarUrl}
                                         alt={`${displayName} avatar`}
-                                        width={16}
-                                        height={16}
-                                        className="w-4 h-4 rounded-full"
+                                        width={12}
+                                        height={12}
+                                        className="w-3 h-3 rounded-full"
                                         onError={(e) => {
                                           e.currentTarget.style.display =
                                             'none';
                                         }}
                                       />
                                     )}
-                                    <span className="text-sm font-medium truncate">
+                                    <span className="text-xs font-medium truncate">
                                       {displayName}
                                     </span>
                                     {isSelected && (
-                                      <Check className="w-4 h-4 text-primary ml-auto" />
+                                      <Check className="w-3 h-3 text-primary ml-auto" />
                                     )}
                                   </div>
                                 );
