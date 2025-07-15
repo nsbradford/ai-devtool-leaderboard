@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 import { ThemeProvider } from '@/components/theme-provider';
+import Script from 'next/script';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -45,7 +46,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    url: 'https://ai-devtool-leaderboard.vercel.app',
+    url: 'https://www.aitooltracker.dev',
     title: 'AI Code Review Usage Tracker',
     description:
       'Track adoption of AI code review tools in active open-source repositories. Real-time data from GitHub showing which AI tools are being adopted by developers.',
@@ -68,7 +69,7 @@ export const metadata: Metadata = {
     creator: '@nsbradford',
   },
   alternates: {
-    canonical: 'https://ai-devtool-leaderboard.vercel.app',
+    canonical: 'https://www.aitooltracker.dev',
   },
   category: 'technology',
   classification: 'AI Developer Tools',
@@ -119,6 +120,18 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-Y1ZFB5L3CP"
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-Y1ZFB5L3CP');
+          `}
+        </Script>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
@@ -128,7 +141,7 @@ export default function RootLayout({
               name: 'AI Code Review Usage Tracker',
               description:
                 'Track adoption of AI code review tools in active open-source repositories. Real-time data from GitHub showing which AI tools are being adopted by developers.',
-              url: 'https://ai-devtool-leaderboard.vercel.app',
+              url: 'https://www.aitooltracker.dev',
               applicationCategory: 'DeveloperApplication',
               operatingSystem: 'Web',
               author: {

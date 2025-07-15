@@ -7,6 +7,6 @@ export default function robots(): MetadataRoute.Robots {
       allow: '/',
       disallow: ['/api/'], // Disallow API routes from being indexed
     },
-    sitemap: 'https://ai-devtool-leaderboard.vercel.app/sitemap.xml',
+    sitemap: 'https://www.aitooltracker.dev/sitemap.xml',
   };
 }

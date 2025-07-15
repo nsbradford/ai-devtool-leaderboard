@@ -1,7 +1,7 @@
 import { MetadataRoute } from 'next';
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = 'https://ai-devtool-leaderboard.vercel.app';
+  const baseUrl = 'https://www.aitooltracker.dev';
 
   return [
     {
