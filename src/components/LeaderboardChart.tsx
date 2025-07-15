@@ -701,7 +701,7 @@ export default function LeaderboardChart() {
                 </div>
 
                 {/* Vertical divider */}
-                <div className="h-6 w-px bg-border" />
+                {/* <div className="h-6 w-px bg-border" /> */}
 
                 {/* Window Size Section */}
                 <div className="flex items-center gap-2">
@@ -720,7 +720,7 @@ export default function LeaderboardChart() {
                 </div>
 
                 {/* Vertical divider */}
-                <div className="h-6 w-px bg-border" />
+                {/* <div className="h-6 w-px bg-border" /> */}
 
                 {/* Series Filter Section */}
                 <div className="flex items-center gap-2">
