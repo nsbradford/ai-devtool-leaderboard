@@ -270,7 +270,7 @@ export default function LeaderboardChart() {
     error: topReposError,
     isLoading: topReposLoading,
   } = useSWR<TopReposByDevtool>(
-    `${baseUrl}/api/top-repos?limit=5&daysBack=30`,
+    `${baseUrl}/api/top-repos?limit=10&daysBack=30`,
     fetcher
   );
 
@@ -400,6 +400,9 @@ export default function LeaderboardChart() {
             GitHub
           </a>
           .
+        </p>
+        <p className="text-muted-foreground text-xs sm:text-sm">
+          Coming soon: AI code generation tracker.
         </p>
       </div>
 
@@ -1086,11 +1089,53 @@ export default function LeaderboardChart() {
                                     />
                                     )
                                   </span>
-                                  {repoIndex <
-                                    Math.min(topRepos[tool.id].length, 3) -
-                                      1 && <span className="mx-1">•</span>}
+                                  {repoIndex < 2 &&
+                                    repoIndex <
+                                      topRepos[tool.id].length - 1 && (
+                                      <span className="mx-1">•</span>
+                                    )}
                                 </span>
                               ))}
+                            {topRepos[tool.id].length > 3 && (
+                              <span className="mx-1">
+                                •
+                                <Popover>
+                                  <PopoverTrigger asChild>
+                                    <button className="ml-1 hover:text-blue-600 hover:underline transition-colors cursor-pointer">
+                                      see more
+                                    </button>
+                                  </PopoverTrigger>
+                                  <PopoverContent className="w-64 p-0">
+                                    <div className="p-3">
+                                      <div className="text-xs font-medium mb-2">
+                                        Top Repositories
+                                      </div>
+                                      <div className="space-y-2">
+                                        {topRepos[tool.id].map((repo) => (
+                                          <div
+                                            key={repo.repo_name}
+                                            className="flex items-center justify-between"
+                                          >
+                                            <a
+                                              href={`https://github.com/${repo.repo_name}`}
+                                              target="_blank"
+                                              rel="noopener noreferrer"
+                                              className="text-xs hover:text-blue-600 hover:underline transition-colors truncate max-w-[180px]"
+                                            >
+                                              {repo.repo_name}
+                                            </a>
+                                            <span className="text-xs text-muted-foreground flex items-center">
+                                              {formatStarCount(repo.star_count)}
+                                              <Star className="inline w-3 h-3 ml-1 text-muted-foreground" />
+                                            </span>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  </PopoverContent>
+                                </Popover>
+                              </span>
+                            )}
                           </div>
                         )}
                     </div>
