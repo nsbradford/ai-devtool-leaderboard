@@ -368,12 +368,14 @@ export default function LeaderboardChart() {
   const pageStructure = (
     <div className="w-full max-w-none xl:max-w-7xl xl:mx-auto space-y-6">
       <div className="text-center relative mx-4 sm:mx-6 mt-4 sm:mt-6">
-        <div className="absolute top-0 right-0">
+        <div className="absolute top-[-0.5em] right-[-0.5em] sm:top-0 sm:right-0">
           <ThemeToggle />
         </div>
-        <h1 className="text-2xl sm:text-4xl font-bold mb-2">
-          AI Code Review Adoption Tracker
-        </h1>
+        <div className="flex justify-center">
+          <h1 className="text-2xl sm:text-4xl font-bold mb-2 max-w-[70%]">
+            AI Code Review Adoption Tracker
+          </h1>
+        </div>
         {/* <p className="text-muted-foreground text-sm sm:text-base">
           Tracking usage of AI code review tools in active open-source repos.
         </p> */}
