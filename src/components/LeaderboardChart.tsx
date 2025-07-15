@@ -366,7 +366,7 @@ export default function LeaderboardChart() {
   ];
 
   const pageStructure = (
-    <div className="container mx-auto p-4 sm:p-6 space-y-6">
+    <div className="w-full max-w-none xl:max-w-7xl xl:mx-auto p-4 sm:p-6 space-y-6">
       <div className="text-center relative">
         <div className="absolute top-0 right-0">
           <ThemeToggle />
