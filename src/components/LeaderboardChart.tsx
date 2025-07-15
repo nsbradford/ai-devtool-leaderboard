@@ -532,7 +532,7 @@ export default function LeaderboardChart() {
       <div className="mx-4 sm:mx-6">
         <br />
         <hr className="border-border" />
-        <p className="text-muted-foreground text-xs mb-24">
+        <p className="text-muted-foreground text-xs mt-2 mb-24">
           Vibe coded by{' '}
           <a
             href="https://www.nsbradford.com"
