@@ -54,6 +54,14 @@ const fetcher = async (url: string) => {
   return response.json();
 };
 
+function formatStarCount(n: number): string {
+  if (n < 1000) return n.toString();
+  if (n < 10000)
+    return (Math.floor(n / 100) / 10).toFixed(1).replace(/\.0$/, '') + 'k'; // 1.0k-9.9k
+  if (n < 1000000) return Math.floor(n / 1000) + 'k'; // 10k-999k
+  return Math.floor(n / 100000) / 10 + 'M'; // 1.0M+
+}
+
 export default function LeaderboardChart() {
   const [displayDateRange, setDisplayDateRange] = useState<DateRange>({
     startDate: '2023-07-01',
@@ -755,7 +763,7 @@ export default function LeaderboardChart() {
                                     {repo.repo_name}
                                   </a>
                                   <span className="ml-1">
-                                    ({repo.star_count.toLocaleString()}
+                                    ({formatStarCount(repo.star_count)}
                                     <Star
                                       className="inline w-3 h-3 text-muted-foreground"
                                       style={{ verticalAlign: '-0.125em' }}
