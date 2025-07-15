@@ -538,7 +538,7 @@ export default function LeaderboardChart() {
             href="https://www.nsbradford.com"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-blue-600 hover:text-blue-400 hover:underline"
+            className="text-blue-400 hover:text-blue-600 hover:underline"
           >
             Nick Bradford
           </a>
