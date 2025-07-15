@@ -22,7 +22,7 @@ import type {
   MaterializedViewType,
   TopReposByDevtool,
 } from '@/types/api';
-import { format } from 'date-fns';
+import { format, subDays, startOfYear, endOfYear, subYears } from 'date-fns';
 import { BarChart3, Check, ChevronDown, Star } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import Image from 'next/image';
@@ -169,6 +169,49 @@ export default function LeaderboardChart() {
 
   const { resolvedTheme } = useTheme();
 
+  // Date presets
+  const today = new Date();
+  const presets = [
+    {
+      label: 'Last 30 days',
+      getRange: () => ({
+        startDate: format(subDays(today, 29), 'yyyy-MM-dd'),
+        endDate: format(today, 'yyyy-MM-dd'),
+      }),
+    },
+    {
+      label: 'Last 90 days',
+      getRange: () => ({
+        startDate: format(subDays(today, 89), 'yyyy-MM-dd'),
+        endDate: format(today, 'yyyy-MM-dd'),
+      }),
+    },
+    {
+      label: 'Year to date',
+      getRange: () => ({
+        startDate: format(startOfYear(today), 'yyyy-MM-dd'),
+        endDate: format(today, 'yyyy-MM-dd'),
+      }),
+    },
+    {
+      label: 'Last year',
+      getRange: () => {
+        const lastYear = subYears(today, 1);
+        return {
+          startDate: format(startOfYear(lastYear), 'yyyy-MM-dd'),
+          endDate: format(endOfYear(lastYear), 'yyyy-MM-dd'),
+        };
+      },
+    },
+    {
+      label: 'All time',
+      getRange: () => ({
+        startDate: '2023-07-01',
+        endDate: format(today, 'yyyy-MM-dd'),
+      }),
+    },
+  ];
+
   const pageStructure = (
     <div className="container mx-auto p-4 sm:p-6 space-y-6">
       <div className="text-center relative">
@@ -282,9 +325,28 @@ export default function LeaderboardChart() {
                   </Button>
                 </div>
               </div>
+              {/* Date Presets Row */}
+              <div className="flex flex-wrap gap-1 mb-1">
+                {presets.map((preset) => (
+                  <button
+                    key={preset.label}
+                    type="button"
+                    className={`px-2 py-1 rounded text-xs border border-input bg-background hover:bg-muted transition-colors ${
+                      displayDateRange.startDate ===
+                        preset.getRange().startDate &&
+                      displayDateRange.endDate === preset.getRange().endDate
+                        ? 'bg-primary/10 border-primary/20 font-semibold'
+                        : ''
+                    }`}
+                    onClick={() => setDisplayDateRange(preset.getRange())}
+                  >
+                    {preset.label}
+                  </button>
+                ))}
+              </div>
               <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-2">
-                  <label className="text-sm font-medium">Start Date:</label>
+                  {/* <label className="text-xs font-medium">Start Date:</label> */}
                   <input
                     type="date"
                     value={displayDateRange.startDate}
@@ -294,11 +356,12 @@ export default function LeaderboardChart() {
                         startDate: e.target.value,
                       }))
                     }
-                    className="px-3 py-2 border border-input bg-background rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
+                    className="px-3 py-2 border border-input bg-background rounded-md text-xs focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
                   />
                 </div>
                 <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-2">
-                  <label className="text-sm font-medium">End Date:</label>
+                  {/* <label className="text-xs font-medium">End Date:</label> */}
+                  <label className="text-xs font-medium">→</label>
                   <input
                     type="date"
                     value={displayDateRange.endDate}
@@ -308,7 +371,7 @@ export default function LeaderboardChart() {
                         endDate: e.target.value,
                       }))
                     }
-                    className="px-3 py-2 border border-input bg-background rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
+                    className="px-3 py-2 border border-input bg-background rounded-md text-xs focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
                   />
                 </div>
               </div>
@@ -585,9 +648,28 @@ export default function LeaderboardChart() {
                 </Popover>
               </div>
             </div>
+            {/* Date Presets Row */}
+            <div className="flex flex-wrap gap-1 mb-1">
+              {presets.map((preset) => (
+                <button
+                  key={preset.label}
+                  type="button"
+                  className={`px-2 py-1 rounded text-xs border border-input bg-background hover:bg-muted transition-colors ${
+                    displayDateRange.startDate ===
+                      preset.getRange().startDate &&
+                    displayDateRange.endDate === preset.getRange().endDate
+                      ? 'bg-primary/10 border-primary/20 font-semibold'
+                      : ''
+                  }`}
+                  onClick={() => setDisplayDateRange(preset.getRange())}
+                >
+                  {preset.label}
+                </button>
+              ))}
+            </div>
             <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
               <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-2">
-                <label className="text-sm font-medium">Start Date:</label>
+                {/* <label className="text-xs font-medium">Start Date:</label> */}
                 <input
                   type="date"
                   value={displayDateRange.startDate}
@@ -597,11 +679,12 @@ export default function LeaderboardChart() {
                       startDate: e.target.value,
                     }))
                   }
-                  className="px-3 py-2 border border-input bg-background rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
+                  className="px-3 py-2 border border-input bg-background rounded-md text-xs focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
                 />
               </div>
               <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-2">
-                <label className="text-sm font-medium">End Date:</label>
+                {/* <label className="text-xs font-medium">End Date:</label> */}
+                <label className="text-xs font-medium">→</label>
                 <input
                   type="date"
                   value={displayDateRange.endDate}
@@ -611,7 +694,7 @@ export default function LeaderboardChart() {
                       endDate: e.target.value,
                     }))
                   }
-                  className="px-3 py-2 border border-input bg-background rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
+                  className="px-3 py-2 border border-input bg-background rounded-md text-xs focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
                 />
               </div>
             </div>
