@@ -4,6 +4,7 @@ import {
   upsertBotReviewsForDate,
 } from '../src/lib/database';
 import { processBotReviewsForDate } from '../src/lib/backfill-utils';
+import devtools from '../src/devtools.json';
 import dotenv from 'dotenv';
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
@@ -18,6 +19,16 @@ if (!process.env.GOOGLE_CLOUD_PROJECT_ID) {
 if (!process.env.DATABASE_URL) {
   console.error('DATABASE_URL environment variable is required');
   process.exit(1);
+}
+
+/**
+ * Get bot IDs for newly added bots (those with "#000000" color)
+ * @returns Array of bot IDs
+ */
+function getNewlyAddedBotIds(): number[] {
+  return devtools
+    .filter((bot) => bot.brand_color === '#000000')
+    .map((bot) => bot.id);
 }
 
 // Semaphore class for controlling concurrency
@@ -64,12 +75,13 @@ function addDays(date: Date, days: number): Date {
 
 async function processDate(
   targetDate: string,
-  semaphore: Semaphore
+  semaphore: Semaphore,
+  botIds?: number[]
 ): Promise<void> {
   await semaphore.acquire();
 
   try {
-    await processBotReviewsForDate(targetDate);
+    await processBotReviewsForDate(targetDate, botIds);
   } catch (error) {
     console.error(`Error processing ${targetDate}:`, error);
     throw error;
@@ -81,12 +93,20 @@ async function processDate(
 async function backfillBotReviewsDateRange(
   startDate: Date,
   endDate: Date,
-  maxConcurrency: number = 4
+  maxConcurrency: number = 4,
+  botIds?: number[]
 ): Promise<void> {
+  const botFilter = botIds
+    ? ` (filtering for ${botIds.length} newly added bots)`
+    : '';
   console.log(
-    `Starting bot reviews backfill from ${formatDate(startDate)} to ${formatDate(endDate)}`
+    `Starting bot reviews backfill from ${formatDate(startDate)} to ${formatDate(endDate)}${botFilter}`
   );
   console.log(`Max concurrency: ${maxConcurrency}`);
+
+  if (botIds) {
+    console.log(`Newly added bot IDs: ${botIds.join(', ')}`);
+  }
 
   const semaphore = new Semaphore(maxConcurrency);
   const finalDate = new Date(endDate);
@@ -108,10 +128,12 @@ async function backfillBotReviewsDateRange(
   const startTime = Date.now();
 
   for (const dateString of allDates) {
-    const promise = processDate(dateString, semaphore).catch((error) => {
-      console.error(`Failed to process ${dateString}:`, error);
-      // Don't re-throw to allow other dates to continue processing
-    });
+    const promise = processDate(dateString, semaphore, botIds).catch(
+      (error) => {
+        console.error(`Failed to process ${dateString}:`, error);
+        // Don't re-throw to allow other dates to continue processing
+      }
+    );
     datePromises.push(promise);
   }
 
@@ -155,11 +177,27 @@ async function main(): Promise<void> {
       default: 8,
       description: 'Maximum number of concurrent operations (1-10)',
     })
+    .option('new-bots-only', {
+      alias: 'n',
+      type: 'boolean',
+      description: 'Only process newly added bots (those with "#000000" color)',
+    })
     .help()
     .alias('help', 'h').argv;
 
   let startDate: Date, endDate: Date;
   let maxConcurrency = argv.concurrency;
+  let botIds: number[] | undefined;
+
+  // Get newly added bot IDs if the option is enabled
+  if (argv['new-bots-only']) {
+    botIds = getNewlyAddedBotIds();
+    if (botIds.length === 0) {
+      console.log('No newly added bots found (bots with "#000000" color)');
+      return;
+    }
+    console.log(`Found ${botIds.length} newly added bots to process`);
+  }
 
   // Validate concurrency limit
   if (maxConcurrency < 1 || maxConcurrency > 10) {
@@ -192,7 +230,7 @@ async function main(): Promise<void> {
   // console.log(`  Start date: ${startDate.toISOString()} (${formatDate(startDate)})`);
   // console.log(`  End date: ${endDate.toISOString()} (${formatDate(endDate)})`);
   // console.log(`  Max concurrency: ${maxConcurrency}`);
-  await backfillBotReviewsDateRange(startDate, endDate, maxConcurrency);
+  await backfillBotReviewsDateRange(startDate, endDate, maxConcurrency, botIds);
 }
 
 if (require.main === module) {

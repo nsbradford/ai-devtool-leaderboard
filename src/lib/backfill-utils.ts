@@ -10,25 +10,28 @@ import { GitHubApi } from './github-api';
 /**
  * Process bot reviews for a single date
  * @param targetDate Date in YYYY-MM-DD format
+ * @param botIds Optional array of bot IDs to filter by
  * @returns Promise<void>
  */
 export async function processBotReviewsForDate(
-  targetDate: string
+  targetDate: string,
+  botIds?: number[]
 ): Promise<void> {
-  console.log(`Processing bot reviews for date: ${targetDate}`);
+  const botFilter = botIds ? ` (filtering for ${botIds.length} bots)` : '';
+  console.log(`Processing bot reviews for date: ${targetDate}${botFilter}`);
 
   try {
-    const botReviews = await getBotReviewsForDay(targetDate);
+    const botReviews = await getBotReviewsForDay(targetDate, botIds);
 
     if (botReviews.length === 0) {
-      console.log(`No bot reviews found for ${targetDate}`);
+      console.log(`No bot reviews found for ${targetDate}${botFilter}`);
       return;
     }
 
     await upsertBotReviewsForDate(botReviews);
 
     console.log(
-      `Successfully processed ${botReviews.length} bot reviews for ${targetDate}`
+      `Successfully processed ${botReviews.length} bot reviews for ${targetDate}${botFilter}`
     );
   } catch (error) {
     console.error(`Error processing bot reviews for ${targetDate}:`, error);
