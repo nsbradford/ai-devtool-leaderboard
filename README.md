@@ -8,7 +8,8 @@ The data pipeline runs daily for the previous day, and has been backfilled from 
 
 ## How it works
 
-- Data source: [GH Archive](https://www.gharchive.org/)'s BigQuery dataset
+- List of tracked devtools is in [devtools.json](/src/devtools.json)
+- Data source: [GH Archive](https://www.gharchive.org/)'s BigQuery dataset. We currently only search over PR Review events.
 - Cron job: uses [Trigger.dev](https://trigger.dev/) every day at 5am UTC to process the previous day's data archive (which is usually uploaded a few minutes after midnight UTC)
 - Storage: [Neon](https://neon.com/) serverless postgres to store intermediate data and materialized views for window aggregates.
 - Frontend: NextJS, Tailwind
@@ -32,36 +33,27 @@ The data pipeline runs daily for the previous day, and has been backfilled from 
    cd ai-devtool-leaderboard
    ```
 
-2. **Install dependencies**
+1. **Install dependencies**
 
    ```bash
    pnpm install
    ```
 
-3. **Environment configuration**
+1. **Environment configuration**
 
    ```bash
    cp .env.local.example .env.local
    ```
 
-   Fill in the required environment variables:
-   - `DATABASE_URL`: PostgreSQL connection string
-   - `GOOGLE_CLOUD_PROJECT_ID`: Your Google Cloud project ID
-   - `GOOGLE_APPLICATION_CREDENTIALS`: Base64-encoded service account JSON
+   Fill in the required environment variables.
 
-4. **Database setup**
-
-   ```bash
-   pnpm run setup-db
-   ```
-
-5. **Start the development server**
+1. **Start the development server**
 
    ```bash
    pnpm dev
    ```
 
-6. **Open the application**
+1. **Open the application**
    Navigate to [http://localhost:3000](http://localhost:3000)
 
 ### Available scripts
@@ -70,8 +62,7 @@ The data pipeline runs daily for the previous day, and has been backfilled from 
 - `pnpm build` - Build for production
 - `pnpm start` - Start production server
 - `pnpm lint` - Run ESLint
-- `pnpm backfill` - Backfill historical data
-- `pnpm setup-db` - Initialize database schema
+- `pnpm format` - Run Prettier
 
 ## License
 
