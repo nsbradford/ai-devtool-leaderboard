@@ -222,7 +222,7 @@ export default function LeaderboardChart() {
             <CardHeader>
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-4">
                 <div>
-                  <CardTitle>Usage Trends</CardTitle>
+                  <CardTitle>Active Repositories</CardTitle>
                   <CardDescription className="text-xs sm:text-sm">
                     Number of repositories with an AI code review,{' '}
                     {viewType === 'weekly' ? '7-day' : '30-day'} rolling window.
@@ -433,7 +433,7 @@ export default function LeaderboardChart() {
           <CardHeader>
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-4">
               <div>
-                <CardTitle>Usage Trends</CardTitle>
+                <CardTitle>Active Repositories</CardTitle>
                 <CardDescription className="text-xs sm:text-sm">
                   Number of repositories with an AI code review,{' '}
                   {viewType === 'weekly' ? '7-day' : '30-day'} rolling window.
@@ -628,11 +628,6 @@ export default function LeaderboardChart() {
                     tickFormatter={xAxisTickFormatter}
                   />
                   <YAxis
-                    label={{
-                      value: 'Repository Count',
-                      angle: -90,
-                      position: 'insideLeft',
-                    }}
                     tick={{ fontSize: 12 }}
                     scale={scaleType}
                     domain={
@@ -640,6 +635,7 @@ export default function LeaderboardChart() {
                         ? [0.5, 'dataMax']
                         : ['dataMin', 'dataMax']
                     }
+                    tickFormatter={formatStarCount}
                   />
                   <Tooltip
                     formatter={(value: number, name: string) => [
@@ -681,10 +677,12 @@ export default function LeaderboardChart() {
         {/* Rankings Section */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Current Rankings</CardTitle>
-            <CardDescription className="text-xs">
-              All tools ranked by current repository count
-            </CardDescription>
+            <div className="flex items-center justify-between w-full">
+              <CardTitle className="text-lg m-0">Current Rankings</CardTitle>
+              <span className="text-xs text-muted-foreground pr-2">
+                Active Repos
+              </span>
+            </div>
           </CardHeader>
           <CardContent>
             <div className="grid gap-2">
