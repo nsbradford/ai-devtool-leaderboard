@@ -366,8 +366,8 @@ export default function LeaderboardChart() {
   ];
 
   const pageStructure = (
-    <div className="w-full max-w-none xl:max-w-7xl xl:mx-auto p-4 sm:p-6 space-y-6">
-      <div className="text-center relative">
+    <div className="w-full max-w-none xl:max-w-7xl xl:mx-auto space-y-6">
+      <div className="text-center relative mx-4 sm:mx-6 mt-4 sm:mt-6">
         <div className="absolute top-0 right-0">
           <ThemeToggle />
         </div>
@@ -413,14 +413,14 @@ export default function LeaderboardChart() {
           </CardContent>
         </Card>
       ) : loading || !stats || !devtools ? (
-        <>
+        <div className="mx-4 sm:mx-6 space-y-6">
           <Card>
             <CardHeader>
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-4">
                 <div>
                   <CardTitle>Active Repositories</CardTitle>
                   <CardDescription className="text-xs sm:text-sm">
-                    Number of repositories with an AI code review,{' '}
+                    Repos with an AI code review,{' '}
                     {viewType === 'weekly' ? '7-day' : '30-day'} rolling window.
                   </CardDescription>
                 </div>
@@ -524,25 +524,27 @@ export default function LeaderboardChart() {
               </div>
             </CardContent>
           </Card>
-        </>
+        </div>
       ) : (
         renderChartAndRankings(resolvedTheme)
       )}
 
-      <br />
-      <hr className="border-border" />
-      <p className="text-muted-foreground text-xs mb-24">
-        Vibe coded by{' '}
-        <a
-          href="https://www.nsbradford.com"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-blue-600 hover:text-blue-400 hover:underline"
-        >
-          Nick Bradford
-        </a>
-        .
-      </p>
+      <div className="mx-4 sm:mx-6">
+        <br />
+        <hr className="border-border" />
+        <p className="text-muted-foreground text-xs mb-24">
+          Vibe coded by{' '}
+          <a
+            href="https://www.nsbradford.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-600 hover:text-blue-400 hover:underline"
+          >
+            Nick Bradford
+          </a>
+          .
+        </p>
+      </div>
     </div>
   );
 
@@ -603,7 +605,7 @@ export default function LeaderboardChart() {
       .sort((a, b) => a.timestamp - b.timestamp);
 
     return (
-      <div className="space-y-6">
+      <div className="mx-4 sm:mx-6 space-y-6">
         {/* Chart Section */}
         <Card>
           <CardHeader>
@@ -611,13 +613,13 @@ export default function LeaderboardChart() {
               <div>
                 <CardTitle>Active Repositories</CardTitle>
                 <CardDescription className="text-xs sm:text-sm">
-                  Number of repositories with an AI code review,{' '}
+                  Repos with an AI code review,{' '}
                   {viewType === 'weekly' ? '7-day' : '30-day'} rolling window.
                 </CardDescription>
               </div>
 
               {/* Single Horizontal Control Bar */}
-              <div className="flex flex-wrap items-center gap-4">
+              <div className="flex flex-wrap items-center gap-1 sm:gap-4">
                 {/* Time Scope Section */}
                 <div className="flex items-center gap-2">
                   {/* <span className="text-sm font-medium text-muted-foreground">Time scope</span> */}
@@ -847,8 +849,8 @@ export default function LeaderboardChart() {
               </div>
             </div>
           </CardHeader>
-          <CardContent>
-            <div className="h-64 sm:h-96">
+          <CardContent className="px-0 pr-6">
+            <div className="h-82 sm:h-128">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={chartData}>
                   <CartesianGrid strokeDasharray="3 3" />
