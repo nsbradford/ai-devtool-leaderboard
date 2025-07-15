@@ -1,24 +1,18 @@
-# AI DevTool Leaderboard
+# AI DevTool Adoption Tracker
 
-A real-time leaderboard tracking the adoption of AI code review tools across open-source GitHub repositories. This project analyzes GitHub Archive data to show which AI tools are being used most frequently for code reviews.
+A dashboard tracking the adoption of AI code review tools across open-source GitHub repositories.
 
-## What it shows
+Currently indexes Code Review bots, indexing for code generation bots is coming soon.
 
-The leaderboard displays:
-
-- **Usage trends**: Interactive charts showing AI tool adoption over time
-- **Current rankings**: Real-time rankings of tools by repository count
-- **Tool filtering**: Select specific tools to compare their adoption patterns
-- **Date range selection**: View historical data from July 2023 onwards
+The data pipeline runs daily for the previous day, and has been backfilled from July 2023 onwards.
 
 ## How it works
 
-1. **Data Collection**: The system processes [GitHub Archive](https://www.gharchive.org/) data daily, analyzing pull request review events to identify AI bot activity
-2. **Bot Detection**: AI code review bots are identified by their GitHub account patterns (e.g., `coderabbitai[bot]`, `ellipsis-dev[bot]`)
-3. **Aggregation**: Data is aggregated into 7-day rolling windows to show repository counts where each AI tool was active
-4. **Visualization**: The frontend displays interactive charts and rankings using the processed data
-
-The data pipeline runs daily and covers activity from July 2023 onwards, providing insights into the growing adoption of AI-powered code review tools in the open-source ecosystem.
+- Data source: [GH Archive](https://www.gharchive.org/)'s BigQuery dataset
+- Cron job: uses [Trigger.dev](https://trigger.dev/) every day at 5am UTC to process the previous day's data archive (which is usually uploaded a few minutes after midnight UTC)
+- Storage: [Neon](https://neon.com/) serverless postgres to store intermediate data and materialized views for window aggregates.
+- Frontend: NextJS, Tailwind
+- Hosting: Vercel
 
 ## Local development
 
@@ -78,27 +72,6 @@ The data pipeline runs daily and covers activity from July 2023 onwards, providi
 - `pnpm lint` - Run ESLint
 - `pnpm backfill` - Backfill historical data
 - `pnpm setup-db` - Initialize database schema
-
-### Development workflow
-
-The application uses:
-
-- **Next.js 15** with App Router
-- **TypeScript** for type safety
-- **Tailwind CSS** for styling
-- **Recharts** for data visualization
-- **SWR** for data fetching and caching
-- **Radix UI** for accessible components
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Make your changes
-4. Run tests and linting (`pnpm lint`)
-5. Commit your changes (`git commit -m 'Add amazing feature'`)
-6. Push to the branch (`git push origin feature/amazing-feature`)
-7. Open a Pull Request
 
 ## License
 
