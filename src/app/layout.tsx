@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'AI Code Review Usage Tracker',
+  title: 'AI Code Review Adoption Tracker',
   description:
     'Track adoption of AI code review tools in active open-source repositories. Real-time data from GitHub showing which AI tools are being adopted by developers.',
   keywords: [
@@ -47,22 +47,22 @@ export const metadata: Metadata = {
     type: 'website',
     locale: 'en_US',
     url: 'https://www.aitooltracker.dev',
-    title: 'AI Code Review Usage Tracker',
+    title: 'AI Code Review Adoption Tracker',
     description:
       'Track adoption of AI code review tools in active open-source repositories. Real-time data from GitHub showing which AI tools are being adopted by developers.',
-    siteName: 'AI Code Review Usage Tracker',
+    siteName: 'AI Code Review Adoption Tracker',
     images: [
       {
         url: '/icons/android-chrome-512x512.png',
         width: 512,
         height: 512,
-        alt: 'AI Code Review Usage Tracker',
+        alt: 'AI Code Review Adoption Tracker',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'AI Code Review Usage Tracker',
+    title: 'AI Code Review Adoption Tracker',
     description:
       'Track adoption of AI code review tools in active open-source repositories. Real-time data from GitHub showing which AI tools are being adopted by developers.',
     images: ['/icons/android-chrome-512x512.png'],
@@ -138,7 +138,7 @@ export default function RootLayout({
             __html: JSON.stringify({
               '@context': 'https://schema.org',
               '@type': 'WebApplication',
-              name: 'AI Code Review Usage Tracker',
+              name: 'AI Code Review Adoption Tracker',
               description:
                 'Track adoption of AI code review tools in active open-source repositories. Real-time data from GitHub showing which AI tools are being adopted by developers.',
               url: 'https://www.aitooltracker.dev',

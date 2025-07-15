@@ -269,9 +269,9 @@ export default function LeaderboardChart() {
         <h1 className="text-2xl sm:text-4xl font-bold mb-2">
           AI Code Review Adoption Tracker
         </h1>
-        <p className="text-muted-foreground text-sm sm:text-base">
+        {/* <p className="text-muted-foreground text-sm sm:text-base">
           Tracking usage of AI code review tools in active open-source repos.
-        </p>
+        </p> */}
         <p className="text-muted-foreground text-xs sm:text-sm">
           Data sourced from{' '}
           <a

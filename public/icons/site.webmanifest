@@ -1,5 +1,5 @@
 {
-  "name": "AI Code Review Usage Tracker",
+  "name": "AI Code Review Adoption Tracker",
   "short_name": "AI Code Review Tracker",
   "description": "Track adoption of AI code review tools in active open-source repositories",
   "start_url": "/",
