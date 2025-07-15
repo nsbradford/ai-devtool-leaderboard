@@ -1,17 +1,7 @@
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
-import useSWR, { mutate } from 'swr';
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-} from 'recharts';
+import { ThemeToggle } from '@/components/theme-toggle';
+import { Button } from '@/components/ui/button';
 import {
   Card,
   CardContent,
@@ -19,25 +9,35 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import { Check, ChevronDown, BarChart3, Star } from 'lucide-react';
-import { format } from 'date-fns';
+import { useDebounce } from '@/lib/client-utils';
 import type {
-  LeaderboardData,
   DateRange,
-  MaterializedViewType,
   DevTool,
+  LeaderboardData,
+  MaterializedViewType,
   TopReposByDevtool,
 } from '@/types/api';
-import { ThemeToggle } from '@/components/theme-toggle';
-import { useDebounce } from '@/lib/client-utils';
-import Image from 'next/image';
+import { format } from 'date-fns';
+import { BarChart3, Check, ChevronDown, Star } from 'lucide-react';
 import { useTheme } from 'next-themes';
+import Image from 'next/image';
+import { useEffect, useMemo, useState } from 'react';
+import {
+  CartesianGrid,
+  Legend,
+  Line,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from 'recharts';
+import useSWR, { mutate } from 'swr';
 // Removed Collapsible import, using Popover instead
 
 interface ChartDataPoint {
@@ -621,7 +621,12 @@ export default function LeaderboardChart() {
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={chartData}>
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="date" tick={{ fontSize: 12 }} />
+                  <XAxis
+                    dataKey="date"
+                    tick={{ fontSize: 12 }}
+                    ticks={getXAxisTicks(chartData)}
+                    tickFormatter={xAxisTickFormatter}
+                  />
                   <YAxis
                     label={{
                       value: 'Repository Count',
@@ -786,6 +791,61 @@ export default function LeaderboardChart() {
         </Card>
       </div>
     );
+  }
+
+  function getXAxisTicks(chartData: ChartDataPoint[]): string[] {
+    if (chartData.length === 0) return [];
+    // If the range is more than 2 years, show only Jan 1 of each year
+    // If the range is more than 6 months, show first of each month
+    // Otherwise, show first of each week (or just use recharts default)
+    const first = chartData[0];
+    const last = chartData[chartData.length - 1];
+    const firstDate = new Date(first.timestamp * 1000);
+    const lastDate = new Date(last.timestamp * 1000);
+    const months =
+      (lastDate.getFullYear() - firstDate.getFullYear()) * 12 +
+      (lastDate.getMonth() - firstDate.getMonth());
+    if (months > 24) {
+      // Show Jan 1 of each year
+      return chartData
+        .filter((d) => {
+          const dt = new Date(d.timestamp * 1000);
+          return dt.getMonth() === 0 && dt.getDate() === 1;
+        })
+        .map((d) => d.date);
+    } else if (months > 6) {
+      // Show first of each month
+      return chartData
+        .filter((d) => {
+          const dt = new Date(d.timestamp * 1000);
+          return dt.getDate() === 1;
+        })
+        .map((d) => d.date);
+    } else {
+      // Show every 2nd or 3rd tick to avoid crowding
+      const step = Math.ceil(chartData.length / 8);
+      return chartData.filter((_, i) => i % step === 0).map((d) => d.date);
+    }
+  }
+
+  function xAxisTickFormatter(dateStr: string) {
+    // Try to parse the date string back to a Date
+    // The current format is 'Apr 6, 25' or 'Apr 6' (from toLocaleDateString)
+    // We'll just show 'MMM yyyy' or 'MMM d' depending on range
+    // But since we control the ticks, we can show 'MMM yyyy' for year/month, 'MMM d' for short
+    // Try to parse as Date
+    const dt = new Date(dateStr);
+    if (isNaN(dt.getTime())) return dateStr;
+    if (dt.getDate() === 1 && dt.getMonth() === 0) {
+      // Jan 1: show year
+      return format(dt, 'yyyy');
+    } else if (dt.getDate() === 1) {
+      // First of month: show month and year
+      return format(dt, 'MMM yyyy');
+    } else {
+      // Otherwise, show month/day
+      return format(dt, 'MMM d');
+    }
   }
 
   return pageStructure;
