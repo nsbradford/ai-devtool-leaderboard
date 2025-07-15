@@ -72,7 +72,7 @@ function WindowToggle({ value, onChange }: { value: 'weekly' | 'monthly'; onChan
       /* shadcn passes `null` when a selected item is clicked again */
       onValueChange={v => v && onChange(v as 'weekly' | 'monthly')}
       /* one ring, one radius → wrapper handles the outer shape */
-      className="inline-flex isolate rounded-lg ring-1 ring-inset ring-border"
+      className="inline-flex isolate rounded-lg ring-1 ring-inset ring-border bg-transparent"
     >
       {(["weekly", "monthly"] as const).map(v => (
         <ToggleGroupItem
@@ -82,9 +82,9 @@ function WindowToggle({ value, onChange }: { value: 'weekly' | 'monthly'; onChan
           /* first/last utilities give you the pill shape without manual classes */
           className={cn(
             "h-7 px-3 text-xs font-medium focus-visible:outline-none",
-            "ring-1 ring-inset ring . -transparent first:rounded-l-lg last:rounded-r-lg",
+            "ring-1 ring-inset ring-transparent first:rounded-l-lg last:rounded-r-lg",
             /* selected state */
-            "data-[state=on]:bg-muted data-[state=on]:ring-border data-[state=on]:text-foreground",
+            "data-[state=on]:bg-muted data-[state=on]:text-foreground",
             /* hover */
             "hover:bg-muted/50"
           )}
@@ -104,7 +104,7 @@ function ScaleToggle({ value, onChange }: { value: 'linear' | 'log'; onChange: (
       /* shadcn passes `null` when a selected item is clicked again */
       onValueChange={v => v && onChange(v as 'linear' | 'log')}
       /* one ring, one radius → wrapper handles the outer shape */
-      className="inline-flex isolate rounded-lg ring-1 ring-inset ring-border"
+      className="inline-flex isolate rounded-lg ring-1 ring-inset ring-border bg-transparent"
     >
       {(["linear", "log"] as const).map(v => (
         <ToggleGroupItem
@@ -116,7 +116,7 @@ function ScaleToggle({ value, onChange }: { value: 'linear' | 'log'; onChange: (
             "h-7 px-3 text-xs font-medium focus-visible:outline-none",
             "ring-1 ring-inset ring-transparent first:rounded-l-lg last:rounded-r-lg",
             /* selected state */
-            "data-[state=on]:bg-muted data-[state=on]:ring-border data-[state=on]:text-foreground",
+            "data-[state=on]:bg-muted data-[state=on]:text-foreground",
             /* hover */
             "hover:bg-muted/50"
           )}
@@ -691,17 +691,17 @@ export default function LeaderboardChart() {
 
                 {/* Window Size Section */}
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium text-muted-foreground">
+                  {/* <span className="text-sm font-medium text-muted-foreground">
                     Window
-                  </span>
+                  </span> */}
                   <WindowToggle value={viewType} onChange={setViewType} />
                 </div>
 
                 {/* Scale Section */}
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium text-muted-foreground">
+                  {/* <span className="text-sm font-medium text-muted-foreground">
                     Scale
-                  </span>
+                  </span> */}
                   <ScaleToggle value={scaleType} onChange={setScaleType} />
                 </div>
 
