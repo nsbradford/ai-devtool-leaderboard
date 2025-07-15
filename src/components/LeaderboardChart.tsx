@@ -62,6 +62,46 @@ function formatStarCount(n: number): string {
   return Math.floor(n / 100000) / 10 + 'M'; // 1.0M+
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function CustomLegend({ payload }: { payload?: any[] }) {
+  if (!payload) return null;
+  return (
+    <div
+      style={{
+        display: 'flex',
+        flexWrap: 'wrap',
+        gap: 12,
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginTop: 8,
+        width: '100%',
+      }}
+    >
+      {payload.map((entry) => (
+        <div
+          key={entry.value}
+          style={{ display: 'flex', alignItems: 'center', gap: 1 }}
+        >
+          <span
+            style={{
+              display: 'inline-block',
+              width: 14,
+              height: 14,
+              backgroundColor: entry.color,
+              borderRadius: 3,
+              marginRight: 2,
+              border: '1px solid #ccc',
+            }}
+          />
+          <span style={{ fontSize: 13, color: entry.color }}>
+            {entry.value}
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export default function LeaderboardChart() {
   const [displayDateRange, setDisplayDateRange] = useState<DateRange>({
     startDate: '2023-07-01',
@@ -737,7 +777,7 @@ export default function LeaderboardChart() {
                     ]}
                     labelFormatter={(label) => `Date: ${label}`}
                   />
-                  <Legend />
+                  <Legend content={<CustomLegend />} />
                   {Object.keys(stats?.tools || {})
                     .filter((toolId) =>
                       selectedTools.size === 0
