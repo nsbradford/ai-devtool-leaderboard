@@ -64,64 +64,76 @@ function formatStarCount(n: number): string {
   return Math.floor(n / 100000) / 10 + 'M'; // 1.0M+
 }
 
-function WindowToggle({ value, onChange }: { value: 'weekly' | 'monthly'; onChange: (v: 'weekly' | 'monthly') => void }) {
+function WindowToggle({
+  value,
+  onChange,
+}: {
+  value: 'weekly' | 'monthly';
+  onChange: (v: 'weekly' | 'monthly') => void;
+}) {
   return (
     <ToggleGroup
       type="single"
       value={value}
       /* shadcn passes `null` when a selected item is clicked again */
-      onValueChange={v => v && onChange(v as 'weekly' | 'monthly')}
+      onValueChange={(v) => v && onChange(v as 'weekly' | 'monthly')}
       /* one ring, one radius → wrapper handles the outer shape */
-      className="inline-flex isolate rounded-lg ring-1 ring-inset ring-border bg-transparent"
+      className="inline-flex isolate rounded-lg ring-1 ring-inset ring-border bg-background"
     >
-      {(["weekly", "monthly"] as const).map(v => (
+      {(['weekly', 'monthly'] as const).map((v) => (
         <ToggleGroupItem
           key={v}
           value={v}
-          aria-label={v === "weekly" ? "7-day window" : "30-day window"}
+          aria-label={v === 'weekly' ? '7-day window' : '30-day window'}
           /* first/last utilities give you the pill shape without manual classes */
           className={cn(
-            "h-7 px-3 text-xs font-medium focus-visible:outline-none",
-            "ring-1 ring-inset ring-transparent first:rounded-l-lg last:rounded-r-lg",
+            'h-7 px-3 text-xs font-medium focus-visible:outline-none',
+            'ring-1 ring-inset ring-transparent first:rounded-l-lg last:rounded-r-lg',
             /* selected state */
-            "data-[state=on]:bg-muted data-[state=on]:text-foreground",
+            'data-[state=on]:bg-primary/10 data-[state=on]:border-primary/20 data-[state=on]:font-semibold',
             /* hover */
-            "hover:bg-muted/50"
+            'hover:bg-muted/50'
           )}
         >
-          {v === "weekly" ? "7-day" : "30-day"}
+          {v === 'weekly' ? '7-day' : '30-day'}
         </ToggleGroupItem>
       ))}
     </ToggleGroup>
   );
 }
 
-function ScaleToggle({ value, onChange }: { value: 'linear' | 'log'; onChange: (v: 'linear' | 'log') => void }) {
+function ScaleToggle({
+  value,
+  onChange,
+}: {
+  value: 'linear' | 'log';
+  onChange: (v: 'linear' | 'log') => void;
+}) {
   return (
     <ToggleGroup
       type="single"
       value={value}
       /* shadcn passes `null` when a selected item is clicked again */
-      onValueChange={v => v && onChange(v as 'linear' | 'log')}
+      onValueChange={(v) => v && onChange(v as 'linear' | 'log')}
       /* one ring, one radius → wrapper handles the outer shape */
-      className="inline-flex isolate rounded-lg ring-1 ring-inset ring-border bg-transparent"
+      className="inline-flex isolate rounded-lg ring-1 ring-inset ring-border bg-background"
     >
-      {(["linear", "log"] as const).map(v => (
+      {(['linear', 'log'] as const).map((v) => (
         <ToggleGroupItem
           key={v}
           value={v}
-          aria-label={v === "linear" ? "Linear scale" : "Logarithmic scale"}
+          aria-label={v === 'linear' ? 'Linear scale' : 'Logarithmic scale'}
           /* first/last utilities give you the pill shape without manual classes */
           className={cn(
-            "h-7 px-3 text-xs font-medium focus-visible:outline-none",
-            "ring-1 ring-inset ring-transparent first:rounded-l-lg last:rounded-r-lg",
+            'h-7 px-3 text-xs font-medium focus-visible:outline-none',
+            'ring-1 ring-inset ring-transparent first:rounded-l-lg last:rounded-r-lg',
             /* selected state */
-            "data-[state=on]:bg-muted data-[state=on]:text-foreground",
+            'data-[state=on]:bg-primary/10 data-[state=on]:border-primary/20 data-[state=on]:font-semibold',
             /* hover */
-            "hover:bg-muted/50"
+            'hover:bg-muted/50'
           )}
         >
-          {v === "linear" ? "Linear" : "Log"}
+          {v === 'linear' ? 'Linear' : 'Log'}
         </ToggleGroupItem>
       ))}
     </ToggleGroup>

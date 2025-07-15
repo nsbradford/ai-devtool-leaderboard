@@ -32,6 +32,7 @@ const ToggleGroup = React.forwardRef<
   React.ElementRef<typeof ToggleGroupPrimitive.Root>,
   React.ComponentPropsWithoutRef<typeof ToggleGroupPrimitive.Root> &
     VariantProps<typeof toggleGroupVariants>
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
 >(({ className, variant, size, children, ...props }, ref) => (
   <ToggleGroupPrimitive.Root
     ref={ref}
@@ -48,6 +49,7 @@ const ToggleGroupItem = React.forwardRef<
   React.ElementRef<typeof ToggleGroupPrimitive.Item>,
   React.ComponentPropsWithoutRef<typeof ToggleGroupPrimitive.Item> &
     VariantProps<typeof toggleGroupVariants>
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
 >(({ className, children, variant, size, ...props }, ref) => (
   <ToggleGroupPrimitive.Item
     ref={ref}
