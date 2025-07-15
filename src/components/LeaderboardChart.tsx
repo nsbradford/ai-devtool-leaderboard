@@ -378,7 +378,7 @@ export default function LeaderboardChart() {
           Tracking usage of AI code review tools in active open-source repos.
         </p> */}
         <p className="text-muted-foreground text-xs sm:text-sm">
-          Data sourced from{' '}
+          Public repo data sourced from{' '}
           <a
             href="https://www.gharchive.org/"
             target="_blank"
@@ -387,7 +387,7 @@ export default function LeaderboardChart() {
           >
             GH Archive
           </a>{' '}
-          starting 2023-07-01 and updated daily.
+          and updated daily.
         </p>
         <p className="text-muted-foreground text-xs sm:text-sm">
           View source on{' '}
