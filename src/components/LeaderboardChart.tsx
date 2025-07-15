@@ -26,7 +26,7 @@ import { format, subDays, startOfYear, endOfYear, subYears } from 'date-fns';
 import { BarChart3, Check, ChevronDown, Star } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import Image from 'next/image';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useRef } from 'react';
 import {
   CartesianGrid,
   Legend,
@@ -72,6 +72,7 @@ export default function LeaderboardChart() {
 
   const [viewType, setViewType] = useState<MaterializedViewType>('monthly');
   const [selectedTools, setSelectedTools] = useState<Set<string>>(new Set());
+  const prevToolKeysRef = useRef<string[]>([]);
   const [scaleType, setScaleType] = useState<'linear' | 'log'>('linear');
 
   const baseUrl =
@@ -144,11 +145,18 @@ export default function LeaderboardChart() {
     };
   }, [stats, debouncedDisplayDateRange]);
 
-  // Initialize selected tools when stats data is loaded
+  // Initialize selected tools when stats data is loaded, but only if the set of tool keys changes
   useEffect(() => {
     if (stats && stats.tools && Object.keys(stats.tools).length > 0) {
-      // Initialize with all tools selected
-      setSelectedTools(new Set(Object.keys(stats.tools)));
+      const toolKeys = Object.keys(stats.tools);
+      const prevToolKeys = prevToolKeysRef.current;
+      const toolKeysChanged =
+        toolKeys.length !== prevToolKeys.length ||
+        toolKeys.some((k, i) => k !== prevToolKeys[i]);
+      if (toolKeysChanged) {
+        setSelectedTools(new Set(toolKeys));
+        prevToolKeysRef.current = toolKeys;
+      }
     }
   }, [stats]);
 
