@@ -27,6 +27,7 @@
     "@radix-ui/react-collapsible": "^1.1.11",
     "@radix-ui/react-popover": "^1.1.14",
     "@radix-ui/react-slot": "^1.2.3",
+    "@radix-ui/react-toggle-group": "^1.1.10",
     "@trigger.dev/sdk": "^3.3.17",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",

@@ -14,7 +14,9 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { useDebounce } from '@/lib/client-utils';
+import { cn } from '@/lib/utils';
 import type {
   DateRange,
   DevTool,
@@ -23,7 +25,7 @@ import type {
   TopReposByDevtool,
 } from '@/types/api';
 import { format, subDays } from 'date-fns';
-import { BarChart3, Calendar, Check, ChevronDown, Star } from 'lucide-react';
+import { Calendar, Check, ChevronDown, Star } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import Image from 'next/image';
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -60,6 +62,70 @@ function formatStarCount(n: number): string {
     return (Math.floor(n / 100) / 10).toFixed(1).replace(/\.0$/, '') + 'k'; // 1.0k-9.9k
   if (n < 1000000) return Math.floor(n / 1000) + 'k'; // 10k-999k
   return Math.floor(n / 100000) / 10 + 'M'; // 1.0M+
+}
+
+function WindowToggle({ value, onChange }: { value: 'weekly' | 'monthly'; onChange: (v: 'weekly' | 'monthly') => void }) {
+  return (
+    <ToggleGroup
+      type="single"
+      value={value}
+      /* shadcn passes `null` when a selected item is clicked again */
+      onValueChange={v => v && onChange(v as 'weekly' | 'monthly')}
+      /* one ring, one radius → wrapper handles the outer shape */
+      className="inline-flex isolate rounded-lg ring-1 ring-inset ring-border"
+    >
+      {(["weekly", "monthly"] as const).map(v => (
+        <ToggleGroupItem
+          key={v}
+          value={v}
+          aria-label={v === "weekly" ? "7-day window" : "30-day window"}
+          /* first/last utilities give you the pill shape without manual classes */
+          className={cn(
+            "h-7 px-3 text-xs font-medium focus-visible:outline-none",
+            "ring-1 ring-inset ring . -transparent first:rounded-l-lg last:rounded-r-lg",
+            /* selected state */
+            "data-[state=on]:bg-muted data-[state=on]:ring-border data-[state=on]:text-foreground",
+            /* hover */
+            "hover:bg-muted/50"
+          )}
+        >
+          {v === "weekly" ? "7-day" : "30-day"}
+        </ToggleGroupItem>
+      ))}
+    </ToggleGroup>
+  );
+}
+
+function ScaleToggle({ value, onChange }: { value: 'linear' | 'log'; onChange: (v: 'linear' | 'log') => void }) {
+  return (
+    <ToggleGroup
+      type="single"
+      value={value}
+      /* shadcn passes `null` when a selected item is clicked again */
+      onValueChange={v => v && onChange(v as 'linear' | 'log')}
+      /* one ring, one radius → wrapper handles the outer shape */
+      className="inline-flex isolate rounded-lg ring-1 ring-inset ring-border"
+    >
+      {(["linear", "log"] as const).map(v => (
+        <ToggleGroupItem
+          key={v}
+          value={v}
+          aria-label={v === "linear" ? "Linear scale" : "Logarithmic scale"}
+          /* first/last utilities give you the pill shape without manual classes */
+          className={cn(
+            "h-7 px-3 text-xs font-medium focus-visible:outline-none",
+            "ring-1 ring-inset ring-transparent first:rounded-l-lg last:rounded-r-lg",
+            /* selected state */
+            "data-[state=on]:bg-muted data-[state=on]:ring-border data-[state=on]:text-foreground",
+            /* hover */
+            "hover:bg-muted/50"
+          )}
+        >
+          {v === "linear" ? "Linear" : "Log"}
+        </ToggleGroupItem>
+      ))}
+    </ToggleGroup>
+  );
 }
 
 function CustomLegend({
@@ -348,47 +414,8 @@ export default function LeaderboardChart() {
                 </div>
                 <div className="flex flex-col sm:flex-row gap-2">
                   {/* Rolling window toggle */}
-                  <div
-                    className="flex gap-1"
-                    role="group"
-                    aria-label="Rolling window selector"
-                  >
-                    <Button
-                      variant={viewType === 'weekly' ? 'default' : 'outline'}
-                      size="sm"
-                      className="text-xs"
-                      aria-pressed={viewType === 'weekly'}
-                      onClick={() => setViewType('weekly')}
-                    >
-                      7-day
-                    </Button>
-                    <Button
-                      variant={viewType === 'monthly' ? 'default' : 'outline'}
-                      size="sm"
-                      className="text-xs"
-                      aria-pressed={viewType === 'monthly'}
-                      onClick={() => setViewType('monthly')}
-                    >
-                      30-day
-                    </Button>
-                  </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="text-xs"
-                    disabled
-                  >
-                    Linear
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="text-xs"
-                    disabled
-                  >
-                    <BarChart3 className="h-3 w-3 mr-1" />
-                    Log
-                  </Button>
+                  <WindowToggle value={viewType} onChange={setViewType} />
+                  <ScaleToggle value={scaleType} onChange={setScaleType} />
                   <Button
                     variant="outline"
                     size="sm"
@@ -465,7 +492,6 @@ export default function LeaderboardChart() {
                 All tools ranked by current repository count
               </CardDescription>
             </CardHeader>{' '}
-            so,
             <CardContent>
               <div className="grid gap-2">
                 {[1, 2, 3, 4, 5].map((i) => (
@@ -668,30 +694,7 @@ export default function LeaderboardChart() {
                   <span className="text-sm font-medium text-muted-foreground">
                     Window
                   </span>
-                  <div
-                    className="flex gap-1"
-                    role="group"
-                    aria-label="Rolling window selector"
-                  >
-                    <Button
-                      variant={viewType === 'weekly' ? 'default' : 'outline'}
-                      size="sm"
-                      className="text-xs h-7"
-                      aria-pressed={viewType === 'weekly'}
-                      onClick={() => setViewType('weekly')}
-                    >
-                      7-day
-                    </Button>
-                    <Button
-                      variant={viewType === 'monthly' ? 'default' : 'outline'}
-                      size="sm"
-                      className="text-xs h-7"
-                      aria-pressed={viewType === 'monthly'}
-                      onClick={() => setViewType('monthly')}
-                    >
-                      30-day
-                    </Button>
-                  </div>
+                  <WindowToggle value={viewType} onChange={setViewType} />
                 </div>
 
                 {/* Scale Section */}
@@ -699,28 +702,7 @@ export default function LeaderboardChart() {
                   <span className="text-sm font-medium text-muted-foreground">
                     Scale
                   </span>
-                  <div
-                    className="flex gap-1"
-                    role="group"
-                    aria-label="Scale selector"
-                  >
-                    <Button
-                      variant={scaleType === 'linear' ? 'default' : 'outline'}
-                      size="sm"
-                      onClick={() => setScaleType('linear')}
-                      className="text-xs h-7"
-                    >
-                      Linear
-                    </Button>
-                    <Button
-                      variant={scaleType === 'log' ? 'default' : 'outline'}
-                      size="sm"
-                      onClick={() => setScaleType('log')}
-                      className="text-xs h-7"
-                    >
-                      Log
-                    </Button>
-                  </div>
+                  <ScaleToggle value={scaleType} onChange={setScaleType} />
                 </div>
 
                 {/* Vertical divider */}
