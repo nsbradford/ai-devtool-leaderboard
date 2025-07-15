@@ -159,7 +159,7 @@ export default function LeaderboardChart() {
   const loading = statsLoading || devtoolsLoading || topReposLoading;
   const error = statsError || devtoolsError || topReposError;
 
-  const { theme } = useTheme();
+  const { resolvedTheme } = useTheme();
 
   const pageStructure = (
     <div className="container mx-auto p-4 sm:p-6 space-y-6">
@@ -341,7 +341,7 @@ export default function LeaderboardChart() {
           </Card>
         </>
       ) : (
-        renderChartAndRankings(theme)
+        renderChartAndRankings(resolvedTheme)
       )}
 
       <br />
