@@ -148,13 +148,13 @@ function CustomLegend({
 }: {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   payload?: any[];
-  selectedTools: Set<string>;
-  setSelectedTools: (tools: Set<string>) => void;
+  selectedTools: Set<number>;
+  setSelectedTools: (tools: Set<number>) => void;
   devtools?: DevTool[];
 }) {
   if (!payload || !devtools) return null;
 
-  const getToolIdFromDisplayName = (displayName: string): string | null => {
+  const getToolIdFromDisplayName = (displayName: string): number | null => {
     const devtool = devtools.find((dt: DevTool) => dt.name === displayName);
     return devtool ? devtool.id : null;
   };
@@ -210,10 +210,10 @@ export default function LeaderboardChart() {
   const debouncedDisplayDateRange = useDebounce(displayDateRange, 300);
 
   const [viewType, setViewType] = useState<MaterializedViewType>('monthly');
-  const [selectedTools, setSelectedTools] = useState<Set<string>>(new Set());
+  const [selectedTools, setSelectedTools] = useState<Set<number>>(new Set());
   const prevToolKeysRef = useRef<string[]>([]);
   const [scaleType, setScaleType] = useState<'linear' | 'log'>('linear');
-  const [openRepoPopover, setOpenRepoPopover] = useState<string | null>(null);
+  const [openRepoPopover, setOpenRepoPopover] = useState<number | null>(null);
   const [datePickerOpen, setDatePickerOpen] = useState(false);
   const [toolSearchQuery, setToolSearchQuery] = useState('');
 
@@ -296,7 +296,7 @@ export default function LeaderboardChart() {
         toolKeys.length !== prevToolKeys.length ||
         toolKeys.some((k, i) => k !== prevToolKeys[i]);
       if (toolKeysChanged) {
-        setSelectedTools(new Set(toolKeys));
+        setSelectedTools(new Set(toolKeys.map(Number)));
         prevToolKeysRef.current = toolKeys;
       }
     }
@@ -550,13 +550,13 @@ export default function LeaderboardChart() {
     if (!filteredStats || !devtools) return null;
 
     // Map tool IDs to display names
-    const getToolDisplayName = (toolId: string): string => {
+    const getToolDisplayName = (toolId: number): string => {
       const devtool = devtools.find((dt: DevTool) => dt.id === toolId);
       const displayName = devtool ? devtool.name : `Tool ${toolId}`;
       return displayName;
     };
 
-    const getToolColor = (toolId: string): string => {
+    const getToolColor = (toolId: number): string => {
       const devtool = devtools.find((dt: DevTool) => dt.id === toolId);
       if (!devtool) return '#8884d8';
       if (theme === 'dark' && devtool.brand_color_dark) {
@@ -565,7 +565,7 @@ export default function LeaderboardChart() {
       return devtool.brand_color;
     };
 
-    const getToolWebsiteUrl = (toolId: string): string | undefined => {
+    const getToolWebsiteUrl = (toolId: number): string | undefined => {
       const devtool = devtools.find((dt: DevTool) => dt.id === toolId);
       return devtool?.website_url;
     };
@@ -583,7 +583,8 @@ export default function LeaderboardChart() {
           timestamp,
         };
 
-        Object.entries(filteredStats.tools).forEach(([toolId, counts]) => {
+        Object.entries(filteredStats.tools).forEach(([toolIdStr, counts]) => {
+          const toolId = Number(toolIdStr);
           // Only include selected tools (or all if none selected)
           if (selectedTools.size === 0 || selectedTools.has(toolId)) {
             const countsArray = counts as number[];
@@ -756,7 +757,7 @@ export default function LeaderboardChart() {
                                 setSelectedTools(new Set()); // Clear all
                               } else if (stats) {
                                 setSelectedTools(
-                                  new Set(Object.keys(stats.tools))
+                                  new Set(Object.keys(stats.tools).map(Number))
                                 ); // Select all
                               }
                             }}
@@ -778,13 +779,16 @@ export default function LeaderboardChart() {
                           />
                           <div className="space-y-0.5 max-h-64 overflow-y-auto">
                             {Object.keys(stats?.tools || {})
-                              .map((toolId) => ({
-                                toolId,
-                                displayName: getToolDisplayName(toolId),
-                                devtool: devtools.find(
-                                  (dt: DevTool) => dt.id === toolId
-                                ),
-                              }))
+                              .map((toolIdStr) => {
+                                const toolId = Number(toolIdStr);
+                                return {
+                                  toolId,
+                                  displayName: getToolDisplayName(toolId),
+                                  devtool: devtools.find(
+                                    (dt: DevTool) => dt.id === toolId
+                                  ),
+                                };
+                              })
                               .filter(({ displayName }) =>
                                 displayName
                                   .toLowerCase()
@@ -893,12 +897,14 @@ export default function LeaderboardChart() {
                     }
                   />
                   {Object.keys(stats?.tools || {})
-                    .filter((toolId) =>
-                      selectedTools.size === 0
+                    .filter((toolIdStr) => {
+                      const toolId = Number(toolIdStr);
+                      return selectedTools.size === 0
                         ? false
-                        : selectedTools.has(toolId)
-                    )
-                    .map((toolId) => {
+                        : selectedTools.has(toolId);
+                    })
+                    .map((toolIdStr) => {
+                      const toolId = Number(toolIdStr);
                       const displayName = getToolDisplayName(toolId);
                       const color = getToolColor(toolId);
                       return (
@@ -935,7 +941,8 @@ export default function LeaderboardChart() {
               {(() => {
                 const latestIndex = filteredStats.timestamps.length - 1;
                 const rankings = Object.entries(filteredStats.tools)
-                  .map(([toolId, counts]) => {
+                  .map(([toolIdStr, counts]) => {
+                    const toolId = Number(toolIdStr);
                     const countsArray = counts as number[];
                     const currentCount = countsArray[latestIndex] || 0;
 
@@ -997,8 +1004,8 @@ export default function LeaderboardChart() {
                           </span>
                           {/* Mobile toggle button */}
                           {topRepos &&
-                            topRepos[tool.id] &&
-                            topRepos[tool.id].length > 0 && (
+                            topRepos[tool.id.toString()] &&
+                            topRepos[tool.id.toString()].length > 0 && (
                               <Popover
                                 open={openRepoPopover === tool.id}
                                 onOpenChange={(open) => {
@@ -1020,25 +1027,27 @@ export default function LeaderboardChart() {
                                       Top Repositories
                                     </div>
                                     <div className="space-y-2">
-                                      {topRepos[tool.id].map((repo) => (
-                                        <div
-                                          key={repo.repo_name}
-                                          className="flex items-center justify-between"
-                                        >
-                                          <a
-                                            href={`https://github.com/${repo.repo_name}`}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="text-xs hover:text-blue-600 hover:underline transition-colors truncate max-w-[180px]"
+                                      {topRepos[tool.id.toString()].map(
+                                        (repo) => (
+                                          <div
+                                            key={repo.repo_name}
+                                            className="flex items-center justify-between"
                                           >
-                                            {repo.repo_name}
-                                          </a>
-                                          <span className="text-xs text-muted-foreground flex items-center">
-                                            {formatStarCount(repo.star_count)}
-                                            <Star className="inline w-3 h-3 ml-1 text-muted-foreground" />
-                                          </span>
-                                        </div>
-                                      ))}
+                                            <a
+                                              href={`https://github.com/${repo.repo_name}`}
+                                              target="_blank"
+                                              rel="noopener noreferrer"
+                                              className="text-xs hover:text-blue-600 hover:underline transition-colors truncate max-w-[180px]"
+                                            >
+                                              {repo.repo_name}
+                                            </a>
+                                            <span className="text-xs text-muted-foreground flex items-center">
+                                              {formatStarCount(repo.star_count)}
+                                              <Star className="inline w-3 h-3 ml-1 text-muted-foreground" />
+                                            </span>
+                                          </div>
+                                        )
+                                      )}
                                     </div>
                                   </div>
                                 </PopoverContent>
@@ -1048,10 +1057,10 @@ export default function LeaderboardChart() {
                       </div>
                       {/* Desktop inline display */}
                       {topRepos &&
-                        topRepos[tool.id] &&
-                        topRepos[tool.id].length > 0 && (
+                        topRepos[tool.id.toString()] &&
+                        topRepos[tool.id.toString()].length > 0 && (
                           <div className="mt-1 ml-8 flex-wrap gap-1 text-xs text-muted-foreground hidden md:flex">
-                            {topRepos[tool.id]
+                            {topRepos[tool.id.toString()]
                               .slice(0, 3)
                               .map((repo, repoIndex) => (
                                 <span key={repo.repo_name}>
@@ -1073,12 +1082,11 @@ export default function LeaderboardChart() {
                                   </span>
                                   {repoIndex < 2 &&
                                     repoIndex <
-                                      topRepos[tool.id].length - 1 && (
-                                      <span className="mx-1">•</span>
-                                    )}
+                                      topRepos[tool.id.toString()].length -
+                                        1 && <span className="mx-1">•</span>}
                                 </span>
                               ))}
-                            {topRepos[tool.id].length > 3 && (
+                            {topRepos[tool.id.toString()].length > 3 && (
                               <span className="mx-1">
                                 •
                                 <Popover>
@@ -1093,25 +1101,29 @@ export default function LeaderboardChart() {
                                         Top Repositories
                                       </div>
                                       <div className="space-y-2">
-                                        {topRepos[tool.id].map((repo) => (
-                                          <div
-                                            key={repo.repo_name}
-                                            className="flex items-center justify-between"
-                                          >
-                                            <a
-                                              href={`https://github.com/${repo.repo_name}`}
-                                              target="_blank"
-                                              rel="noopener noreferrer"
-                                              className="text-xs hover:text-blue-600 hover:underline transition-colors truncate max-w-[180px]"
+                                        {topRepos[tool.id.toString()].map(
+                                          (repo) => (
+                                            <div
+                                              key={repo.repo_name}
+                                              className="flex items-center justify-between"
                                             >
-                                              {repo.repo_name}
-                                            </a>
-                                            <span className="text-xs text-muted-foreground flex items-center">
-                                              {formatStarCount(repo.star_count)}
-                                              <Star className="inline w-3 h-3 ml-1 text-muted-foreground" />
-                                            </span>
-                                          </div>
-                                        ))}
+                                              <a
+                                                href={`https://github.com/${repo.repo_name}`}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="text-xs hover:text-blue-600 hover:underline transition-colors truncate max-w-[180px]"
+                                              >
+                                                {repo.repo_name}
+                                              </a>
+                                              <span className="text-xs text-muted-foreground flex items-center">
+                                                {formatStarCount(
+                                                  repo.star_count
+                                                )}
+                                                <Star className="inline w-3 h-3 ml-1 text-muted-foreground" />
+                                              </span>
+                                            </div>
+                                          )
+                                        )}
                                       </div>
                                     </div>
                                   </PopoverContent>

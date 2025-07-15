@@ -10,7 +10,7 @@ export interface LeaderboardStats {
 
 export interface LeaderboardData {
   timestamps: number[];
-  tools: Record<string, number[]>; // toolname -> repo_count[]
+  tools: Record<number, number[]>; // tool_id -> repo_count[]
 }
 
 export interface ToolRanking {
@@ -34,14 +34,13 @@ export interface MaterializedViewData {
 }
 
 export interface DevTool {
-  id: string;
+  id: number;
   account_login: string;
   name: string;
   avatar_url: string;
   website_url: string;
   brand_color: string;
   brand_color_dark?: string;
-  created_at: string;
 }
 
 export interface TopRepo {

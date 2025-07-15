@@ -1,93 +1,83 @@
 [
   {
-    "id": "65095814",
+    "id": 65095814,
     "account_login": "ellipsis-dev[bot]",
     "name": "Ellipsis",
     "avatar_url": "https://avatars.githubusercontent.com/in/64358?v=4",
     "website_url": "https://ellipsis.dev",
-    "brand_color": "#06b6d4",
-    "created_at": "2025-07-12 20:16:03.103191"
+    "brand_color": "#06b6d4"
   },
   {
-    "id": "96075541",
+    "id": 96075541,
     "account_login": "graphite-app[bot]",
     "name": "Graphite",
     "avatar_url": "https://avatars.githubusercontent.com/in/158384?v=4",
     "website_url": "https://graphite.dev",
-    "brand_color": "#2563eb",
-    "created_at": "2025-07-12 20:16:03.103191"
+    "brand_color": "#2563eb"
   },
   {
-    "id": "136622811",
+    "id": 136622811,
     "account_login": "coderabbitai[bot]",
     "name": "CodeRabbit",
     "avatar_url": "https://avatars.githubusercontent.com/in/347564?v=4",
     "website_url": "https://coderabbit.ai",
-    "brand_color": "#f97316",
-    "created_at": "2025-07-12 20:16:03.103191"
+    "brand_color": "#f97316"
   },
   {
-    "id": "151058649",
+    "id": 151058649,
     "account_login": "qodo-merge-pro[bot]",
     "name": "Qodo",
     "avatar_url": "https://avatars.githubusercontent.com/in/484649?v=4",
     "website_url": "https://qodo.ai",
-    "brand_color": "#f0b6fc",
-    "created_at": "2025-07-12 20:16:03.103191"
+    "brand_color": "#f0b6fc"
   },
   {
-    "id": "151821869",
+    "id": 151821869,
     "account_login": "codeant-ai[bot]",
     "name": "CodeAnt",
     "avatar_url": "https://avatars.githubusercontent.com/in/646884?v=4",
     "website_url": "https://codeant.ai",
-    "brand_color": "#a855f7",
-    "created_at": "2025-07-12 20:18:03.499728"
+    "brand_color": "#a855f7"
   },
   {
-    "id": "165735046",
+    "id": 165735046,
     "account_login": "greptile-apps[bot]",
     "name": "Greptile",
     "avatar_url": "https://avatars.githubusercontent.com/in/867647?v=4",
     "website_url": "https://greptile.com",
-    "brand_color": "#22c55e",
-    "created_at": "2025-07-12 20:16:03.103191"
+    "brand_color": "#22c55e"
   },
   {
-    "id": "175728472",
+    "id": 175728472,
     "account_login": "copilot-pull-request-reviewer[bot]",
     "name": "Copilot",
     "avatar_url": "https://avatars.githubusercontent.com/in/946600?v=4",
     "website_url": "https://github.com/features/copilot",
     "brand_color": "#1f2937",
-    "brand_color_dark": "#e5e7eb",
-    "created_at": "2025-07-12 20:16:03.103191"
+    "brand_color_dark": "#e5e7eb"
   },
   {
-    "id": "189301087",
+    "id": 189301087,
     "account_login": "windsurf-bot[bot]",
     "name": "Windsurf",
     "avatar_url": "https://avatars.githubusercontent.com/in/1066231?v=4",
     "website_url": "https://windsurf.com",
-    "brand_color": "#0d9488",
-    "created_at": "2025-07-12 20:16:03.103191"
+    "brand_color": "#0d9488"
   },
   {
-    "id": "191113872",
+    "id": 191113872,
     "account_login": "cubic-dev-ai[bot]",
     "name": "Cubic",
     "avatar_url": "https://avatars.githubusercontent.com/in/1082092?v=4",
     "website_url": "https://cubic.dev",
-    "brand_color": "#edc00c",
-    "created_at": "2025-07-12 20:16:03.103191"
+    "brand_color": "#edc00c"
   },
   {
-    "id": "206951365",
+    "id": 206951365,
     "account_login": "cursor[bot]",
     "name": "Cursor",
     "avatar_url": "https://avatars.githubusercontent.com/in/1210556?v=4",
     "website_url": "https://cursor.com",
-    "brand_color": "#dc2626",
-    "created_at": "2025-07-12 20:16:03.103191"
+    "brand_color": "#dc2626"
   }
 ]
