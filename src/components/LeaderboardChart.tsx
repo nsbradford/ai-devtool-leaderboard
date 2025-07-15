@@ -975,8 +975,8 @@ export default function LeaderboardChart() {
                       className="flex flex-col p-2 rounded-lg border hover:bg-muted/50 transition-colors"
                     >
                       <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-2">
-                          <span className="text-xs font-bold text-muted-foreground min-w-[1.5rem]">
+                        <div className="flex items-center space-x-2 pl-2">
+                          <span className="text-xs font-bold text-muted-foreground min-w-[1.0rem]">
                             {index + 1}
                           </span>
                           {avatarUrl && (
