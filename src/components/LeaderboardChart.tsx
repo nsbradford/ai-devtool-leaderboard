@@ -384,9 +384,6 @@ export default function LeaderboardChart() {
           </a>
           .
         </p>
-        <p className="text-muted-foreground text-xs sm:text-sm">
-          Coming soon: AI code generation tracker.
-        </p>
       </div>
 
       {error ? (
