@@ -160,17 +160,7 @@ function CustomLegend({
   };
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        flexWrap: 'wrap',
-        gap: 12,
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginTop: 8,
-        width: '100%',
-      }}
-    >
+    <div className="flex flex-wrap gap-x-2 gap-y-1 sm:gap-3 items-center justify-center mt-2 w-full">
       {payload.map((entry) => {
         const toolId = getToolIdFromDisplayName(entry.value);
         const isSelected = toolId ? selectedTools.has(toolId) : true;
@@ -179,14 +169,8 @@ function CustomLegend({
         return (
           <div
             key={entry.value}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 1,
-              cursor: 'pointer',
-              opacity,
-              transition: 'opacity 0.2s ease',
-            }}
+            className="flex items-center gap-0.5 cursor-pointer transition-opacity duration-200"
+            style={{ opacity }}
             onClick={() => {
               if (toolId) {
                 const newSelected = new Set(selectedTools);
@@ -201,17 +185,13 @@ function CustomLegend({
             title={`Click to ${isSelected ? 'hide' : 'show'} ${entry.value}`}
           >
             <span
+              className="inline-block w-3 h-3 sm:w-3.5 sm:h-3.5 rounded-sm border"
               style={{
-                display: 'inline-block',
-                width: 14,
-                height: 14,
                 backgroundColor: entry.color,
-                borderRadius: 3,
-                marginRight: 2,
-                border: '1px solid #ccc',
+                borderColor: '#ccc',
               }}
             />
-            <span style={{ fontSize: 13, color: entry.color }}>
+            <span className="text-xs sm:text-sm" style={{ color: entry.color }}>
               {entry.value}
             </span>
           </div>
