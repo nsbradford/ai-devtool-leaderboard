@@ -52,7 +52,7 @@ export async function getBotReviewsForDay(
     const bigquery = getBigQueryClient();
 
     // Use provided bot IDs or default to all devtools
-    const botIdList = botIds || devtools.map((tool) => parseInt(tool.id));
+    const botIdList = botIds || devtools.map((tool) => tool.id);
 
     const query = `
       DECLARE target_date DATE DEFAULT DATE('${targetDate}');
