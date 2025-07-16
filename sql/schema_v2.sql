@@ -5,8 +5,8 @@ CREATE TABLE IF NOT EXISTS github_repositories (
   id          BIGINT      PRIMARY KEY,
   full_name   TEXT        NOT NULL,                         -- e.g. "vercel/next.js"
   star_count  INTEGER     NOT NULL CHECK (star_count >= 0),    -- latest stargazer tally
-  updated_at  TIMESTAMPTZ NOT NULL DEFAULT now(),              -- last refresh
   is_error    BOOLEAN     NOT NULL DEFAULT false,              -- true if fetch failed (probably deleted repo)
+  updated_at  TIMESTAMPTZ NOT NULL DEFAULT now()              -- last refresh
 );
 
 /* -----------------------------------------------------------------
