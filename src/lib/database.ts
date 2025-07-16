@@ -83,14 +83,14 @@ export async function upsertBotReviewsForDate(
       const values = batch
         .map(
           (review) =>
-            `('${review.event_date}', ${review.bot_id}, '${review.repo_name.replace(/'/g, "''")}', ${review.bot_review_count})`
+            `('${review.event_date}', ${review.bot_id}, ${review.repo_id}, ${review.bot_review_count})`
         )
         .join(', ');
 
       const query = `
-        INSERT INTO bot_reviews_daily (event_date, bot_id, repo_name, bot_review_count)
+        INSERT INTO bot_reviews_daily_by_repo (event_date, bot_id, repo_id, bot_review_count)
         VALUES ${values}
-        ON CONFLICT (event_date, bot_id, repo_name) 
+        ON CONFLICT (event_date, bot_id, repo_id) 
         DO UPDATE SET bot_review_count = EXCLUDED.bot_review_count;
       `;
 
@@ -112,10 +112,63 @@ export async function upsertBotReviewsForDate(
 }
 
 /**
- * Bulk upsert repository star counts in batches
- * @param repoStarCounts Map of repository full names to star counts
+ * Bulk upsert GitHub repository data in batches
+ * @param repoData Array of GitHub repository data objects
  * @param batchSize Size of each batch (default: 1000)
  * @returns Promise<void>
+ */
+export async function upsertGitHubRepositories(
+  repoData: Array<{ id: number; full_name: string; star_count: number }>,
+  batchSize: number = 1000
+): Promise<void> {
+  if (repoData.length === 0) {
+    console.log('No GitHub repository data to upsert');
+    return;
+  }
+
+  const sql = getSql();
+  const totalRecords = repoData.length;
+
+  try {
+    // Process in batches
+    for (let i = 0; i < repoData.length; i += batchSize) {
+      const batch = repoData.slice(i, i + batchSize);
+
+      // Build batch upsert query
+      const values = batch
+        .map(
+          (repo) =>
+            `(${repo.id}, '${repo.full_name.replace(/'/g, "''")}', ${repo.star_count})`
+        )
+        .join(', ');
+
+      const query = `
+        INSERT INTO github_repositories (id, full_name, star_count)
+        VALUES ${values}
+        ON CONFLICT (id) 
+        DO UPDATE SET 
+          full_name = EXCLUDED.full_name,
+          star_count = EXCLUDED.star_count,
+          updated_at = NOW();
+      `;
+
+      await sql(query);
+
+      console.log(
+        `Upserted batch: ${batch.length}/${totalRecords} GitHub repository records`
+      );
+    }
+
+    console.log(`Completed upsert of ${totalRecords} GitHub repository records`);
+  } catch (error) {
+    console.error('Failed to upsert GitHub repositories:', error);
+    throw error;
+  }
+}
+
+/**
+ * Legacy function for backward compatibility - upserts to old repo_star_counts table
+ * @deprecated Use upsertGitHubRepositories instead
  */
 export async function upsertRepoStarCounts(
   repoStarCounts: Record<string, number>,
@@ -169,10 +222,59 @@ export async function upsertRepoStarCounts(
 }
 
 /**
- * Upsert error status for repositories that failed to fetch star counts
+ * Upsert error status for repositories that failed to fetch data
  * @param errorRepos Array of repository full names that had errors
  * @param batchSize Size of each batch (default: 1000)
  * @returns Promise<void>
+ */
+export async function upsertGitHubRepositoryErrors(
+  errorRepos: string[],
+  batchSize: number = 1000
+): Promise<void> {
+  if (errorRepos.length === 0) {
+    console.log('No error repos to upsert');
+    return;
+  }
+
+  const sql = getSql();
+  const totalRecords = errorRepos.length;
+
+  try {
+    // Process in batches
+    for (let i = 0; i < errorRepos.length; i += batchSize) {
+      const batch = errorRepos.slice(i, i + batchSize);
+
+      // Build batch upsert query for error repos
+      const values = batch
+        .map((fullName) => `(0, '${fullName.replace(/'/g, "''")}', 0, true)`)
+        .join(', ');
+
+      const query = `
+        INSERT INTO github_repositories (id, full_name, star_count, is_error)
+        VALUES ${values}
+        ON CONFLICT (id) 
+        DO UPDATE SET 
+          is_error = true,
+          updated_at = NOW();
+      `;
+
+      await sql(query);
+
+      console.log(
+        `Upserted error batch: ${batch.length}/${totalRecords} GitHub repository error records`
+      );
+    }
+
+    console.log(`Completed upsert of ${totalRecords} GitHub repository error records`);
+  } catch (error) {
+    console.error('Failed to upsert GitHub repository errors:', error);
+    throw error;
+  }
+}
+
+/**
+ * Legacy function for backward compatibility
+ * @deprecated Use upsertGitHubRepositoryErrors instead
  */
 export async function upsertRepoStarCountErrors(
   errorRepos: string[],
@@ -235,7 +337,7 @@ export async function getMaterializedViewData(
 
   try {
     const viewName =
-      viewType === 'weekly' ? 'mv_bot_repo_count_7d' : 'mv_bot_repo_count_30d';
+      viewType === 'weekly' ? 'mv_bot_reviews_repo_7d' : 'mv_bot_reviews_repo_30d';
 
     const query = `
       SELECT 
@@ -293,14 +395,14 @@ export async function refreshMaterializedViewsConcurrently(): Promise<void> {
   const sql = getSql();
   try {
     // Refresh 7d view
-    console.log('Refreshing materialized view: mv_bot_repo_count_7d...');
-    await sql('REFRESH MATERIALIZED VIEW CONCURRENTLY mv_bot_repo_count_7d;');
-    console.log('Finished refreshing: mv_bot_repo_count_7d');
+    console.log('Refreshing materialized view: mv_bot_reviews_repo_7d...');
+    await sql('REFRESH MATERIALIZED VIEW CONCURRENTLY mv_bot_reviews_repo_7d;');
+    console.log('Finished refreshing: mv_bot_reviews_repo_7d');
 
     // Refresh 30d view
-    console.log('Refreshing materialized view: mv_bot_repo_count_30d...');
-    await sql('REFRESH MATERIALIZED VIEW CONCURRENTLY mv_bot_repo_count_30d;');
-    console.log('Finished refreshing: mv_bot_repo_count_30d');
+    console.log('Refreshing materialized view: mv_bot_reviews_repo_30d...');
+    await sql('REFRESH MATERIALIZED VIEW CONCURRENTLY mv_bot_reviews_repo_30d;');
+    console.log('Finished refreshing: mv_bot_reviews_repo_30d');
   } catch (error) {
     console.error('Failed to refresh materialized views:', error);
     throw error;
@@ -309,13 +411,13 @@ export async function refreshMaterializedViewsConcurrently(): Promise<void> {
 }
 
 /**
- * Get repositories that need star count updates from the database
+ * Get repositories that need data updates from the database
  * @param daysBack Number of days to look back for repos (default: 30)
- * @param maxAgeDays Maximum age of existing star count entries in days (default: 7)
+ * @param maxAgeDays Maximum age of existing repo entries in days (default: 7)
  * @param limit Maximum number of repos to return (default: 1000)
  * @returns Promise<string[]> Array of repo full names
  */
-export async function getReposNeedingStarCounts(
+export async function getReposNeedingUpdates(
   daysBack: number = 30,
   maxAgeDays: number = 7,
   limit: number = 1000
@@ -323,24 +425,26 @@ export async function getReposNeedingStarCounts(
   const sql = getSql();
 
   const query = `
-    SELECT DISTINCT br.repo_name
-    FROM bot_reviews_daily br
-    WHERE br.event_date >= CURRENT_DATE - INTERVAL '${daysBack} days'
-      AND (
-        -- Repo doesn't exist in star counts table
-        NOT EXISTS (
-          SELECT 1 FROM repo_star_counts rsc 
-          WHERE rsc.full_name = br.repo_name
-        )
-        OR
-        -- Repo exists but star count is older than maxAgeDays
-        EXISTS (
-          SELECT 1 FROM repo_star_counts rsc 
-          WHERE rsc.full_name = br.repo_name
-            AND rsc.updated_at < CURRENT_DATE - INTERVAL '${maxAgeDays} days'
-        )
-      )
-    ORDER BY br.repo_name
+    WITH recent_repo_ids AS (
+      SELECT DISTINCT br.repo_id
+      FROM bot_reviews_daily_by_repo br
+      WHERE br.event_date >= CURRENT_DATE - INTERVAL '${daysBack} days'
+    )
+    SELECT DISTINCT 
+      CASE 
+        WHEN gr.full_name IS NOT NULL THEN gr.full_name
+        ELSE CONCAT('unknown/', rri.repo_id)
+      END as repo_name
+    FROM recent_repo_ids rri
+    LEFT JOIN github_repositories gr ON rri.repo_id = gr.id
+    WHERE (
+      -- Repo doesn't exist in github_repositories table
+      gr.id IS NULL
+      OR
+      -- Repo exists but data is older than maxAgeDays
+      gr.updated_at < CURRENT_DATE - INTERVAL '${maxAgeDays} days'
+    )
+    ORDER BY repo_name
     LIMIT ${limit};
   `;
 
@@ -348,9 +452,21 @@ export async function getReposNeedingStarCounts(
     const results = await sql(query);
     return results.map((row: Record<string, unknown>) => String(row.repo_name));
   } catch (error) {
-    console.error('Failed to get repos needing star counts:', error);
+    console.error('Failed to get repos needing updates:', error);
     throw error;
   }
+}
+
+/**
+ * Legacy function for backward compatibility
+ * @deprecated Use getReposNeedingUpdates instead
+ */
+export async function getReposNeedingStarCounts(
+  daysBack: number = 30,
+  maxAgeDays: number = 7,
+  limit: number = 1000
+): Promise<string[]> {
+  return getReposNeedingUpdates(daysBack, maxAgeDays, limit);
 }
 
 /**
@@ -374,23 +490,23 @@ export async function getTopStarredReposByDevtool(
       WITH recent_bot_activity AS (
         SELECT DISTINCT 
           br.bot_id,
-          br.repo_name
-        FROM bot_reviews_daily br
+          br.repo_id
+        FROM bot_reviews_daily_by_repo br
         WHERE br.event_date >= $1
       ),
       ranked_repos AS (
         SELECT 
           rba.bot_id,
-          rba.repo_name,
-          rsc.star_count,
+          gr.full_name as repo_name,
+          gr.star_count,
           ROW_NUMBER() OVER (
             PARTITION BY rba.bot_id 
-            ORDER BY rsc.star_count DESC NULLS LAST
+            ORDER BY gr.star_count DESC NULLS LAST
           ) as rank
         FROM recent_bot_activity rba
-        LEFT JOIN repo_star_counts rsc ON rba.repo_name = rsc.full_name
-        WHERE rsc.star_count IS NOT NULL 
-          AND rsc.is_error = false
+        JOIN github_repositories gr ON rba.repo_id = gr.id
+        WHERE gr.star_count IS NOT NULL 
+          AND gr.is_error = false
       )
       SELECT 
         bot_id,

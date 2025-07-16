@@ -1,35 +1,35 @@
-import { processStarCountUpdates } from '../src/lib/backfill-utils';
+import { processRepoDataUpdates } from '../src/lib/backfill-utils';
 import dotenv from 'dotenv';
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
 
 dotenv.config({ path: '.env.local' });
 
-async function backfillStarCounts(
+async function backfillRepoData(
   repos: number,
   daysBack: number = 30,
   maxAgeDays: number = 7
 ): Promise<void> {
   console.log(
-    `Starting star counts backfill for ${repos} repos from last ${daysBack} days`
+    `Starting repo data backfill for ${repos} repos from last ${daysBack} days`
   );
-  console.log(`Max age for existing star counts: ${maxAgeDays} days`);
+  console.log(`Max age for existing repo data: ${maxAgeDays} days`);
 
   const startTime = Date.now();
 
   try {
-    // Get all repos needing star count updates
-    const { getReposNeedingStarCounts } = await import('../src/lib/database');
-    const allRepos: string[] = await getReposNeedingStarCounts(
+    // Get all repos needing data updates
+    const { getReposNeedingUpdates } = await import('../src/lib/database');
+    const allRepos: string[] = await getReposNeedingUpdates(
       daysBack,
       maxAgeDays,
       repos
     );
     if (allRepos.length === 0) {
-      console.log('No repos found needing star count updates');
+      console.log('No repos found needing data updates');
       return;
     }
-    console.log(`Found ${allRepos.length} repos needing star count updates`);
+    console.log(`Found ${allRepos.length} repos needing data updates`);
 
     // Process in chunks of 100
     const chunkSize = 100;
@@ -38,8 +38,8 @@ async function backfillStarCounts(
       console.log(
         `\nProcessing chunk ${Math.floor(i / chunkSize) + 1} (${batch.length} repos)...`
       );
-      // Call processStarCountUpdates for this batch
-      await processStarCountUpdates(daysBack, maxAgeDays, batch.length);
+      // Call processRepoDataUpdates for this batch
+      await processRepoDataUpdates(daysBack, maxAgeDays, batch.length);
       // Wait 6 seconds between chunks, except after the last chunk
       if (i + chunkSize < allRepos.length) {
         console.log('Waiting 6 seconds before next chunk...');
@@ -47,7 +47,7 @@ async function backfillStarCounts(
       }
     }
   } catch (error) {
-    console.error('Error during star counts backfill:', error);
+    console.error('Error during repo data backfill:', error);
     throw error;
   }
 
@@ -55,7 +55,7 @@ async function backfillStarCounts(
   const duration = (endTime - startTime) / 1000;
 
   console.log(
-    `\nStar counts backfill completed in ${duration.toFixed(2)} seconds`
+    `\nRepo data backfill completed in ${duration.toFixed(2)} seconds`
   );
 }
 
@@ -101,12 +101,12 @@ async function main(): Promise<void> {
     process.exit(1);
   }
 
-  console.log(`\nBackfill Star Counts Configuration:`);
+  console.log(`\nBackfill Repo Data Configuration:`);
   console.log(`  Number of repos: ${repos}`);
   console.log(`  Days back: ${daysBack}`);
   console.log(`  Max age days: ${maxAgeDays}`);
 
-  await backfillStarCounts(repos, daysBack, maxAgeDays);
+  await backfillRepoData(repos, daysBack, maxAgeDays);
 }
 
 if (require.main === module) {

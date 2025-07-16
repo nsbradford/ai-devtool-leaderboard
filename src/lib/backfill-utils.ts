@@ -1,9 +1,9 @@
 import { getBotReviewsForDay } from './bigquery';
 import {
-  getReposNeedingStarCounts,
+  getReposNeedingUpdates,
   upsertBotReviewsForDate,
-  upsertRepoStarCounts,
-  upsertRepoStarCountErrors,
+  upsertGitHubRepositories,
+  upsertGitHubRepositoryErrors,
 } from './database';
 import { GitHubApi } from './github-api';
 
@@ -50,66 +50,79 @@ export function getYesterdayDateString(): string {
 }
 
 /**
- * Process star count updates for repositories
- * Combines getting repos from database, fetching star counts from GitHub API, and upserting them
+ * Process repository data updates (ID, name, star count)
+ * Combines getting repos from database, fetching data from GitHub API, and upserting them
  * @param daysBack Number of days to look back for repos (default: 30)
- * @param maxAgeDays Maximum age of existing star count entries in days (default: 7)
+ * @param maxAgeDays Maximum age of existing repo entries in days (default: 7)
  * @param limit Maximum number of repos to process (default: 1000)
  * @returns Promise<void>
+ */
+export async function processRepoDataUpdates(
+  daysBack: number = 30,
+  maxAgeDays: number = 7,
+  limit: number = 1000
+): Promise<void> {
+  console.log(
+    `Processing repo data updates for repos from last ${daysBack} days, max age ${maxAgeDays} days, limit ${limit}`
+  );
+
+  try {
+    // Get repos that need data updates
+    const repos = await getReposNeedingUpdates(daysBack, maxAgeDays, limit);
+
+    if (repos.length === 0) {
+      console.log('No repos found needing data updates');
+      return;
+    }
+
+    console.log(`Found ${repos.length} repos needing data updates`);
+
+    // Initialize GitHub API client
+    const githubApi = new GitHubApi();
+
+    // Fetch repo data from GitHub API
+    console.log('Fetching repo data from GitHub API...');
+    const { repoData, errorRepos } = await githubApi.fetchRepoData(
+      repos as `${string}/${string}`[]
+    );
+
+    console.log(
+      `Successfully fetched repo data for ${Object.keys(repoData).length} repos`
+    );
+    if (errorRepos.length > 0) {
+      console.log(`Failed to fetch repo data for ${errorRepos.length} repos`);
+    }
+
+    // Upsert successful repo data to database
+    if (Object.keys(repoData).length > 0) {
+      const repoDataArray = Object.values(repoData);
+      await upsertGitHubRepositories(repoDataArray);
+      console.log(
+        `Successfully upserted repo data for ${repoDataArray.length} repos`
+      );
+    }
+
+    // Upsert error repos to database
+    if (errorRepos.length > 0) {
+      await upsertGitHubRepositoryErrors(errorRepos);
+      console.log(
+        `Successfully marked ${errorRepos.length} repos as having errors`
+      );
+    }
+  } catch (error) {
+    console.error('Error processing repo data updates:', error);
+    throw error;
+  }
+}
+
+/**
+ * Legacy function for backward compatibility
+ * @deprecated Use processRepoDataUpdates instead
  */
 export async function processStarCountUpdates(
   daysBack: number = 30,
   maxAgeDays: number = 7,
   limit: number = 1000
 ): Promise<void> {
-  console.log(
-    `Processing star count updates for repos from last ${daysBack} days, max age ${maxAgeDays} days, limit ${limit}`
-  );
-
-  try {
-    // Get repos that need star count updates
-    const repos = await getReposNeedingStarCounts(daysBack, maxAgeDays, limit);
-
-    if (repos.length === 0) {
-      console.log('No repos found needing star count updates');
-      return;
-    }
-
-    console.log(`Found ${repos.length} repos needing star count updates`);
-
-    // Initialize GitHub API client
-    const githubApi = new GitHubApi();
-
-    // Fetch star counts from GitHub API
-    console.log('Fetching star counts from GitHub API...');
-    const { starCounts, errorRepos } = await githubApi.fetchStarCounts(
-      repos as `${string}/${string}`[]
-    );
-
-    console.log(
-      `Successfully fetched star counts for ${Object.keys(starCounts).length} repos`
-    );
-    if (errorRepos.length > 0) {
-      console.log(`Failed to fetch star counts for ${errorRepos.length} repos`);
-    }
-
-    // Upsert successful star counts to database
-    if (Object.keys(starCounts).length > 0) {
-      await upsertRepoStarCounts(starCounts);
-      console.log(
-        `Successfully upserted star counts for ${Object.keys(starCounts).length} repos`
-      );
-    }
-
-    // Upsert error repos to database
-    if (errorRepos.length > 0) {
-      await upsertRepoStarCountErrors(errorRepos);
-      console.log(
-        `Successfully marked ${errorRepos.length} repos as having errors`
-      );
-    }
-  } catch (error) {
-    console.error('Error processing star count updates:', error);
-    throw error;
-  }
+  return processRepoDataUpdates(daysBack, maxAgeDays, limit);
 }

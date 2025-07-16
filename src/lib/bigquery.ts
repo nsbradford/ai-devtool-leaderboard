@@ -5,7 +5,7 @@ import { BotReviewInRepoDate } from '@/types/api';
 // Type for raw BigQuery row data
 interface BigQueryRow {
   event_date: { value: string } | string;
-  repo_name: string;
+  repo_id: number;
   bot_id: number;
   bot_review_count: number;
 }
@@ -61,15 +61,15 @@ export async function getBotReviewsForDay(
 
       SELECT
         target_date                     AS event_date,
-        repo.name                       AS repo_name,
+        repo.id                         AS repo_id,
         actor.id                        AS bot_id,
         COUNT(*)                        AS bot_review_count
       FROM \`githubarchive.day.20*\`                      -- ← skips every view
       WHERE _TABLE_SUFFIX = FORMAT_DATE('%y%m%d', target_date)   -- 250712
         AND type          = 'PullRequestReviewEvent'
         AND actor.id      IN UNNEST(bot_id_list)
-      GROUP BY repo.name, actor.id
-      ORDER BY repo_name;
+      GROUP BY repo.id, actor.id
+      ORDER BY repo_id;
     `;
 
     // console.log(`Running bot reviews query for ${targetDate}...`);
@@ -91,7 +91,7 @@ export async function getBotReviewsForDay(
         typeof row.event_date === 'object'
           ? row.event_date.value
           : String(row.event_date),
-      repo_name: row.repo_name,
+      repo_id: row.repo_id,
       bot_id: row.bot_id,
       bot_review_count: row.bot_review_count,
     }));

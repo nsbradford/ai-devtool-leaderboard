@@ -1,6 +1,6 @@
 export interface BotReviewInRepoDate {
   event_date: string;
-  repo_name: string;
+  repo_id: number;
   bot_id: number;
   bot_review_count: number;
 }
@@ -51,6 +51,14 @@ export interface TopRepo {
 
 export interface TopReposByDevtool {
   [devtoolId: string]: TopRepo[];
+}
+
+export interface GitHubRepository {
+  id: number;
+  full_name: string;
+  star_count: number;
+  is_error: boolean;
+  updated_at: string;
 }
 
 // export interface LeaderboardQueryParams {
