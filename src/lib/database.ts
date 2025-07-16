@@ -83,14 +83,15 @@ export async function upsertBotReviewsForDate(
       const values = batch
         .map(
           (review) =>
-            `('${review.event_date}', ${review.bot_id}, '${review.repo_name.replace(/'/g, "''")}')`
+            `('${review.event_date}', ${review.bot_id}, '${review.repo_name.replace(/'/g, "''")}', ${review.bot_review_count})`
         )
         .join(', ');
 
       const query = `
-        INSERT INTO bot_reviews_daily (event_date, bot_id, repo_name)
+        INSERT INTO bot_reviews_daily (event_date, bot_id, repo_name, bot_review_count)
         VALUES ${values}
-        ON CONFLICT (event_date, bot_id, repo_name) DO NOTHING;
+        ON CONFLICT (event_date, bot_id, repo_name) 
+        DO UPDATE SET bot_review_count = EXCLUDED.bot_review_count;
       `;
 
       await sql(query);

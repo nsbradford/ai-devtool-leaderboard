@@ -1,7 +1,9 @@
 CREATE TABLE IF NOT EXISTS bot_reviews_daily (
+  -- TODO key on repo id instead of repo name.
   event_date  DATE    NOT NULL,
   bot_id      BIGINT  NOT NULL,
   repo_name   TEXT    NOT NULL,
+  bot_review_count INTEGER NOT NULL,
   PRIMARY KEY (event_date, bot_id, repo_name)
 );
 
