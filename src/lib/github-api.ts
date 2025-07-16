@@ -149,7 +149,7 @@ export class GitHubApi {
   }> {
     const { repoData, errorRepos } = await this.fetchRepoData(repos);
     const starCounts: Record<RepoFullName, number> = {};
-    
+
     Object.entries(repoData).forEach(([fullName, data]) => {
       starCounts[fullName as RepoFullName] = data.star_count;
     });

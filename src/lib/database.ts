@@ -159,7 +159,9 @@ export async function upsertGitHubRepositories(
       );
     }
 
-    console.log(`Completed upsert of ${totalRecords} GitHub repository records`);
+    console.log(
+      `Completed upsert of ${totalRecords} GitHub repository records`
+    );
   } catch (error) {
     console.error('Failed to upsert GitHub repositories:', error);
     throw error;
@@ -265,7 +267,9 @@ export async function upsertGitHubRepositoryErrors(
       );
     }
 
-    console.log(`Completed upsert of ${totalRecords} GitHub repository error records`);
+    console.log(
+      `Completed upsert of ${totalRecords} GitHub repository error records`
+    );
   } catch (error) {
     console.error('Failed to upsert GitHub repository errors:', error);
     throw error;
@@ -337,7 +341,9 @@ export async function getMaterializedViewData(
 
   try {
     const viewName =
-      viewType === 'weekly' ? 'mv_bot_reviews_repo_7d' : 'mv_bot_reviews_repo_30d';
+      viewType === 'weekly'
+        ? 'mv_bot_reviews_repo_7d'
+        : 'mv_bot_reviews_repo_30d';
 
     const query = `
       SELECT 
@@ -401,7 +407,9 @@ export async function refreshMaterializedViewsConcurrently(): Promise<void> {
 
     // Refresh 30d view
     console.log('Refreshing materialized view: mv_bot_reviews_repo_30d...');
-    await sql('REFRESH MATERIALIZED VIEW CONCURRENTLY mv_bot_reviews_repo_30d;');
+    await sql(
+      'REFRESH MATERIALIZED VIEW CONCURRENTLY mv_bot_reviews_repo_30d;'
+    );
     console.log('Finished refreshing: mv_bot_reviews_repo_30d');
   } catch (error) {
     console.error('Failed to refresh materialized views:', error);
