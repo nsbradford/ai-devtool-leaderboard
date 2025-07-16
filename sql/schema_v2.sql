@@ -2,7 +2,8 @@
    One row per GitHub repository (full “owner/name” string)
    ----------------------------------------------------------------- */
 CREATE TABLE IF NOT EXISTS github_repositories (
-  id          BIGINT      PRIMARY KEY,
+  node_id     TEXT        PRIMARY KEY,
+  database_id BIGINT      NOT NULL,
   full_name   TEXT        NOT NULL,                         -- e.g. "vercel/next.js"
   star_count  INTEGER     NOT NULL CHECK (star_count >= 0),    -- latest stargazer tally
   is_error    BOOLEAN     NOT NULL DEFAULT false,              -- true if fetch failed (probably deleted repo)
@@ -16,9 +17,10 @@ CREATE TABLE IF NOT EXISTS github_repositories (
 CREATE TABLE IF NOT EXISTS bot_reviews_daily_by_repo (
   event_date    DATE    NOT NULL,
   bot_id        BIGINT  NOT NULL,
-  repo_id       BIGINT  NOT NULL, -- no FK to github_repositories because we use this data to know what repos to populate later.
+  repo_node_id  TEXT    NOT NULL, -- no FK to github_repositories because we use this data to know what repos to populate later.
+  -- repo_db_id    BIGINT  NOT NULL,
   bot_review_count INTEGER NOT NULL,
-  PRIMARY KEY (event_date, bot_id, repo_id)
+  PRIMARY KEY (event_date, bot_id, repo_node_id)
 );
 
 -- we don't track # of reviews in the user table because it's a much larger table.
@@ -44,7 +46,7 @@ WITH calendar AS (
 SELECT
   c.event_date,
   br.bot_id,
-  COUNT(DISTINCT br.repo_id) AS repo_count
+  COUNT(DISTINCT br.repo_node_id) AS repo_count
 FROM calendar c
 JOIN bot_reviews_daily_by_repo br
   ON br.event_date BETWEEN c.event_date - INTERVAL '6 days'
@@ -68,7 +70,7 @@ WITH calendar AS (
 SELECT
   c.event_date,
   br.bot_id,
-  COUNT(DISTINCT br.repo_id) AS repo_count    -- absolute, 30-day window
+  COUNT(DISTINCT br.repo_node_id) AS repo_count    -- absolute, 30-day window
 FROM calendar c
 JOIN bot_reviews_daily_by_repo br
   ON br.event_date BETWEEN c.event_date - INTERVAL '29 days'
