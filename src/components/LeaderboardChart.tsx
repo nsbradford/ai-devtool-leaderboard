@@ -888,6 +888,31 @@ export default function LeaderboardChart() {
                     ]}
                     labelFormatter={(label) => `Date: ${label}`}
                     wrapperStyle={{ zIndex: 1000 }}
+                    contentStyle={{
+                      backgroundColor:
+                        resolvedTheme === 'dark'
+                          ? 'oklch(0.205 0 0)'
+                          : 'oklch(1 0 0)',
+                      color:
+                        resolvedTheme === 'dark'
+                          ? 'oklch(0.985 0 0)'
+                          : 'oklch(0.145 0 0)',
+                      border:
+                        resolvedTheme === 'dark'
+                          ? '1px solid oklch(1 0 0 / 10%)'
+                          : '1px solid oklch(0.922 0 0)',
+                      borderRadius: '0.625rem',
+                      boxShadow:
+                        resolvedTheme === 'dark'
+                          ? '0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.15)'
+                          : '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+                    }}
+                    labelStyle={{
+                      color:
+                        resolvedTheme === 'dark'
+                          ? 'oklch(0.985 0 0)'
+                          : 'oklch(0.145 0 0)',
+                    }}
                   />
                   <Legend
                     content={
