@@ -1,17 +1,19 @@
 CREATE TABLE IF NOT EXISTS bot_reviews_daily (
+  -- TODO key on repo id instead of repo name.
   event_date  DATE    NOT NULL,
   bot_id      BIGINT  NOT NULL,
   repo_name   TEXT    NOT NULL,
+  bot_review_count INTEGER NOT NULL,
   PRIMARY KEY (event_date, bot_id, repo_name)
 );
 
--- CREATE TABLE IF NOT EXISTS daily_bot_reviews_repo (
---   event_date  DATE    NOT NULL,
---   bot_id      BIGINT  NOT NULL,
---   repo_id     BIGINT  NOT NULL,
---   reviews     INTEGER NOT NULL,
---   PRIMARY KEY (event_date, bot_id, repo_id)
--- );
+CREATE TABLE IF NOT EXISTS bot_reviews_daily_by_repo (
+  event_date  DATE    NOT NULL,
+  bot_id        BIGINT  NOT NULL,
+  repo_id       BIGINT  NOT NULL,
+  bot_review_count INTEGER NOT NULL,
+  PRIMARY KEY (event_date, bot_id, repo_id)
+);
 
 -- we don't track # of reviews in the user table because it's a much larger table.
 -- CREATE TABLE IF NOT EXISTS daily_bot_reviews_user (
@@ -160,3 +162,5 @@ $$ LANGUAGE plpgsql;
 CREATE TRIGGER trg_touch_repo_star_counts
 BEFORE INSERT OR UPDATE ON repo_star_counts
 FOR EACH ROW EXECUTE FUNCTION touch_repo_star_counts();
+
+
