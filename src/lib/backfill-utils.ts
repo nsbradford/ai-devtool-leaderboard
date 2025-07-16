@@ -1,6 +1,7 @@
 import { getBotReviewsForDay } from './bigquery';
 import {
   getReposNeedingUpdates,
+  getRepoFullNames,
   upsertBotReviewsForDate,
   upsertGitHubRepositories,
   upsertGitHubRepositoryErrors,
@@ -67,23 +68,42 @@ export async function processRepoDataUpdates(
   );
 
   try {
-    // Get repos that need data updates
-    const repos = await getReposNeedingUpdates(daysBack, maxAgeDays, limit);
+    // Get repo IDs that need data updates
+    const repoIds = await getReposNeedingUpdates(daysBack, maxAgeDays, limit);
 
-    if (repos.length === 0) {
+    if (repoIds.length === 0) {
       console.log('No repos found needing data updates');
       return;
     }
 
-    console.log(`Found ${repos.length} repos needing data updates`);
+    console.log(`Found ${repoIds.length} repo IDs needing data updates`);
+
+    const existingFullNames = await getRepoFullNames(repoIds);
+    const reposWithNames = Object.values(existingFullNames);
+
+    // For repos without full names, we can't fetch from GitHub API
+    const reposWithoutNames = repoIds.filter((id) => !existingFullNames[id]);
+
+    if (reposWithoutNames.length > 0) {
+      console.log(
+        `Warning: ${reposWithoutNames.length} repos don't have full names in database, skipping GitHub API fetch for these`
+      );
+    }
+
+    if (reposWithNames.length === 0) {
+      console.log('No repos with known full names to fetch data for');
+      return;
+    }
 
     // Initialize GitHub API client
     const githubApi = new GitHubApi();
 
     // Fetch repo data from GitHub API
-    console.log('Fetching repo data from GitHub API...');
+    console.log(
+      `Fetching repo data from GitHub API for ${reposWithNames.length} repos...`
+    );
     const { repoData, errorRepos } = await githubApi.fetchRepoData(
-      repos as `${string}/${string}`[]
+      reposWithNames as `${string}/${string}`[]
     );
 
     console.log(

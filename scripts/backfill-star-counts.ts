@@ -18,30 +18,30 @@ async function backfillRepoData(
   const startTime = Date.now();
 
   try {
-    // Get all repos needing data updates
+    // Get all repo IDs needing data updates
     const { getReposNeedingUpdates } = await import('../src/lib/database');
-    const allRepos: string[] = await getReposNeedingUpdates(
+    const allRepoIds: number[] = await getReposNeedingUpdates(
       daysBack,
       maxAgeDays,
       repos
     );
-    if (allRepos.length === 0) {
+    if (allRepoIds.length === 0) {
       console.log('No repos found needing data updates');
       return;
     }
-    console.log(`Found ${allRepos.length} repos needing data updates`);
+    console.log(`Found ${allRepoIds.length} repo IDs needing data updates`);
 
     // Process in chunks of 100
     const chunkSize = 100;
-    for (let i = 0; i < allRepos.length; i += chunkSize) {
-      const batch = allRepos.slice(i, i + chunkSize);
+    for (let i = 0; i < allRepoIds.length; i += chunkSize) {
+      const batch = allRepoIds.slice(i, i + chunkSize);
       console.log(
-        `\nProcessing chunk ${Math.floor(i / chunkSize) + 1} (${batch.length} repos)...`
+        `\nProcessing chunk ${Math.floor(i / chunkSize) + 1} (${batch.length} repo IDs)...`
       );
       // Call processRepoDataUpdates for this batch
       await processRepoDataUpdates(daysBack, maxAgeDays, batch.length);
       // Wait 6 seconds between chunks, except after the last chunk
-      if (i + chunkSize < allRepos.length) {
+      if (i + chunkSize < allRepoIds.length) {
         console.log('Waiting 6 seconds before next chunk...');
         await new Promise((resolve) => setTimeout(resolve, 6000));
       }

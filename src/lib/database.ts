@@ -419,17 +419,17 @@ export async function refreshMaterializedViewsConcurrently(): Promise<void> {
 }
 
 /**
- * Get repositories that need data updates from the database
+ * Get repository IDs that need data updates from the database
  * @param daysBack Number of days to look back for repos (default: 30)
  * @param maxAgeDays Maximum age of existing repo entries in days (default: 7)
  * @param limit Maximum number of repos to return (default: 1000)
- * @returns Promise<string[]> Array of repo full names
+ * @returns Promise<number[]> Array of repo IDs that need updates
  */
 export async function getReposNeedingUpdates(
   daysBack: number = 30,
   maxAgeDays: number = 7,
   limit: number = 1000
-): Promise<string[]> {
+): Promise<number[]> {
   const sql = getSql();
 
   const query = `
@@ -438,11 +438,7 @@ export async function getReposNeedingUpdates(
       FROM bot_reviews_daily_by_repo br
       WHERE br.event_date >= CURRENT_DATE - INTERVAL '${daysBack} days'
     )
-    SELECT DISTINCT 
-      CASE 
-        WHEN gr.full_name IS NOT NULL THEN gr.full_name
-        ELSE CONCAT('unknown/', rri.repo_id)
-      END as repo_name
+    SELECT DISTINCT rri.repo_id
     FROM recent_repo_ids rri
     LEFT JOIN github_repositories gr ON rri.repo_id = gr.id
     WHERE (
@@ -452,15 +448,53 @@ export async function getReposNeedingUpdates(
       -- Repo exists but data is older than maxAgeDays
       gr.updated_at < CURRENT_DATE - INTERVAL '${maxAgeDays} days'
     )
-    ORDER BY repo_name
+    ORDER BY rri.repo_id
     LIMIT ${limit};
   `;
 
   try {
     const results = await sql(query);
-    return results.map((row: Record<string, unknown>) => String(row.repo_name));
+    return results.map((row: Record<string, unknown>) => Number(row.repo_id));
   } catch (error) {
     console.error('Failed to get repos needing updates:', error);
+    throw error;
+  }
+}
+
+/**
+ * Get repository full names from repo IDs using the github_repositories table
+ * @param repoIds Array of repository IDs
+ * @returns Promise<Record<number, string>> Mapping of repo_id to full_name
+ */
+export async function getRepoFullNames(
+  repoIds: number[]
+): Promise<Record<number, string>> {
+  if (repoIds.length === 0) {
+    return {};
+  }
+
+  const sql = getSql();
+  const placeholders = repoIds.map((_, i) => `$${i + 1}`).join(', ');
+
+  const query = `
+    SELECT id, full_name
+    FROM github_repositories
+    WHERE id IN (${placeholders})
+      AND full_name IS NOT NULL
+      AND is_error = false;
+  `;
+
+  try {
+    const results = await sql(query, repoIds);
+    const mapping: Record<number, string> = {};
+
+    results.forEach((row: Record<string, unknown>) => {
+      mapping[Number(row.id)] = String(row.full_name);
+    });
+
+    return mapping;
+  } catch (error) {
+    console.error('Failed to get repo full names:', error);
     throw error;
   }
 }
@@ -474,7 +508,11 @@ export async function getReposNeedingStarCounts(
   maxAgeDays: number = 7,
   limit: number = 1000
 ): Promise<string[]> {
-  return getReposNeedingUpdates(daysBack, maxAgeDays, limit);
+  // For backward compatibility, convert repo IDs to full names
+  const repoIds = await getReposNeedingUpdates(daysBack, maxAgeDays, limit);
+  const fullNames = await getRepoFullNames(repoIds);
+
+  return Object.values(fullNames);
 }
 
 /**
