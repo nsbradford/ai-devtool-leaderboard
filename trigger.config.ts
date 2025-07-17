@@ -3,7 +3,7 @@ import { defineConfig } from '@trigger.dev/sdk/v3';
 export default defineConfig({
   project: 'proj_iktgagahkrxzcvwojqhy',
   logLevel: 'log',
-  maxDuration: 300,
+  maxDuration: 1800, // 30 minutes
   retries: {
     enabledInDev: true,
     default: {

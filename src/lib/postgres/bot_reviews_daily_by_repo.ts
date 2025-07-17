@@ -152,6 +152,19 @@ export async function refreshMaterializedViewsConcurrently(): Promise<void> {
       'REFRESH MATERIALIZED VIEW CONCURRENTLY mv_bot_reviews_repo_30d;'
     );
     console.log('Finished refreshing: mv_bot_reviews_repo_30d');
+
+    // Refresh stats views
+    console.log('Refreshing materialized view: mv_bot_reviews_stats_7d...');
+    await sql(
+      'REFRESH MATERIALIZED VIEW CONCURRENTLY mv_bot_reviews_stats_7d;'
+    );
+    console.log('Finished refreshing: mv_bot_reviews_stats_7d');
+
+    console.log('Refreshing materialized view: mv_bot_reviews_stats_30d...');
+    await sql(
+      'REFRESH MATERIALIZED VIEW CONCURRENTLY mv_bot_reviews_stats_30d;'
+    );
+    console.log('Finished refreshing: mv_bot_reviews_stats_30d');
   } catch (error) {
     console.error('Failed to refresh materialized views:', error);
     throw error;
