@@ -100,9 +100,7 @@ export async function upsertRepoMetadata(
       await sql(query);
     }
 
-    console.log(
-      `Completed upsert of ${totalRecords} repo metadata records`
-    );
+    console.log(`Completed upsert of ${totalRecords} repo metadata records`);
   } catch (error) {
     console.error('Failed to upsert repo metadata:', error);
     throw error;
@@ -132,7 +130,7 @@ export async function getRepoDbIdMapping(
     `;
 
     const results = await sql(query, repoNames);
-    
+
     const mapping: Record<string, number> = {};
     results.forEach((row: Record<string, unknown>) => {
       mapping[String(row.full_name)] = Number(row.database_id);
@@ -320,7 +318,9 @@ export async function getMaterializedViewData(
 
   try {
     const viewName =
-      viewType === 'weekly' ? 'mv_bot_reviews_repo_7d' : 'mv_bot_reviews_repo_30d';
+      viewType === 'weekly'
+        ? 'mv_bot_reviews_repo_7d'
+        : 'mv_bot_reviews_repo_30d';
 
     const query = `
       SELECT 
@@ -384,7 +384,9 @@ export async function refreshMaterializedViewsConcurrently(): Promise<void> {
 
     // Refresh 30d view
     console.log('Refreshing materialized view: mv_bot_reviews_repo_30d...');
-    await sql('REFRESH MATERIALIZED VIEW CONCURRENTLY mv_bot_reviews_repo_30d;');
+    await sql(
+      'REFRESH MATERIALIZED VIEW CONCURRENTLY mv_bot_reviews_repo_30d;'
+    );
     console.log('Finished refreshing: mv_bot_reviews_repo_30d');
   } catch (error) {
     console.error('Failed to refresh materialized views:', error);
@@ -431,7 +433,9 @@ export async function getReposNeedingStarCounts(
 
   try {
     const results = await sql(query);
-    return results.map((row: Record<string, unknown>) => String(row.repo_full_name));
+    return results.map((row: Record<string, unknown>) =>
+      String(row.repo_full_name)
+    );
   } catch (error) {
     console.error('Failed to get repos needing star counts:', error);
     throw error;

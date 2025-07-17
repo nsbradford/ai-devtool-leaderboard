@@ -30,35 +30,41 @@ export async function processBotReviewsForDate(
       return;
     }
 
-    const repoNames = [...new Set(botReviews.map(r => r.repo_name))];
+    const repoNames = [...new Set(botReviews.map((r) => r.repo_name))];
     console.log(`Found ${repoNames.length} unique repositories`);
 
     const githubApi = new GitHubApi();
-    
+
     let existingMapping = await getRepoDbIdMapping(repoNames);
-    const missingRepos = repoNames.filter(name => !existingMapping[name]);
-    
+    const missingRepos = repoNames.filter((name) => !existingMapping[name]);
+
     if (missingRepos.length > 0) {
-      console.log(`Fetching metadata for ${missingRepos.length} missing repositories`);
+      console.log(
+        `Fetching metadata for ${missingRepos.length} missing repositories`
+      );
       const { repoMetadata, errorRepos } = await githubApi.fetchRepoMetadata(
         missingRepos as `${string}/${string}`[]
       );
-      
+
       if (Object.keys(repoMetadata).length > 0) {
         await upsertRepoMetadata(repoMetadata);
-        console.log(`Upserted metadata for ${Object.keys(repoMetadata).length} repositories`);
+        console.log(
+          `Upserted metadata for ${Object.keys(repoMetadata).length} repositories`
+        );
       }
-      
+
       if (errorRepos.length > 0) {
-        console.log(`Failed to fetch metadata for ${errorRepos.length} repositories`);
+        console.log(
+          `Failed to fetch metadata for ${errorRepos.length} repositories`
+        );
       }
-      
+
       existingMapping = await getRepoDbIdMapping(repoNames);
     }
 
     const transformedReviews = botReviews
-      .filter(review => existingMapping[review.repo_name])
-      .map(review => ({
+      .filter((review) => existingMapping[review.repo_name])
+      .map((review) => ({
         event_date: review.event_date,
         repo_db_id: existingMapping[review.repo_name],
         repo_full_name: review.repo_name,
@@ -68,7 +74,9 @@ export async function processBotReviewsForDate(
       }));
 
     if (transformedReviews.length === 0) {
-      console.log(`No valid bot reviews to process for ${targetDate}${botFilter}`);
+      console.log(
+        `No valid bot reviews to process for ${targetDate}${botFilter}`
+      );
       return;
     }
 

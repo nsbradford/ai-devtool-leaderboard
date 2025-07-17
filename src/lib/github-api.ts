@@ -43,13 +43,23 @@ export class GitHubApi {
    * @returns Object with successful metadata and array of repos that had errors
    */
   async fetchRepoMetadata(repos: RepoFullName[]): Promise<{
-    repoMetadata: Record<RepoFullName, { database_id: number; node_id: string }>;
+    repoMetadata: Record<
+      RepoFullName,
+      { database_id: number; node_id: string }
+    >;
     errorRepos: RepoFullName[];
   }> {
-    console.log('[GitHubApi] Fetching repo metadata for', repos.length, 'repos');
+    console.log(
+      '[GitHubApi] Fetching repo metadata for',
+      repos.length,
+      'repos'
+    );
 
     const CHUNK = 100;
-    const repoMetadata: Record<RepoFullName, { database_id: number; node_id: string }> = {};
+    const repoMetadata: Record<
+      RepoFullName,
+      { database_id: number; node_id: string }
+    > = {};
     const errorRepos: RepoFullName[] = [];
 
     for (let i = 0; i < repos.length; i += CHUNK) {
@@ -98,7 +108,10 @@ export class GitHubApi {
             `[GitHubApi] Attempting to extract partial results from error response`
           );
           batch.forEach((full, j) => {
-            const result = graphqlError.data?.[`r${j}`] as { databaseId: number; id: string } | null;
+            const result = graphqlError.data?.[`r${j}`] as {
+              databaseId: number;
+              id: string;
+            } | null;
             if (
               result &&
               result.databaseId !== null &&
@@ -191,7 +204,9 @@ export class GitHubApi {
             `[GitHubApi] Attempting to extract partial results from error response`
           );
           batch.forEach((full, j) => {
-            const result = graphqlError.data?.[`r${j}`] as { stargazerCount: number } | null;
+            const result = graphqlError.data?.[`r${j}`] as {
+              stargazerCount: number;
+            } | null;
             if (
               result &&
               result.stargazerCount !== null &&
