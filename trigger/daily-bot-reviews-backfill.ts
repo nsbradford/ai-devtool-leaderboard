@@ -2,8 +2,9 @@ import { schedules } from '@trigger.dev/sdk/v3';
 import {
   processBotReviewsForDate,
   getYesterdayDateString,
-} from '../src/lib/backfill-utils';
+} from '@/lib/backfill/bot-reviews';
 import { refreshMaterializedViewsConcurrently } from '@/lib/postgres/bot_reviews_daily_by_repo';
+import { backfillStarCounts } from '@/lib/backfill/github-repositories';
 
 export const dailyBotReviewsBackfill = schedules.task({
   id: 'daily-bot-reviews-backfill',
@@ -20,6 +21,9 @@ export const dailyBotReviewsBackfill = schedules.task({
 
       // Refresh materialized views after upsert
       await refreshMaterializedViewsConcurrently();
+
+      // Backfill star counts for 10,000 repos
+      await backfillStarCounts(10000);
 
       console.log(
         `Daily bot reviews backfill completed successfully for ${targetDate}`
