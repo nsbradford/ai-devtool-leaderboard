@@ -72,3 +72,16 @@ export function xAxisTickFormatter(dateStr: string): string {
     return format(dt, 'MMM d');
   }
 }
+
+export function getChartTitleAndDescription(
+  metric: 'active_repos' | 'pr_reviews',
+  viewType: 'weekly' | 'monthly'
+) {
+  const chartTitle =
+    metric === 'pr_reviews' ? 'PR Reviews' : 'Active Repositories';
+  const chartDescription =
+    metric === 'pr_reviews'
+      ? `Number of PR reviews by AI code review bots, ${viewType === 'weekly' ? '7-day' : '30-day'} rolling window.`
+      : `Repos with an AI code review, ${viewType === 'weekly' ? '7-day' : '30-day'} rolling window.`;
+  return { chartTitle, chartDescription };
+}
