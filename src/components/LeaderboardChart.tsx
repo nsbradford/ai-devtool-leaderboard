@@ -9,15 +9,17 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import { CustomLegend } from '@/components/ui/CustomLegend';
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
-import { DEFAULT_START_DATE, ACTIVE_REPOS_MONTHLY } from '@/lib/constants';
+import { ScaleToggle } from '@/components/ui/ScaleToggle';
+import { WindowToggle } from '@/components/ui/WindowToggle';
 import { useDebounce } from '@/lib/client-utils';
-import { cn } from '@/lib/utils';
+import { ACTIVE_REPOS_MONTHLY, DEFAULT_START_DATE } from '@/lib/constants';
+import { formatStarCount } from '@/lib/utils';
 import type {
   DateRange,
   DevTool,
@@ -57,150 +59,7 @@ const fetcher = async (url: string) => {
   return response.json();
 };
 
-function formatStarCount(n: number): string {
-  if (n < 1000) return n.toString();
-  if (n < 10000)
-    return (Math.floor(n / 100) / 10).toFixed(1).replace(/\.0$/, '') + 'k'; // 1.0k-9.9k
-  if (n < 1000000) return Math.floor(n / 1000) + 'k'; // 10k-999k
-  return Math.floor(n / 100000) / 10 + 'M'; // 1.0M+
-}
-
-function WindowToggle({
-  value,
-  onChange,
-}: {
-  value: 'weekly' | 'monthly';
-  onChange: (v: 'weekly' | 'monthly') => void;
-}) {
-  return (
-    <ToggleGroup
-      type="single"
-      value={value}
-      /* shadcn passes `null` when a selected item is clicked again */
-      onValueChange={(v) => v && onChange(v as 'weekly' | 'monthly')}
-      /* one ring, one radius → wrapper handles the outer shape */
-      className="inline-flex isolate rounded-lg ring-1 ring-inset ring-border bg-background"
-    >
-      {(['weekly', 'monthly'] as const).map((v) => (
-        <ToggleGroupItem
-          key={v}
-          value={v}
-          aria-label={v === 'weekly' ? '7-day window' : '30-day window'}
-          /* first/last utilities give you the pill shape without manual classes */
-          className={cn(
-            'h-7 px-3 text-xs font-medium focus-visible:outline-none',
-            'ring-1 ring-inset ring-transparent first:rounded-l-lg last:rounded-r-lg',
-            /* selected state */
-            'data-[state=on]:bg-primary/10 data-[state=on]:border-primary/20 data-[state=on]:font-semibold',
-            /* hover */
-            'hover:bg-muted/50'
-          )}
-        >
-          {v === 'weekly' ? '7-day' : '30-day'}
-        </ToggleGroupItem>
-      ))}
-    </ToggleGroup>
-  );
-}
-
-function ScaleToggle({
-  value,
-  onChange,
-}: {
-  value: 'linear' | 'log';
-  onChange: (v: 'linear' | 'log') => void;
-}) {
-  return (
-    <ToggleGroup
-      type="single"
-      value={value}
-      /* shadcn passes `null` when a selected item is clicked again */
-      onValueChange={(v) => v && onChange(v as 'linear' | 'log')}
-      /* one ring, one radius → wrapper handles the outer shape */
-      className="inline-flex isolate rounded-lg ring-1 ring-inset ring-border bg-background"
-    >
-      {(['linear', 'log'] as const).map((v) => (
-        <ToggleGroupItem
-          key={v}
-          value={v}
-          aria-label={v === 'linear' ? 'Linear scale' : 'Logarithmic scale'}
-          /* first/last utilities give you the pill shape without manual classes */
-          className={cn(
-            'h-7 px-3 text-xs font-medium focus-visible:outline-none',
-            'ring-1 ring-inset ring-transparent first:rounded-l-lg last:rounded-r-lg',
-            /* selected state */
-            'data-[state=on]:bg-primary/10 data-[state=on]:border-primary/20 data-[state=on]:font-semibold',
-            /* hover */
-            'hover:bg-muted/50'
-          )}
-        >
-          {v === 'linear' ? 'Linear' : 'Log'}
-        </ToggleGroupItem>
-      ))}
-    </ToggleGroup>
-  );
-}
-
-function CustomLegend({
-  payload,
-  selectedTools,
-  setSelectedTools,
-  devtools,
-}: {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  payload?: any[];
-  selectedTools: Set<number>;
-  setSelectedTools: (tools: Set<number>) => void;
-  devtools?: DevTool[];
-}) {
-  if (!payload || !devtools) return null;
-
-  const getToolIdFromDisplayName = (displayName: string): number | null => {
-    const devtool = devtools.find((dt: DevTool) => dt.name === displayName);
-    return devtool ? devtool.id : null;
-  };
-
-  return (
-    <div className="flex flex-wrap gap-x-2 gap-y-1 sm:gap-3 items-center justify-center mt-2 w-full">
-      {payload.map((entry) => {
-        const toolId = getToolIdFromDisplayName(entry.value);
-        const isSelected = toolId ? selectedTools.has(toolId) : true;
-        const opacity = isSelected ? 1 : 0.5;
-
-        return (
-          <div
-            key={entry.value}
-            className="flex items-center gap-0.5 cursor-pointer transition-opacity duration-200"
-            style={{ opacity }}
-            onClick={() => {
-              if (toolId) {
-                const newSelected = new Set(selectedTools);
-                if (isSelected) {
-                  newSelected.delete(toolId);
-                } else {
-                  newSelected.add(toolId);
-                }
-                setSelectedTools(newSelected);
-              }
-            }}
-            title={`Click to ${isSelected ? 'hide' : 'show'} ${entry.value}`}
-          >
-            <span
-              className="inline-block w-3 h-3 sm:w-3.5 sm:h-3.5 rounded-sm border"
-              style={{
-                backgroundColor: entry.color,
-                borderColor: '#ccc',
-              }}
-            />
-            <span className="text-xs sm:text-sm" style={{ color: entry.color }}>
-              {entry.value}
-            </span>
-          </div>
-        );
-      })}
-    </div>
-  );
-}
+// Remove the in-file definitions of WindowToggle, ScaleToggle, and CustomLegend (lines 68-200)
 
 const METRIC_OPTIONS = [
   { value: 'active_repos', label: 'Active Repos' },

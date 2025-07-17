@@ -29,3 +29,14 @@ export function getSecondsUntilCacheReset(
 
   return Math.floor((targetTime.getTime() - now.getTime()) / 1000);
 }
+
+/**
+ * Format a star count as a human-readable string (e.g., 1.2k, 3M)
+ */
+export function formatStarCount(n: number): string {
+  if (n < 1000) return n.toString();
+  if (n < 10000)
+    return (Math.floor(n / 100) / 10).toFixed(1).replace(/\.0$/, '') + 'k'; // 1.0k-9.9k
+  if (n < 1000000) return Math.floor(n / 1000) + 'k'; // 10k-999k
+  return Math.floor(n / 100000) / 10 + 'M'; // 1.0M+
+}
