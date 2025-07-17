@@ -405,7 +405,7 @@ export default function LeaderboardChart() {
         <div className="mx-4 sm:mx-6 space-y-6">
           <Card>
             <CardHeader>
-              <div className="flex flex-col gap-4">
+              <div className="flex flex-col gap-2">
                 <div>
                   <CardTitle className="mb-2">Active Repositories</CardTitle>
                   <CardDescription className="text-xs">
@@ -472,7 +472,7 @@ export default function LeaderboardChart() {
                       disabled
                     >
                       <ChevronDown className="h-3 w-3" />
-                      Series (Loading...)
+                      Series (...)
                     </Button>
                   </div>
 
