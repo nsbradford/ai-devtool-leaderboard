@@ -71,24 +71,25 @@ export async function processStarCountUpdates(
     // Initialize GitHub API client
     const githubApi = new GitHubApi();
 
-    // Fetch star counts from GitHub API
-    console.log('Fetching star counts from GitHub API...');
-    const { starCounts, errorRepos } = await githubApi.getRepositoryGraphQLData(
+    // Fetch star counts and metadata from GitHub API
+    console.log('Fetching star counts and metadata from GitHub API...');
+    const { repoData, errorRepos } = await githubApi.getRepositoryGraphQLData(
       repos as `${string}/${string}`[]
     );
 
+    const repoDataArr = Object.values(repoData);
     console.log(
-      `Successfully fetched star counts for ${Object.keys(starCounts).length} repos`
+      `Successfully fetched metadata for ${repoDataArr.length} repos`
     );
     if (errorRepos.length > 0) {
-      console.log(`Failed to fetch star counts for ${errorRepos.length} repos`);
+      console.log(`Failed to fetch metadata for ${errorRepos.length} repos`);
     }
 
-    // Upsert successful star counts to database
-    if (Object.keys(starCounts).length > 0) {
-      await upsertGithubRepoGraphQLData(starCounts);
+    // Upsert successful repo metadata to database
+    if (repoDataArr.length > 0) {
+      await upsertGithubRepoGraphQLData(repoDataArr);
       console.log(
-        `Successfully upserted star counts for ${Object.keys(starCounts).length} repos`
+        `Successfully upserted metadata for ${repoDataArr.length} repos`
       );
     }
 

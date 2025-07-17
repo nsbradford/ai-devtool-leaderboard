@@ -7,9 +7,9 @@ import {
   DEPRECATED_getTopStarredReposByDevtool,
   upsertGithubRepoGraphQLData,
   upsertRepoStarCountErrors,
-} from '../src/lib/postgres/github_repositories_by_name';
-import { GitHubApi } from '../src/lib/github-api';
-import type { GithubRepoGraphQLData } from '../src/types/api';
+} from '../../src/lib/postgres/github_repositories_by_name';
+import { GitHubApi } from '../../src/lib/github-api';
+import type { GithubRepoGraphQLData } from '../../src/types/api';
 
 async function backfillTopReposToNewTable(limit: number, daysBack: number) {
   console.log(
