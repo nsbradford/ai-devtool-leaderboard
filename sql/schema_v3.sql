@@ -6,9 +6,9 @@
 -- So, we track our GraphQL fetches (by full_name) in this table, and coalesce later.
 CREATE TABLE IF NOT EXISTS github_repositories_by_name (
   full_name   TEXT        PRIMARY KEY,                         -- e.g. "vercel/next.js"
-  node_id     TEXT        NOT NULL,
-  database_id BIGINT      NOT NULL,
-  star_count  INTEGER     NOT NULL CHECK (star_count >= 0),    -- latest stargazer tally
+  node_id     TEXT        ,
+  database_id BIGINT      ,
+  star_count  INTEGER     ,    -- latest stargazer tally
   is_error    BOOLEAN     NOT NULL DEFAULT false,              -- true if star count fetch failed
   updated_at  TIMESTAMPTZ NOT NULL DEFAULT now()              -- last refresh
 );

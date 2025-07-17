@@ -1,5 +1,6 @@
 import { Octokit } from '@octokit/core';
 import { graphql } from '@octokit/graphql';
+import type { GithubRepoGraphQLData } from '@/types/api';
 
 /** A repo string in the form "owner/name" */
 export type RepoFullName = `${string}/${string}`;
@@ -144,37 +145,45 @@ export class GitHubApi {
   }
 
   /**
-   * Fetch stargazer counts for multiple repositories.
+   * Fetch stargazer counts and metadata for multiple repositories.
    *
-   * @param repos List of "owner/name" repositories to fetch star counts for.
-   * @returns Object with successful star counts and array of repos that had errors
+   * @param repos List of "owner/name" repositories to fetch data for.
+   * @returns Object with successful repo data and array of repos that had errors
    */
-  async fetchStarCounts(repos: RepoFullName[]): Promise<{
-    starCounts: Record<RepoFullName, number>;
+  async getRepositoryGraphQLData(repos: RepoFullName[]): Promise<{
+    repoData: Record<RepoFullName, GithubRepoGraphQLData>;
     errorRepos: RepoFullName[];
   }> {
-    console.log('[GitHubApi] Fetching star counts for', repos.length, 'repos');
+    console.log(
+      '[GitHubApi] Fetching star counts and metadata for',
+      repos.length,
+      'repos'
+    );
 
     // Split into ≤100-alias chunks (GraphQL limit).
     const CHUNK = 100;
-    const starCounts: Record<RepoFullName, number> = {};
+    const repoData: Record<RepoFullName, GithubRepoGraphQLData> = {};
     const errorRepos: RepoFullName[] = [];
 
     for (let i = 0; i < repos.length; i += CHUNK) {
       const chunkIndex = Math.floor(i / CHUNK) + 1;
       const batch = repos.slice(i, i + CHUNK);
 
-      // Build one big document: alias₀: repository(owner:"x",name:"y"){stargazerCount}
+      // Build one big document: alias₀: repository(owner:"x",name:"y"){stargazerCount, id, databaseId}
       const body = batch
         .map((full, j) => {
           const [owner, name] = full.split('/');
-          return `r${j}: repository(owner:"${owner}", name:"${name}") { stargazerCount }`;
+          return `r${j}: repository(owner:"${owner}", name:"${name}") { stargazerCount id databaseId }`;
         })
         .join('\n');
 
       try {
         const data = await this.gql<{
-          [k: string]: { stargazerCount: number } | null;
+          [k: string]: {
+            stargazerCount: number;
+            id: string;
+            databaseId: number;
+          } | null;
         }>(`query { ${body} }`);
 
         batch.forEach((full, j) => {
@@ -182,11 +191,20 @@ export class GitHubApi {
           if (
             result &&
             result.stargazerCount !== null &&
-            result.stargazerCount !== undefined
+            result.stargazerCount !== undefined &&
+            result.id &&
+            result.databaseId !== null &&
+            result.databaseId !== undefined
           ) {
-            starCounts[full] = result.stargazerCount;
+            repoData[full] = {
+              full_name: full,
+              node_id: result.id,
+              database_id: result.databaseId,
+              star_count: result.stargazerCount,
+              is_error: false,
+              updated_at: new Date().toISOString(),
+            };
           } else {
-            // console.log(`[GitHubApi] Repo ${full} returned null/undefined result:`, result);
             errorRepos.push(full);
           }
         });
@@ -206,16 +224,26 @@ export class GitHubApi {
           batch.forEach((full, j) => {
             const result = graphqlError.data?.[`r${j}`] as {
               stargazerCount: number;
+              id: string;
+              databaseId: number;
             } | null;
             if (
               result &&
               result.stargazerCount !== null &&
-              result.stargazerCount !== undefined
+              result.stargazerCount !== undefined &&
+              result.id &&
+              result.databaseId !== null &&
+              result.databaseId !== undefined
             ) {
-              starCounts[full] = result.stargazerCount;
-              // console.log(`[GitHubApi] Successfully extracted star count for ${full}: ${result.stargazerCount}`);
+              repoData[full] = {
+                full_name: full,
+                node_id: result.id,
+                database_id: result.databaseId,
+                star_count: result.stargazerCount,
+                is_error: false,
+                updated_at: new Date().toISOString(),
+              };
             } else {
-              // console.log(`[GitHubApi] Repo ${full} failed or returned null result:`, result);
               errorRepos.push(full);
             }
           });
@@ -230,9 +258,9 @@ export class GitHubApi {
     }
 
     console.log(
-      `[GitHubApi] fetchStarCounts completed: ${Object.keys(starCounts).length} successful, ${errorRepos.length} errors`
+      `[GitHubApi] fetchStarCounts completed: ${Object.keys(repoData).length} successful, ${errorRepos.length} errors`
     );
 
-    return { starCounts, errorRepos };
+    return { repoData, errorRepos };
   }
 }

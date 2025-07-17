@@ -21,7 +21,7 @@ async function testGitHubApi() {
 
     console.log('Fetching star counts for:', testRepos);
 
-    const starCounts = await github.fetchStarCounts([...testRepos]);
+    const starCounts = await github.getRepositoryGraphQLData([...testRepos]);
 
     console.log('\nResults:');
     console.log('========');

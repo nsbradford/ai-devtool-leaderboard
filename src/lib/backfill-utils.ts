@@ -1,6 +1,6 @@
 import { getBotReviewsForDay } from './bigquery';
 import { upsertBotReviewsForDate } from './postgres/bot_reviews_daily_by_repo';
-import { upsertRepoStarCounts } from '@/lib/postgres/github_repositories_by_name';
+import { upsertGithubRepoGraphQLData } from '@/lib/postgres/github_repositories_by_name';
 import { upsertRepoStarCountErrors } from '@/lib/postgres/github_repositories_by_name';
 import { getReposNeedingStarCounts } from '@/lib/postgres/github_repositories_by_name';
 import { GitHubApi } from './github-api';
@@ -73,7 +73,7 @@ export async function processStarCountUpdates(
 
     // Fetch star counts from GitHub API
     console.log('Fetching star counts from GitHub API...');
-    const { starCounts, errorRepos } = await githubApi.fetchStarCounts(
+    const { starCounts, errorRepos } = await githubApi.getRepositoryGraphQLData(
       repos as `${string}/${string}`[]
     );
 
@@ -86,7 +86,7 @@ export async function processStarCountUpdates(
 
     // Upsert successful star counts to database
     if (Object.keys(starCounts).length > 0) {
-      await upsertRepoStarCounts(starCounts);
+      await upsertGithubRepoGraphQLData(starCounts);
       console.log(
         `Successfully upserted star counts for ${Object.keys(starCounts).length} repos`
       );

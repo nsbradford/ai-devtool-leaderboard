@@ -1,4 +1,6 @@
 import { getSql } from '@/lib/postgres/bot_reviews_daily_by_repo';
+import type { TopReposByDevtool } from '@/types/api';
+import type { GithubRepoGraphQLData } from '@/types/api';
 
 /**
  * Get top N starred repositories for each devtool based on 30-day activity window
@@ -7,7 +9,7 @@ import { getSql } from '@/lib/postgres/bot_reviews_daily_by_repo';
  * @returns Promise<Record<string, Array<{repo_name: string, star_count: number}>>>
  */
 
-export async function getTopStarredReposByDevtool(
+export async function DEPRECATED_getTopStarredReposByDevtool(
   limit: number = 5,
   daysBack: number = 30
 ): Promise<Record<string, Array<{ repo_name: string; star_count: number }>>> {
@@ -76,17 +78,18 @@ export async function getTopStarredReposByDevtool(
     console.error('Failed to get top starred repos by devtool:', error);
     throw error;
   }
-} /**
+}
+
+/**
  * Get top N starred repositories for each devtool based on 30-day activity window
  * @param limit Number of top repos to return per devtool (default: 5)
  * @param daysBack Number of days to look back for activity (default: 30)
  * @returns Promise<Record<string, Array<{repo_name: string, star_count: number}>>>
  */
-
-export async function getTopStarredReposByDevtool_NEW(
+export async function getTopStarredReposByDevtool(
   limit: number = 5,
   daysBack: number = 30
-): Promise<Record<string, Array<{ repo_name: string; star_count: number }>>> {
+): Promise<TopReposByDevtool> {
   const sql = getSql();
 
   try {
@@ -98,27 +101,39 @@ export async function getTopStarredReposByDevtool_NEW(
       WITH recent_bot_activity AS (
         SELECT DISTINCT 
           br.bot_id,
-          br.repo_full_name
+          br.repo_db_id
         FROM bot_reviews_daily_by_repo br
         WHERE br.event_date >= $1
+      ),
+      latest_repo_names AS (
+        SELECT DISTINCT ON (database_id)
+          database_id,
+          full_name AS repo_name,
+          updated_at
+        FROM github_repositories_by_name
+        WHERE is_error = false
+        ORDER BY database_id, updated_at DESC
       ),
       ranked_repos AS (
         SELECT 
           rba.bot_id,
-          rba.repo_full_name,
+          grbn.database_id AS repo_db_id,
+          lrn.repo_name,
           grbn.star_count,
           ROW_NUMBER() OVER (
             PARTITION BY rba.bot_id 
             ORDER BY grbn.star_count DESC NULLS LAST
           ) as rank
         FROM recent_bot_activity rba
-        LEFT JOIN github_repositories_by_name grbn ON rba.repo_full_name = grbn.full_name
+        LEFT JOIN github_repositories_by_name grbn ON rba.repo_db_id = grbn.database_id
+        LEFT JOIN latest_repo_names lrn ON grbn.database_id = lrn.database_id
         WHERE grbn.star_count IS NOT NULL 
           AND grbn.is_error = false
       )
       SELECT 
         bot_id,
-        repo_full_name,
+        repo_db_id,
+        repo_name,
         star_count
       FROM ranked_repos
       WHERE rank <= $2
@@ -127,14 +142,12 @@ export async function getTopStarredReposByDevtool_NEW(
 
     const results = await sql(query, [cutoffDateStr, limit]);
 
-    const groupedResults: Record<
-      string,
-      Array<{ repo_name: string; star_count: number }>
-    > = {};
+    const groupedResults: TopReposByDevtool = {};
 
     results.forEach((row: Record<string, unknown>) => {
       const botId = String(row.bot_id);
-      const repoName = String(row.repo_full_name);
+      const repoDbId = Number(row.repo_db_id);
+      const repoName = String(row.repo_name);
       const starCount = Number(row.star_count);
 
       if (!groupedResults[botId]) {
@@ -142,6 +155,7 @@ export async function getTopStarredReposByDevtool_NEW(
       }
 
       groupedResults[botId].push({
+        repo_db_id: repoDbId,
         repo_name: repoName,
         star_count: starCount,
       });
@@ -226,13 +240,16 @@ export async function upsertRepoStarCountErrors(
 
       // Build batch upsert query for error repos
       const values = batch
-        .map((fullName) => `('${fullName.replace(/'/g, "''")}', 0, true)`)
+        .map(
+          (fullName) =>
+            `('${fullName.replace(/'/g, "''")}', NULL, NULL, NULL, true, NOW())`
+        )
         .join(', ');
 
       const query = `
-        INSERT INTO github_repositories_by_name (full_name, star_count, is_error, node_id, database_id)
-        VALUES ${values.replace(/\('([^']+)', 0, true\)/g, "('$1', 0, true, '', 0)")}
-        ON CONFLICT (full_name) 
+        INSERT INTO github_repositories_by_name (full_name, node_id, database_id, star_count, is_error, updated_at)
+        VALUES ${values}
+        ON CONFLICT (full_name)
         DO UPDATE SET 
           is_error = true,
           updated_at = NOW();
@@ -258,50 +275,51 @@ export async function upsertRepoStarCountErrors(
  * @returns Promise<void>
  */
 
-export async function upsertRepoStarCounts(
-  repoStarCounts: Record<string, number>,
+export async function upsertGithubRepoGraphQLData(
+  repoData: GithubRepoGraphQLData[],
   batchSize: number = 1000
 ): Promise<void> {
-  if (Object.keys(repoStarCounts).length === 0) {
-    console.log('No repo star counts to upsert');
+  if (repoData.length === 0) {
+    console.log('No repo data to upsert');
     return;
   }
 
   const sql = getSql();
-  const totalRecords = Object.keys(repoStarCounts).length;
+  const totalRecords = repoData.length;
 
   try {
-    const entries = Object.entries(repoStarCounts);
-
-    for (let i = 0; i < entries.length; i += batchSize) {
-      const batch = entries.slice(i, i + batchSize);
+    for (let i = 0; i < repoData.length; i += batchSize) {
+      const batch = repoData.slice(i, i + batchSize);
 
       const values = batch
         .map(
-          ([fullName, starCount]) =>
-            `('${fullName.replace(/'/g, "''")}', ${starCount})`
+          (repo) =>
+            `('${repo.full_name.replace(/'/g, "''")}', '${repo.node_id}', ${repo.database_id}, ${repo.star_count}, ${repo.is_error}, '${repo.updated_at}')`
         )
         .join(', ');
 
       const query = `
-        INSERT INTO github_repositories_by_name (full_name, star_count, node_id, database_id)
-        VALUES ${values.replace(/\('([^']+)', (\d+)\)/g, "('$1', $2, '', 0)")}
-        ON CONFLICT (full_name) 
-        DO UPDATE SET 
+        INSERT INTO github_repositories_by_name (full_name, node_id, database_id, star_count, is_error, updated_at)
+        VALUES ${values}
+        ON CONFLICT (full_name)
+        DO UPDATE SET
+          node_id = EXCLUDED.node_id,
+          database_id = EXCLUDED.database_id,
           star_count = EXCLUDED.star_count,
-          updated_at = NOW();
+          is_error = EXCLUDED.is_error,
+          updated_at = EXCLUDED.updated_at;
       `;
 
       await sql(query);
 
       console.log(
-        `Upserted batch: ${batch.length}/${totalRecords} repo star count records`
+        `Upserted batch: ${batch.length}/${totalRecords} repo metadata records`
       );
     }
 
-    console.log(`Completed upsert of ${totalRecords} repo star count records`);
+    console.log(`Completed upsert of ${totalRecords} repo metadata records`);
   } catch (error) {
-    console.error('Failed to upsert repo star counts:', error);
+    console.error('Failed to upsert repo metadata:', error);
     throw error;
   }
 }

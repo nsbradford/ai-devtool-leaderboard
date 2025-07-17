@@ -7,28 +7,9 @@ export interface BotReviewInRepoDate {
   pr_count: number;
 }
 
-// export interface BotReviewInRepoDateLegacy {
-//   event_date: string;
-//   repo_name: string;
-//   bot_id: number;
-//   bot_review_count: number;
-//   pr_count: number;
-// }
-
-export interface LeaderboardStats {
-  data: LeaderboardData;
-}
-
 export interface LeaderboardData {
   timestamps: number[];
   tools: Record<number, number[]>; // tool_id -> repo_count[]
-}
-
-export interface ToolRanking {
-  name: string;
-  current_count: number;
-  percentage: number;
-  trend: 'up' | 'down' | 'stable';
 }
 
 export interface DateRange {
@@ -55,7 +36,8 @@ export interface DevTool {
 }
 
 export interface TopRepo {
-  repo_name: string;
+  repo_db_id: number;
+  repo_name: string; // note that there may be occasional inconsistencies
   star_count: number;
 }
 
@@ -69,3 +51,12 @@ export interface TopReposByDevtool {
 //   day?: string;
 //   viewType?: MaterializedViewType;
 // }
+
+export interface GithubRepoGraphQLData {
+  full_name: string;
+  node_id?: string;
+  database_id?: number;
+  star_count?: number;
+  is_error: boolean;
+  updated_at: string; // ISO string
+}
