@@ -448,7 +448,7 @@ export default function LeaderboardChart() {
   );
 
   function renderChartAndRankings(theme: string | undefined) {
-    if (!filteredStats || !devtools) return null;
+    if (!filteredStats || !devtools || !stats) return null;
 
     // Prepare chartData as before
     const chartData: ChartDataPoint[] = filteredStats.timestamps

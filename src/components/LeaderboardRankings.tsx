@@ -30,7 +30,7 @@ interface LeaderboardRankingsProps {
   getToolWebsiteUrl: (toolId: number) => string | undefined;
   chartTitle: string;
   metric: 'active_repos' | 'pr_reviews';
-  activeReposMonthly: number;
+  activeReposMonthly: string;
 }
 
 export function LeaderboardRankings({
