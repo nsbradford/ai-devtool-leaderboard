@@ -1,10 +1,8 @@
 import { getBotReviewsForDay } from './bigquery';
-import {
-  getReposNeedingStarCounts,
-  upsertBotReviewsForDate,
-  upsertRepoStarCountErrors,
-  upsertRepoStarCounts,
-} from './database';
+import { upsertBotReviewsForDate } from './postgres/bot_reviews_daily_by_repo';
+import { upsertRepoStarCounts } from '@/lib/postgres/github_repositories_by_name';
+import { upsertRepoStarCountErrors } from '@/lib/postgres/github_repositories_by_name';
+import { getReposNeedingStarCounts } from '@/lib/postgres/github_repositories_by_name';
 import { GitHubApi } from './github-api';
 
 /**

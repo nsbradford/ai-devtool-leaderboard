@@ -19,7 +19,9 @@ async function backfillStarCounts(
 
   try {
     // Get all repos needing star count updates
-    const { getReposNeedingStarCounts } = await import('../src/lib/database');
+    const { getReposNeedingStarCounts } = await import(
+      '../src/lib/postgres/bot_reviews_daily_by_repo'
+    );
     const allRepos: string[] = await getReposNeedingStarCounts(
       daysBack,
       maxAgeDays,

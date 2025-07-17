@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import type { TopReposByDevtool } from '@/types/api';
-import { getTopStarredReposByDevtool } from '@/lib/database';
+import { getTopStarredReposByDevtool } from '@/lib/postgres/github_repositories_by_name';
 import { getSecondsUntilCacheReset } from '@/lib/utils';
 
 export async function GET(request: Request) {

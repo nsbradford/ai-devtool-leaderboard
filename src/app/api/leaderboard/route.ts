@@ -4,7 +4,7 @@ import type {
   MaterializedViewType,
   MaterializedViewData,
 } from '@/types/api';
-import { getLeaderboardDataForDateRange } from '@/lib/database';
+import { getLeaderboardDataForDateRange } from '@/lib/postgres/bot_reviews_daily_by_repo';
 import { getSecondsUntilCacheReset } from '@/lib/utils';
 import { DEFAULT_START_DATE } from '@/lib/constants';
 

@@ -2,7 +2,7 @@ import { getBotReviewsForDay } from '../src/lib/bigquery';
 import {
   refreshMaterializedViewsConcurrently,
   upsertBotReviewsForDate,
-} from '../src/lib/database';
+} from '../src/lib/postgres/bot_reviews_daily_by_repo';
 import { processBotReviewsForDate } from '../src/lib/backfill-utils';
 import devtools from '../src/devtools.json';
 import dotenv from 'dotenv';
