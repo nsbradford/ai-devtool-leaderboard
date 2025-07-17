@@ -2,10 +2,8 @@ import { getBotReviewsForDay } from './bigquery';
 import {
   getReposNeedingStarCounts,
   upsertBotReviewsForDate,
-  upsertRepoStarCounts,
   upsertRepoStarCountErrors,
-  upsertRepoMetadata,
-  getRepoDbIdMapping,
+  upsertRepoStarCounts,
 } from './database';
 import { GitHubApi } from './github-api';
 
@@ -24,66 +22,9 @@ export async function processBotReviewsForDate(
 
   try {
     const botReviews = await getBotReviewsForDay(targetDate, botIds);
-
-    if (botReviews.length === 0) {
-      console.log(`No bot reviews found for ${targetDate}${botFilter}`);
-      return;
-    }
-
-    const repoNames = [...new Set(botReviews.map((r) => r.repo_name))];
-    console.log(`Found ${repoNames.length} unique repositories`);
-
-    const githubApi = new GitHubApi();
-
-    let existingMapping = await getRepoDbIdMapping(repoNames);
-    const missingRepos = repoNames.filter((name) => !existingMapping[name]);
-
-    if (missingRepos.length > 0) {
-      console.log(
-        `Fetching metadata for ${missingRepos.length} missing repositories`
-      );
-      const { repoMetadata, errorRepos } = await githubApi.fetchRepoMetadata(
-        missingRepos as `${string}/${string}`[]
-      );
-
-      if (Object.keys(repoMetadata).length > 0) {
-        await upsertRepoMetadata(repoMetadata);
-        console.log(
-          `Upserted metadata for ${Object.keys(repoMetadata).length} repositories`
-        );
-      }
-
-      if (errorRepos.length > 0) {
-        console.log(
-          `Failed to fetch metadata for ${errorRepos.length} repositories`
-        );
-      }
-
-      existingMapping = await getRepoDbIdMapping(repoNames);
-    }
-
-    const transformedReviews = botReviews
-      .filter((review) => existingMapping[review.repo_name])
-      .map((review) => ({
-        event_date: review.event_date,
-        repo_db_id: existingMapping[review.repo_name],
-        repo_full_name: review.repo_name,
-        bot_id: review.bot_id,
-        bot_review_count: review.bot_review_count,
-        pr_count: review.pr_count,
-      }));
-
-    if (transformedReviews.length === 0) {
-      console.log(
-        `No valid bot reviews to process for ${targetDate}${botFilter}`
-      );
-      return;
-    }
-
-    await upsertBotReviewsForDate(transformedReviews);
-
+    await upsertBotReviewsForDate(botReviews);
     console.log(
-      `Successfully processed ${transformedReviews.length} bot reviews for ${targetDate}${botFilter}`
+      `Successfully processed ${botReviews.length} bot reviews for ${targetDate}${botFilter}`
     );
   } catch (error) {
     console.error(`Error processing bot reviews for ${targetDate}:`, error);

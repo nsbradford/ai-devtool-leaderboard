@@ -1,11 +1,12 @@
 import { BigQuery } from '@google-cloud/bigquery';
 import devtools from '../devtools.json';
-import { BotReviewInRepoDateLegacy } from '@/types/api';
+import { BotReviewInRepoDate } from '@/types/api';
 
 // Type for raw BigQuery row data
 interface BigQueryRow {
   event_date: { value: string } | string;
   repo_name: string;
+  repo_db_id: number;
   bot_id: number;
   bot_review_count: number;
   pr_count: number;
@@ -49,7 +50,7 @@ function getBigQueryClient(): BigQuery {
 export async function getBotReviewsForDay(
   targetDate: string,
   botIds?: number[]
-): Promise<BotReviewInRepoDateLegacy[]> {
+): Promise<BotReviewInRepoDate[]> {
   try {
     const bigquery = getBigQueryClient();
 
@@ -62,16 +63,16 @@ export async function getBotReviewsForDay(
 
       SELECT
         target_date                     AS event_date,
-        repo.name                       AS repo_name,
-        actor.id                        AS bot_id,
-        COUNT(*)                        AS bot_review_count,
+        ARRAY_AGG(repo.name ORDER BY repo.name DESC LIMIT 1)[OFFSET(0)] AS repo_name,
+        repo.id                        AS repo_db_id,
+        actor.id                       AS bot_id,
+        COUNT(*)                       AS bot_review_count,
         COUNT(DISTINCT JSON_EXTRACT_SCALAR(payload, '$.pull_request.id')) AS pr_count
       FROM \`githubarchive.day.20*\`                      -- ← skips every view
       WHERE _TABLE_SUFFIX = FORMAT_DATE('%y%m%d', target_date)   -- 250712
         AND type          = 'PullRequestReviewEvent'
         AND actor.id      IN UNNEST(bot_id_list)
-      GROUP BY repo.name, actor.id
-      ORDER BY repo_name;
+      GROUP BY repo.id, actor.id, target_date;
     `;
 
     // console.log(`Running bot reviews query for ${targetDate}...`);
@@ -93,13 +94,14 @@ export async function getBotReviewsForDay(
         typeof row.event_date === 'object'
           ? row.event_date.value
           : String(row.event_date),
-      repo_name: row.repo_name,
+      repo_db_id: row.repo_db_id,
+      repo_full_name: row.repo_name,
       bot_id: row.bot_id,
       bot_review_count: row.bot_review_count,
       pr_count: row.pr_count,
     }));
 
-    return convertedRows as BotReviewInRepoDateLegacy[];
+    return convertedRows as BotReviewInRepoDate[];
   } catch (error) {
     console.error('BigQuery bot reviews query failed:', error);
     throw error;
