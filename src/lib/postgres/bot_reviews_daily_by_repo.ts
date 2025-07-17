@@ -158,3 +158,55 @@ export async function refreshMaterializedViewsConcurrently(): Promise<void> {
   }
   console.log('Materialized views refreshed successfully');
 }
+
+export interface MaterializedReviewCountData {
+  event_date: string;
+  bot_id: number;
+  review_count: number;
+}
+
+/**
+ * Get PR review counts from stats materialized views (weekly or monthly)
+ * @param viewType Type of view to query ('weekly' or 'monthly')
+ * @param startDate Start date for the query (YYYY-MM-DD format)
+ * @param endDate End date for the query (YYYY-MM-DD format)
+ * @returns Promise<MaterializedReviewCountData[]> Array of review count data
+ */
+export async function getMaterializedReviewCountData(
+  viewType: MaterializedViewType,
+  startDate: string,
+  endDate: string
+): Promise<MaterializedReviewCountData[]> {
+  const sql = getSql();
+
+  try {
+    const viewName =
+      viewType === 'weekly'
+        ? 'mv_bot_reviews_stats_7d'
+        : 'mv_bot_reviews_stats_30d';
+
+    const query = `
+      SELECT 
+        event_date,
+        bot_id,
+        ${viewType === 'weekly' ? 'review_count_7d AS review_count' : 'review_count_30d AS review_count'}
+      FROM ${viewName}
+      WHERE event_date BETWEEN $1 AND $2
+      ORDER BY event_date ASC;
+    `;
+
+    console.log(
+      `Running query against ${viewName} for dates ${startDate} to ${endDate}`
+    );
+    const results = await sql(query, [startDate, endDate]);
+
+    return results.map((row: Record<string, unknown>) => ({
+      event_date: String(row.event_date),
+      bot_id: Number(row.bot_id),
+      review_count: Number(row.review_count),
+    }));
+  } catch (error) {
+    console.error(`Failed to get ${viewType} review count data:`, error);
+    throw error;
+  }
+}

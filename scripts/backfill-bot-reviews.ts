@@ -1,13 +1,9 @@
-import { getBotReviewsForDay } from '../src/lib/bigquery';
-import {
-  refreshMaterializedViewsConcurrently,
-  upsertBotReviewsForDate,
-} from '../src/lib/postgres/bot_reviews_daily_by_repo';
-import { processBotReviewsForDate } from '../src/lib/backfill-utils';
-import devtools from '../src/devtools.json';
 import dotenv from 'dotenv';
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
+import devtools from '../src/devtools.json';
+import { processBotReviewsForDate } from '../src/lib/backfill/bot-reviews';
+import { refreshMaterializedViewsConcurrently } from '../src/lib/postgres/bot_reviews_daily_by_repo';
 
 dotenv.config({ path: '.env.local' });
 

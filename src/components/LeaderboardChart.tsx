@@ -202,6 +202,11 @@ function CustomLegend({
   );
 }
 
+const METRIC_OPTIONS = [
+  { value: 'active_repos', label: 'Active Repos' },
+  { value: 'pr_reviews', label: 'PR Reviews' },
+];
+
 export default function LeaderboardChart() {
   const [displayDateRange, setDisplayDateRange] = useState<DateRange>({
     startDate: DEFAULT_START_DATE,
@@ -217,28 +222,29 @@ export default function LeaderboardChart() {
   const [openRepoPopover, setOpenRepoPopover] = useState<number | null>(null);
   const [datePickerOpen, setDatePickerOpen] = useState(false);
   const [toolSearchQuery, setToolSearchQuery] = useState('');
+  const [metric, setMetric] = useState<'active_repos' | 'pr_reviews'>(
+    'active_repos'
+  );
 
   const baseUrl =
     typeof window !== 'undefined' && window.location.hostname !== 'localhost'
       ? window.location.origin
       : '';
 
-  const maxRangeParams = useMemo(
-    () =>
-      new URLSearchParams({
-        viewType,
-      }),
-    [viewType]
-  );
+  // Fetch stats from the correct endpoint based on metric
+  const statsEndpoint = useMemo(() => {
+    const params = new URLSearchParams({ viewType });
+    if (metric === 'pr_reviews') {
+      return `${baseUrl}/api/leaderboard-reviews?${params}`;
+    }
+    return `${baseUrl}/api/leaderboard?${params}`;
+  }, [baseUrl, viewType, metric]);
 
   const {
     data: stats,
     error: statsError,
     isLoading: statsLoading,
-  } = useSWR<LeaderboardData>(
-    `${baseUrl}/api/leaderboard?${maxRangeParams}`,
-    fetcher
-  );
+  } = useSWR<LeaderboardData>(statsEndpoint, fetcher);
 
   const {
     data: devtools,
@@ -469,6 +475,47 @@ export default function LeaderboardChart() {
                       Series (Loading...)
                     </Button>
                   </div>
+
+                  {/* Metric Dropdown */}
+                  <div className="flex items-center gap-2">
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="flex items-center gap-2 text-xs h-7 rounded-full"
+                        >
+                          <ChevronDown className="h-3 w-3" />
+                          {METRIC_OPTIONS.find((opt) => opt.value === metric)
+                            ?.label || 'Metric'}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-40 p-0">
+                        <div className="flex flex-col">
+                          {METRIC_OPTIONS.map((opt) => (
+                            <button
+                              key={opt.value}
+                              className={`px-3 py-2 text-left text-xs hover:bg-muted ${
+                                metric === opt.value
+                                  ? 'bg-primary/10 font-semibold'
+                                  : ''
+                              }`}
+                              onClick={() =>
+                                setMetric(
+                                  opt.value as 'active_repos' | 'pr_reviews'
+                                )
+                              }
+                            >
+                              {opt.label}
+                              {metric === opt.value && (
+                                <Check className="inline ml-2 h-3 w-3 text-primary" />
+                              )}
+                            </button>
+                          ))}
+                        </div>
+                      </PopoverContent>
+                    </Popover>
+                  </div>
                 </div>
               </div>
             </CardHeader>
@@ -605,6 +652,14 @@ export default function LeaderboardChart() {
       })
       .sort((a, b) => a.timestamp - b.timestamp);
 
+    // Dynamic chart title and description
+    const chartTitle =
+      metric === 'pr_reviews' ? 'PR Reviews' : 'Active Repositories';
+    const chartDescription =
+      metric === 'pr_reviews'
+        ? `Number of PR reviews by AI code review bots, ${viewType === 'weekly' ? '7-day' : '30-day'} rolling window.`
+        : `Repos with an AI code review, ${viewType === 'weekly' ? '7-day' : '30-day'} rolling window.`;
+
     return (
       <div className="mx-4 sm:mx-6 space-y-6">
         {/* Chart Section */}
@@ -612,10 +667,9 @@ export default function LeaderboardChart() {
           <CardHeader>
             <div className="flex flex-col gap-2">
               <div>
-                <CardTitle className="mb-2">Active Repositories</CardTitle>
+                <CardTitle className="mb-2">{chartTitle}</CardTitle>
                 <CardDescription className="text-xs">
-                  Repos with an AI code review,{' '}
-                  {viewType === 'weekly' ? '7-day' : '30-day'} rolling window.
+                  {chartDescription}
                 </CardDescription>
               </div>
 
@@ -850,6 +904,47 @@ export default function LeaderboardChart() {
                     </PopoverContent>
                   </Popover>
                 </div>
+
+                {/* Metric Dropdown */}
+                <div className="flex items-center gap-2">
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="flex items-center gap-2 text-xs h-7 rounded-full"
+                      >
+                        <ChevronDown className="h-3 w-3" />
+                        {METRIC_OPTIONS.find((opt) => opt.value === metric)
+                          ?.label || 'Metric'}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-40 p-0">
+                      <div className="flex flex-col">
+                        {METRIC_OPTIONS.map((opt) => (
+                          <button
+                            key={opt.value}
+                            className={`px-3 py-2 text-left text-xs hover:bg-muted ${
+                              metric === opt.value
+                                ? 'bg-primary/10 font-semibold'
+                                : ''
+                            }`}
+                            onClick={() =>
+                              setMetric(
+                                opt.value as 'active_repos' | 'pr_reviews'
+                              )
+                            }
+                          >
+                            {opt.label}
+                            {metric === opt.value && (
+                              <Check className="inline ml-2 h-3 w-3 text-primary" />
+                            )}
+                          </button>
+                        ))}
+                      </div>
+                    </PopoverContent>
+                  </Popover>
+                </div>
               </div>
             </div>
           </CardHeader>
@@ -959,12 +1054,13 @@ export default function LeaderboardChart() {
             <div className="flex items-center justify-between w-full">
               <CardTitle className="">Current Rankings</CardTitle>
               <span className="text-xs text-muted-foreground pr-2">
-                Active Repos
+                {chartTitle}
               </span>
             </div>
             <CardDescription className="text-xs">
-              Note: there are {ACTIVE_REPOS_MONTHLY} public repos with pull
-              requests per month.
+              {metric === 'pr_reviews'
+                ? 'Total PR reviews by bot in the selected window.'
+                : `There were ${ACTIVE_REPOS_MONTHLY} public repos with pull requests last month.`}
             </CardDescription>
           </CardHeader>
 
