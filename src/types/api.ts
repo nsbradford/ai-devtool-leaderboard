@@ -1,8 +1,18 @@
 export interface BotReviewInRepoDate {
   event_date: string;
+  repo_db_id: number;
+  repo_full_name: string;
+  bot_id: number;
+  bot_review_count: number;
+  pr_count: number;
+}
+
+export interface BotReviewInRepoDateLegacy {
+  event_date: string;
   repo_name: string;
   bot_id: number;
   bot_review_count: number;
+  pr_count: number;
 }
 
 export interface LeaderboardStats {

@@ -1,6 +1,6 @@
 import { BigQuery } from '@google-cloud/bigquery';
 import devtools from '../devtools.json';
-import { BotReviewInRepoDate } from '@/types/api';
+import { BotReviewInRepoDateLegacy } from '@/types/api';
 
 // Type for raw BigQuery row data
 interface BigQueryRow {
@@ -8,6 +8,7 @@ interface BigQueryRow {
   repo_name: string;
   bot_id: number;
   bot_review_count: number;
+  pr_count: number;
 }
 
 /**
@@ -48,7 +49,7 @@ function getBigQueryClient(): BigQuery {
 export async function getBotReviewsForDay(
   targetDate: string,
   botIds?: number[]
-): Promise<BotReviewInRepoDate[]> {
+): Promise<BotReviewInRepoDateLegacy[]> {
   try {
     const bigquery = getBigQueryClient();
 
@@ -63,7 +64,8 @@ export async function getBotReviewsForDay(
         target_date                     AS event_date,
         repo.name                       AS repo_name,
         actor.id                        AS bot_id,
-        COUNT(*)                        AS bot_review_count
+        COUNT(*)                        AS bot_review_count,
+        COUNT(DISTINCT JSON_EXTRACT_SCALAR(payload, '$.pull_request.id')) AS pr_count
       FROM \`githubarchive.day.20*\`                      -- ← skips every view
       WHERE _TABLE_SUFFIX = FORMAT_DATE('%y%m%d', target_date)   -- 250712
         AND type          = 'PullRequestReviewEvent'
@@ -94,9 +96,10 @@ export async function getBotReviewsForDay(
       repo_name: row.repo_name,
       bot_id: row.bot_id,
       bot_review_count: row.bot_review_count,
+      pr_count: row.pr_count,
     }));
 
-    return convertedRows as BotReviewInRepoDate[];
+    return convertedRows as BotReviewInRepoDateLegacy[];
   } catch (error) {
     console.error('BigQuery bot reviews query failed:', error);
     throw error;
