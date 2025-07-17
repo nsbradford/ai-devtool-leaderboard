@@ -3,7 +3,7 @@ import {
   processBotReviewsForDate,
   getYesterdayDateString,
 } from '../src/lib/backfill-utils';
-import { refreshMaterializedViewsConcurrently } from '@/lib/database';
+import { refreshMaterializedViewsConcurrently } from '@/lib/postgres/bot_reviews_daily_by_repo';
 
 export const dailyBotReviewsBackfill = schedules.task({
   id: 'daily-bot-reviews-backfill',

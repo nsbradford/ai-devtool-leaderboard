@@ -1,14 +1,12 @@
 import { getBotReviewsForDay } from './bigquery';
-import {
-  getReposNeedingStarCounts,
-  upsertBotReviewsForDate,
-  upsertRepoStarCounts,
-  upsertRepoStarCountErrors,
-} from './database';
+import { upsertBotReviewsForDate } from './postgres/bot_reviews_daily_by_repo';
+import { upsertGithubRepoGraphQLData } from '@/lib/postgres/github_repositories_by_name';
+import { upsertRepoStarCountErrors } from '@/lib/postgres/github_repositories_by_name';
+import { getReposNeedingStarCounts } from '@/lib/postgres/github_repositories_by_name';
 import { GitHubApi } from './github-api';
 
 /**
- * Process bot reviews for a single date
+ * Process bot reviews for a single date (updated for schema v3)
  * @param targetDate Date in YYYY-MM-DD format
  * @param botIds Optional array of bot IDs to filter by
  * @returns Promise<void>
@@ -22,14 +20,7 @@ export async function processBotReviewsForDate(
 
   try {
     const botReviews = await getBotReviewsForDay(targetDate, botIds);
-
-    if (botReviews.length === 0) {
-      console.log(`No bot reviews found for ${targetDate}${botFilter}`);
-      return;
-    }
-
     await upsertBotReviewsForDate(botReviews);
-
     console.log(
       `Successfully processed ${botReviews.length} bot reviews for ${targetDate}${botFilter}`
     );
@@ -80,24 +71,25 @@ export async function processStarCountUpdates(
     // Initialize GitHub API client
     const githubApi = new GitHubApi();
 
-    // Fetch star counts from GitHub API
-    console.log('Fetching star counts from GitHub API...');
-    const { starCounts, errorRepos } = await githubApi.fetchStarCounts(
+    // Fetch star counts and metadata from GitHub API
+    console.log('Fetching star counts and metadata from GitHub API...');
+    const { repoData, errorRepos } = await githubApi.getRepositoryGraphQLData(
       repos as `${string}/${string}`[]
     );
 
+    const repoDataArr = Object.values(repoData);
     console.log(
-      `Successfully fetched star counts for ${Object.keys(starCounts).length} repos`
+      `Successfully fetched metadata for ${repoDataArr.length} repos`
     );
     if (errorRepos.length > 0) {
-      console.log(`Failed to fetch star counts for ${errorRepos.length} repos`);
+      console.log(`Failed to fetch metadata for ${errorRepos.length} repos`);
     }
 
-    // Upsert successful star counts to database
-    if (Object.keys(starCounts).length > 0) {
-      await upsertRepoStarCounts(starCounts);
+    // Upsert successful repo metadata to database
+    if (repoDataArr.length > 0) {
+      await upsertGithubRepoGraphQLData(repoDataArr);
       console.log(
-        `Successfully upserted star counts for ${Object.keys(starCounts).length} repos`
+        `Successfully upserted metadata for ${repoDataArr.length} repos`
       );
     }
 

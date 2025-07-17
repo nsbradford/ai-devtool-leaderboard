@@ -1,3 +1,4 @@
+import { getReposNeedingStarCounts } from '@/lib/postgres/github_repositories_by_name';
 import { processStarCountUpdates } from '../src/lib/backfill-utils';
 import dotenv from 'dotenv';
 import yargs from 'yargs';
@@ -18,8 +19,6 @@ async function backfillStarCounts(
   const startTime = Date.now();
 
   try {
-    // Get all repos needing star count updates
-    const { getReposNeedingStarCounts } = await import('../src/lib/database');
     const allRepos: string[] = await getReposNeedingStarCounts(
       daysBack,
       maxAgeDays,

@@ -6,9 +6,9 @@
 -- So, we track our GraphQL fetches (by full_name) in this table, and coalesce later.
 CREATE TABLE IF NOT EXISTS github_repositories_by_name (
   full_name   TEXT        PRIMARY KEY,                         -- e.g. "vercel/next.js"
-  node_id     TEXT        NOT NULL,
-  database_id BIGINT      NOT NULL,
-  star_count  INTEGER     NOT NULL CHECK (star_count >= 0),    -- latest stargazer tally
+  node_id     TEXT        ,
+  database_id BIGINT      ,
+  star_count  INTEGER     ,    -- latest stargazer tally
   is_error    BOOLEAN     NOT NULL DEFAULT false,              -- true if star count fetch failed
   updated_at  TIMESTAMPTZ NOT NULL DEFAULT now()              -- last refresh
 );
@@ -132,4 +132,53 @@ GROUP BY c.event_date, bu.bot_id;
 
 CREATE UNIQUE INDEX mv_bot_reviews_user_30d_pk
   ON mv_bot_reviews_user_30d (event_date, bot_id);
+
+
+/* -----------------------------------------------------------------
+   Materialized views for rolling review counts (per bot)
+   ----------------------------------------------------------------- */
+
+-- 7-day rolling window: total reviews
+CREATE MATERIALIZED VIEW mv_bot_reviews_stats_7d AS
+WITH calendar AS (
+  SELECT generate_series(
+           (SELECT MIN(event_date) FROM bot_reviews_daily_by_repo),
+           (SELECT MAX(event_date) FROM bot_reviews_daily_by_repo),
+           '1 day'
+         )::date AS event_date
+)
+SELECT
+  c.event_date,
+  br.bot_id,
+  SUM(br.bot_review_count) AS review_count_7d
+FROM calendar c
+JOIN bot_reviews_daily_by_repo br
+  ON br.event_date BETWEEN c.event_date - INTERVAL '6 days'
+                      AND     c.event_date
+GROUP BY c.event_date, br.bot_id;
+
+CREATE UNIQUE INDEX mv_bot_reviews_stats_7d_pk
+  ON mv_bot_reviews_stats_7d (event_date, bot_id);
+
+-- 30-day rolling window: total reviews
+CREATE MATERIALIZED VIEW mv_bot_reviews_stats_30d AS
+WITH calendar AS (
+  SELECT generate_series(
+           (SELECT MIN(event_date) FROM bot_reviews_daily_by_repo),
+           (SELECT MAX(event_date) FROM bot_reviews_daily_by_repo),
+           '1 day'
+         )::date AS event_date
+)
+SELECT
+  c.event_date,
+  br.bot_id,
+  SUM(br.bot_review_count) AS review_count_30d
+FROM calendar c
+JOIN bot_reviews_daily_by_repo br
+  ON br.event_date BETWEEN c.event_date - INTERVAL '29 days'
+                      AND     c.event_date
+GROUP BY c.event_date, br.bot_id;
+
+CREATE UNIQUE INDEX mv_bot_reviews_stats_30d_pk
+  ON mv_bot_reviews_stats_30d (event_date, bot_id);
 
