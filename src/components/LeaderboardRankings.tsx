@@ -1,6 +1,16 @@
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
 import { Star, ChevronDown } from 'lucide-react';
 import Image from 'next/image';
 import { formatStarCount } from '@/lib/utils';
@@ -40,7 +50,9 @@ export function LeaderboardRankings({
       <CardHeader>
         <div className="flex items-center justify-between w-full">
           <CardTitle className="">Current Rankings</CardTitle>
-          <span className="text-xs text-muted-foreground pr-2">{chartTitle}</span>
+          <span className="text-xs text-muted-foreground pr-2">
+            {chartTitle}
+          </span>
         </div>
         <CardDescription className="text-xs">
           {metric === 'pr_reviews'
@@ -164,11 +176,17 @@ export function LeaderboardRankings({
                             </a>
                             <span className="ml-1">
                               ({formatStarCount(repo.star_count)}
-                              <Star className="inline w-3 h-3 text-muted-foreground" style={{ verticalAlign: '-0.125em' }} />
+                              <Star
+                                className="inline w-3 h-3 text-muted-foreground"
+                                style={{ verticalAlign: '-0.125em' }}
+                              />
                               )
                             </span>
                             {repoIndex < 2 &&
-                              repoIndex < topRepos[tool.id.toString()].length - 1 && <span className="mx-1">•</span>}
+                              repoIndex <
+                                topRepos[tool.id.toString()].length - 1 && (
+                                <span className="mx-1">•</span>
+                              )}
                           </span>
                         ))}
                       {topRepos[tool.id.toString()].length > 3 && (
@@ -220,4 +238,4 @@ export function LeaderboardRankings({
       </CardContent>
     </Card>
   );
-} 
+}

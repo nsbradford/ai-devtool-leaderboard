@@ -1,27 +1,35 @@
 import { Button } from '@/components/ui/button';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
 import { ScaleToggle } from '@/components/ui/ScaleToggle';
 import { WindowToggle } from '@/components/ui/WindowToggle';
 import { Calendar, Check, ChevronDown } from 'lucide-react';
-import { DevTool } from '@/types/api';
+import type { LeaderboardData, MaterializedViewType } from '@/types/api';
 import Image from 'next/image';
 import React from 'react';
+import { DevTool } from '@/types/api';
 
 interface LeaderboardChartControlsProps {
   displayDateRange: { startDate: string; endDate: string };
   setDisplayDateRange: (range: { startDate: string; endDate: string }) => void;
   datePickerOpen: boolean;
   setDatePickerOpen: (open: boolean) => void;
-  presets: { label: string; getRange: () => { startDate: string; endDate: string } }[];
-  viewType: string;
-  setViewType: (v: any) => void;
+  presets: {
+    label: string;
+    getRange: () => { startDate: string; endDate: string };
+  }[];
+  viewType: MaterializedViewType;
+  setViewType: (v: MaterializedViewType) => void;
   scaleType: 'linear' | 'log';
   setScaleType: (v: 'linear' | 'log') => void;
   selectedTools: Set<number>;
   setSelectedTools: (s: Set<number>) => void;
   toolSearchQuery: string;
   setToolSearchQuery: (q: string) => void;
-  stats: any;
+  stats: LeaderboardData;
   devtools: DevTool[];
   metric: 'active_repos' | 'pr_reviews';
   setMetric: (m: 'active_repos' | 'pr_reviews') => void;
@@ -91,7 +99,10 @@ export function LeaderboardChartControls({
                       type="date"
                       value={displayDateRange.startDate}
                       onChange={(e) =>
-                        setDisplayDateRange({ ...displayDateRange, startDate: e.target.value })
+                        setDisplayDateRange({
+                          ...displayDateRange,
+                          startDate: e.target.value,
+                        })
                       }
                       className="px-3 py-2 border border-input bg-background rounded-md text-xs focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
                     />
@@ -102,7 +113,10 @@ export function LeaderboardChartControls({
                       type="date"
                       value={displayDateRange.endDate}
                       onChange={(e) =>
-                        setDisplayDateRange({ ...displayDateRange, endDate: e.target.value })
+                        setDisplayDateRange({
+                          ...displayDateRange,
+                          endDate: e.target.value,
+                        })
                       }
                       className="px-3 py-2 border border-input bg-background rounded-md text-xs focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
                     />
@@ -153,11 +167,14 @@ export function LeaderboardChartControls({
                     ) {
                       setSelectedTools(new Set());
                     } else if (stats) {
-                      setSelectedTools(new Set(Object.keys(stats.tools).map(Number)));
+                      setSelectedTools(
+                        new Set(Object.keys(stats.tools).map(Number))
+                      );
                     }
                   }}
                 >
-                  {stats && selectedTools.size === Object.keys(stats.tools).length
+                  {stats &&
+                  selectedTools.size === Object.keys(stats.tools).length
                     ? 'Clear All'
                     : 'Select All'}
                 </Button>
@@ -181,7 +198,9 @@ export function LeaderboardChartControls({
                       };
                     })
                     .filter(({ displayName }) =>
-                      displayName.toLowerCase().includes(toolSearchQuery.toLowerCase())
+                      displayName
+                        .toLowerCase()
+                        .includes(toolSearchQuery.toLowerCase())
                     )
                     .sort((a, b) => a.displayName.localeCompare(b.displayName))
                     .map(({ toolId, displayName, devtool }) => {
@@ -217,8 +236,12 @@ export function LeaderboardChartControls({
                               }}
                             />
                           )}
-                          <span className="text-xs font-medium truncate">{displayName}</span>
-                          {isSelected && <Check className="w-3 h-3 text-primary ml-auto" />}
+                          <span className="text-xs font-medium truncate">
+                            {displayName}
+                          </span>
+                          {isSelected && (
+                            <Check className="w-3 h-3 text-primary ml-auto" />
+                          )}
                         </div>
                       );
                     })}
@@ -238,7 +261,8 @@ export function LeaderboardChartControls({
               className="flex items-center gap-2 text-xs h-7 rounded-full"
             >
               <ChevronDown className="h-3 w-3" />
-              {METRIC_OPTIONS.find((opt) => opt.value === metric)?.label || 'Metric'}
+              {METRIC_OPTIONS.find((opt) => opt.value === metric)?.label ||
+                'Metric'}
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-40 p-0">
@@ -249,10 +273,14 @@ export function LeaderboardChartControls({
                   className={`px-3 py-2 text-left text-xs hover:bg-muted ${
                     metric === opt.value ? 'bg-primary/10 font-semibold' : ''
                   }`}
-                  onClick={() => setMetric(opt.value as 'active_repos' | 'pr_reviews')}
+                  onClick={() =>
+                    setMetric(opt.value as 'active_repos' | 'pr_reviews')
+                  }
                 >
                   {opt.label}
-                  {metric === opt.value && <Check className="inline ml-2 h-3 w-3 text-primary" />}
+                  {metric === opt.value && (
+                    <Check className="inline ml-2 h-3 w-3 text-primary" />
+                  )}
                 </button>
               ))}
             </div>
@@ -261,4 +289,4 @@ export function LeaderboardChartControls({
       </div>
     </div>
   );
-} 
+}

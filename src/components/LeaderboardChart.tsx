@@ -9,7 +9,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { CustomLegend } from '@/components/ui/CustomLegend';
 import {
   Popover,
   PopoverContent,
@@ -19,7 +18,6 @@ import { ScaleToggle } from '@/components/ui/ScaleToggle';
 import { WindowToggle } from '@/components/ui/WindowToggle';
 import { useDebounce } from '@/lib/client-utils';
 import { ACTIVE_REPOS_MONTHLY, DEFAULT_START_DATE } from '@/lib/constants';
-import { formatStarCount } from '@/lib/utils';
 import type {
   DateRange,
   DevTool,
@@ -28,23 +26,21 @@ import type {
   TopReposByDevtool,
 } from '@/types/api';
 import { format, subDays } from 'date-fns';
-import { Calendar, Check, ChevronDown, Star } from 'lucide-react';
+import { Calendar, Check, ChevronDown } from 'lucide-react';
 import { useTheme } from 'next-themes';
-import Image from 'next/image';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import {
-  CartesianGrid,
-  Legend,
-  Line,
-  LineChart,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from 'recharts';
 import useSWR, { mutate } from 'swr';
-// Removed Collapsible import, using Popover instead
+import { LeaderboardChartControls } from './LeaderboardChartControls';
+import {
+  getToolColor,
+  getToolDisplayName,
+  getToolWebsiteUrl,
+  getXAxisTicks,
+  xAxisTickFormatter,
+} from './leaderboardChartUtils';
+import { LeaderboardRankings } from './LeaderboardRankings';
 
+import { LeaderboardChartGraph } from './LeaderboardChartGraph';
 interface ChartDataPoint {
   date: string;
   timestamp: number;
@@ -58,8 +54,6 @@ const fetcher = async (url: string) => {
   }
   return response.json();
 };
-
-// Remove the in-file definitions of WindowToggle, ScaleToggle, and CustomLegend (lines 68-200)
 
 const METRIC_OPTIONS = [
   { value: 'active_repos', label: 'Active Repos' },
@@ -78,7 +72,6 @@ export default function LeaderboardChart() {
   const [selectedTools, setSelectedTools] = useState<Set<number>>(new Set());
   const prevToolKeysRef = useRef<string[]>([]);
   const [scaleType, setScaleType] = useState<'linear' | 'log'>('linear');
-  const [openRepoPopover, setOpenRepoPopover] = useState<number | null>(null);
   const [datePickerOpen, setDatePickerOpen] = useState(false);
   const [toolSearchQuery, setToolSearchQuery] = useState('');
   const [metric, setMetric] = useState<'active_repos' | 'pr_reviews'>(
@@ -457,67 +450,54 @@ export default function LeaderboardChart() {
   function renderChartAndRankings(theme: string | undefined) {
     if (!filteredStats || !devtools) return null;
 
-    // Map tool IDs to display names
-    const getToolDisplayName = (toolId: number): string => {
-      const devtool = devtools.find((dt: DevTool) => dt.id === toolId);
-      const displayName = devtool ? devtool.name : `Tool ${toolId}`;
-      return displayName;
-    };
-
-    const getToolColor = (toolId: number): string => {
-      const devtool = devtools.find((dt: DevTool) => dt.id === toolId);
-      if (!devtool) return '#8884d8';
-      if (theme === 'dark' && devtool.brand_color_dark) {
-        return devtool.brand_color_dark;
-      }
-      return devtool.brand_color;
-    };
-
-    const getToolWebsiteUrl = (toolId: number): string | undefined => {
-      const devtool = devtools.find((dt: DevTool) => dt.id === toolId);
-      return devtool?.website_url;
-    };
-
+    // Prepare chartData as before
     const chartData: ChartDataPoint[] = filteredStats.timestamps
       .map((timestamp, index) => {
         const date = new Date(timestamp * 1000).toLocaleDateString('en-US', {
           month: 'short',
           day: 'numeric',
-          year: filteredStats.timestamps.length > 365 ? '2-digit' : undefined,
+          year: filteredStats.timestamps.length > 365 ? 'numeric' : undefined,
         });
-
         const dataPoint: ChartDataPoint = {
           date,
           timestamp,
         };
-
         Object.entries(filteredStats.tools).forEach(([toolIdStr, counts]) => {
           const toolId = Number(toolIdStr);
-          // Only include selected tools (or all if none selected)
           if (selectedTools.size === 0 || selectedTools.has(toolId)) {
             const countsArray = counts as number[];
-            const displayName = getToolDisplayName(toolId);
+            const displayName = getToolDisplayName(toolId, devtools);
             let value = countsArray[index];
-            // For log scale, we need to handle zero values carefully
-            // We'll use a small positive value (0.5) to represent zero
             if (scaleType === 'log' && value === 0) {
               value = 0.5;
             }
             dataPoint[displayName] = value;
           }
         });
-
         return dataPoint;
       })
       .sort((a, b) => a.timestamp - b.timestamp);
 
-    // Dynamic chart title and description
     const chartTitle =
       metric === 'pr_reviews' ? 'PR Reviews' : 'Active Repositories';
     const chartDescription =
       metric === 'pr_reviews'
         ? `Number of PR reviews by AI code review bots, ${viewType === 'weekly' ? '7-day' : '30-day'} rolling window.`
         : `Repos with an AI code review, ${viewType === 'weekly' ? '7-day' : '30-day'} rolling window.`;
+
+    // Rankings data
+    const latestIndex = filteredStats.timestamps.length - 1;
+    const rankings = Object.entries(filteredStats.tools)
+      .map(([toolIdStr, counts]) => {
+        const toolId = Number(toolIdStr);
+        const countsArray = counts as number[];
+        const currentCount = countsArray[latestIndex] || 0;
+        return {
+          id: toolId,
+          current_count: currentCount,
+        };
+      })
+      .sort((a, b) => b.current_count - a.current_count);
 
     return (
       <div className="mx-4 sm:mx-6 space-y-6">
@@ -531,658 +511,58 @@ export default function LeaderboardChart() {
                   {chartDescription}
                 </CardDescription>
               </div>
-
-              {/* Single Horizontal Control Bar */}
-              <div className="flex flex-wrap items-center gap-1 sm:gap-4">
-                {/* Time Scope Section */}
-                <div className="flex items-center gap-2">
-                  {/* <span className="text-sm font-medium text-muted-foreground">Time scope</span> */}
-                  <div className="flex items-center gap-1">
-                    {/* Time preset buttons - horizontal scroll if > 5 */}
-                    <div className="flex gap-1 overflow-x-auto">
-                      {presets.map((preset) => (
-                        <button
-                          key={preset.label}
-                          type="button"
-                          className={`px-2 py-1 rounded text-xs border border-input bg-background hover:bg-muted transition-colors whitespace-nowrap ${
-                            displayDateRange.startDate ===
-                              preset.getRange().startDate &&
-                            displayDateRange.endDate ===
-                              preset.getRange().endDate
-                              ? 'bg-primary/10 border-primary/20 font-semibold'
-                              : ''
-                          }`}
-                          onClick={() => setDisplayDateRange(preset.getRange())}
-                        >
-                          {preset.label}
-                        </button>
-                      ))}
-                    </div>
-                    {/* Date range picker icon */}
-                    <Popover
-                      open={datePickerOpen}
-                      onOpenChange={setDatePickerOpen}
-                    >
-                      <PopoverTrigger asChild>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="h-7 w-7 p-0"
-                        >
-                          <Calendar className="h-3 w-3" />
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <div className="p-4">
-                          <div className="space-y-4">
-                            <div className="flex flex-col gap-2">
-                              <label className="text-xs font-medium">
-                                Start Date
-                              </label>
-                              <input
-                                type="date"
-                                value={displayDateRange.startDate}
-                                onChange={(e) =>
-                                  setDisplayDateRange((prev) => ({
-                                    ...prev,
-                                    startDate: e.target.value,
-                                  }))
-                                }
-                                className="px-3 py-2 border border-input bg-background rounded-md text-xs focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
-                              />
-                            </div>
-                            <div className="flex flex-col gap-2">
-                              <label className="text-xs font-medium">
-                                End Date
-                              </label>
-                              <input
-                                type="date"
-                                value={displayDateRange.endDate}
-                                onChange={(e) =>
-                                  setDisplayDateRange((prev) => ({
-                                    ...prev,
-                                    endDate: e.target.value,
-                                  }))
-                                }
-                                className="px-3 py-2 border border-input bg-background rounded-md text-xs focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
-                              />
-                            </div>
-                          </div>
-                        </div>
-                      </PopoverContent>
-                    </Popover>
-                  </div>
-                </div>
-
-                {/* Vertical divider */}
-                {/* <div className="h-6 w-px bg-border" /> */}
-
-                {/* Window Size Section */}
-                <div className="flex items-center gap-2">
-                  {/* <span className="text-sm font-medium text-muted-foreground">
-                    Window
-                  </span> */}
-                  <WindowToggle value={viewType} onChange={setViewType} />
-                </div>
-
-                {/* Scale Section */}
-                <div className="flex items-center gap-2">
-                  {/* <span className="text-sm font-medium text-muted-foreground">
-                    Scale
-                  </span> */}
-                  <ScaleToggle value={scaleType} onChange={setScaleType} />
-                </div>
-
-                {/* Vertical divider */}
-                {/* <div className="h-6 w-px bg-border" /> */}
-
-                {/* Series Filter Section */}
-                <div className="flex items-center gap-2">
-                  {/* <span className="text-sm font-medium text-muted-foreground">Series filter</span> */}
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="flex items-center gap-2 text-xs h-7 rounded-full"
-                      >
-                        <ChevronDown className="h-3 w-3" />
-                        Series (
-                        {selectedTools.size === 0 ? 'All' : selectedTools.size})
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-80 p-0">
-                      <div className="flex flex-col space-y-2 p-2 border-b rounded-t-lg bg-muted/50">
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs font-medium">
-                            {selectedTools.size === 0
-                              ? 'All tools selected'
-                              : `${selectedTools.size} of ${Object.keys(stats?.tools || {}).length} tools selected`}
-                          </span>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="h-6 px-2 text-xs"
-                            onClick={() => {
-                              if (
-                                stats &&
-                                selectedTools.size ===
-                                  Object.keys(stats.tools).length
-                              ) {
-                                setSelectedTools(new Set()); // Clear all
-                              } else if (stats) {
-                                setSelectedTools(
-                                  new Set(Object.keys(stats.tools).map(Number))
-                                ); // Select all
-                              }
-                            }}
-                          >
-                            {stats &&
-                            selectedTools.size ===
-                              Object.keys(stats.tools).length
-                              ? 'Clear All'
-                              : 'Select All'}
-                          </Button>
-                        </div>
-                        <div className="space-y-1">
-                          <input
-                            type="text"
-                            placeholder="Search tools..."
-                            value={toolSearchQuery}
-                            onChange={(e) => setToolSearchQuery(e.target.value)}
-                            className="w-full px-2 py-1 border border-input bg-background rounded-md text-xs focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
-                          />
-                          <div className="space-y-0.5 max-h-64 overflow-y-auto">
-                            {Object.keys(stats?.tools || {})
-                              .map((toolIdStr) => {
-                                const toolId = Number(toolIdStr);
-                                return {
-                                  toolId,
-                                  displayName: getToolDisplayName(toolId),
-                                  devtool: devtools.find(
-                                    (dt: DevTool) => dt.id === toolId
-                                  ),
-                                };
-                              })
-                              .filter(({ displayName }) =>
-                                displayName
-                                  .toLowerCase()
-                                  .includes(toolSearchQuery.toLowerCase())
-                              )
-                              .sort((a, b) =>
-                                a.displayName.localeCompare(b.displayName)
-                              )
-                              .map(({ toolId, displayName, devtool }) => {
-                                const isSelected = selectedTools.has(toolId);
-                                const avatarUrl = devtool?.avatar_url;
-                                return (
-                                  <div
-                                    key={toolId}
-                                    className={`flex items-center space-x-1.5 p-1.5 rounded-md border cursor-pointer transition-colors ${
-                                      isSelected
-                                        ? 'bg-primary/10 border-primary/20'
-                                        : 'bg-background border-border hover:bg-muted'
-                                    }`}
-                                    onClick={() => {
-                                      const newSelected = new Set(
-                                        selectedTools
-                                      );
-                                      if (isSelected) {
-                                        newSelected.delete(toolId);
-                                      } else {
-                                        newSelected.add(toolId);
-                                      }
-                                      setSelectedTools(newSelected);
-                                    }}
-                                  >
-                                    {avatarUrl && (
-                                      <Image
-                                        src={avatarUrl}
-                                        alt={`${displayName} avatar`}
-                                        width={12}
-                                        height={12}
-                                        className="w-3 h-3 rounded-full"
-                                        onError={(e) => {
-                                          e.currentTarget.style.display =
-                                            'none';
-                                        }}
-                                      />
-                                    )}
-                                    <span className="text-xs font-medium truncate">
-                                      {displayName}
-                                    </span>
-                                    {isSelected && (
-                                      <Check className="w-3 h-3 text-primary ml-auto" />
-                                    )}
-                                  </div>
-                                );
-                              })}
-                          </div>
-                        </div>
-                      </div>
-                    </PopoverContent>
-                  </Popover>
-                </div>
-
-                {/* Metric Dropdown */}
-                <div className="flex items-center gap-2">
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="flex items-center gap-2 text-xs h-7 rounded-full"
-                      >
-                        <ChevronDown className="h-3 w-3" />
-                        {METRIC_OPTIONS.find((opt) => opt.value === metric)
-                          ?.label || 'Metric'}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-40 p-0">
-                      <div className="flex flex-col">
-                        {METRIC_OPTIONS.map((opt) => (
-                          <button
-                            key={opt.value}
-                            className={`px-3 py-2 text-left text-xs hover:bg-muted ${
-                              metric === opt.value
-                                ? 'bg-primary/10 font-semibold'
-                                : ''
-                            }`}
-                            onClick={() =>
-                              setMetric(
-                                opt.value as 'active_repos' | 'pr_reviews'
-                              )
-                            }
-                          >
-                            {opt.label}
-                            {metric === opt.value && (
-                              <Check className="inline ml-2 h-3 w-3 text-primary" />
-                            )}
-                          </button>
-                        ))}
-                      </div>
-                    </PopoverContent>
-                  </Popover>
-                </div>
-              </div>
+              <LeaderboardChartControls
+                displayDateRange={displayDateRange}
+                setDisplayDateRange={setDisplayDateRange}
+                datePickerOpen={datePickerOpen}
+                setDatePickerOpen={setDatePickerOpen}
+                presets={presets}
+                viewType={viewType}
+                setViewType={setViewType}
+                scaleType={scaleType}
+                setScaleType={setScaleType}
+                selectedTools={selectedTools}
+                setSelectedTools={setSelectedTools}
+                toolSearchQuery={toolSearchQuery}
+                setToolSearchQuery={setToolSearchQuery}
+                stats={stats}
+                devtools={devtools}
+                metric={metric}
+                setMetric={setMetric}
+                METRIC_OPTIONS={METRIC_OPTIONS}
+              />
             </div>
           </CardHeader>
           <CardContent className="px-0 pr-6">
-            <div className="h-82 sm:h-128">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={chartData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis
-                    dataKey="date"
-                    tick={{ fontSize: 11 }}
-                    ticks={getXAxisTicks(chartData)}
-                    tickFormatter={xAxisTickFormatter}
-                  />
-                  <YAxis
-                    // label={{
-                    //   value: 'Repositories',
-                    //   angle: -90,
-                    //   position: 'insideLeft',
-                    // }}
-                    tick={{ fontSize: 11 }}
-                    scale={scaleType}
-                    domain={
-                      scaleType === 'log'
-                        ? [0.5, 'dataMax']
-                        : ['dataMin', 'dataMax']
-                    }
-                    tickFormatter={formatStarCount}
-                  />
-                  <Tooltip
-                    formatter={(value: number, name: string) => [
-                      scaleType === 'log' && value === 0.5
-                        ? '0'
-                        : value.toLocaleString(),
-                      name,
-                    ]}
-                    labelFormatter={(label) => `Date: ${label}`}
-                    wrapperStyle={{ zIndex: 1000 }}
-                    contentStyle={{
-                      backgroundColor:
-                        resolvedTheme === 'dark'
-                          ? 'oklch(0.205 0 0)'
-                          : 'oklch(1 0 0)',
-                      color:
-                        resolvedTheme === 'dark'
-                          ? 'oklch(0.985 0 0)'
-                          : 'oklch(0.145 0 0)',
-                      border:
-                        resolvedTheme === 'dark'
-                          ? '1px solid oklch(1 0 0 / 10%)'
-                          : '1px solid oklch(0.922 0 0)',
-                      borderRadius: '0.625rem',
-                      boxShadow:
-                        resolvedTheme === 'dark'
-                          ? '0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.15)'
-                          : '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
-                    }}
-                    labelStyle={{
-                      color:
-                        resolvedTheme === 'dark'
-                          ? 'oklch(0.985 0 0)'
-                          : 'oklch(0.145 0 0)',
-                    }}
-                  />
-                  <Legend
-                    content={
-                      <CustomLegend
-                        selectedTools={selectedTools}
-                        setSelectedTools={setSelectedTools}
-                        devtools={devtools}
-                      />
-                    }
-                  />
-                  {Object.keys(stats?.tools || {})
-                    .filter((toolIdStr) => {
-                      const toolId = Number(toolIdStr);
-                      return selectedTools.size === 0
-                        ? false
-                        : selectedTools.has(toolId);
-                    })
-                    .map((toolIdStr) => {
-                      const toolId = Number(toolIdStr);
-                      const displayName = getToolDisplayName(toolId);
-                      const color = getToolColor(toolId);
-                      return (
-                        <Line
-                          key={toolId}
-                          type="monotone"
-                          dataKey={displayName}
-                          stroke={color}
-                          strokeWidth={2}
-                          name={displayName}
-                          dot={false}
-                          animationDuration={400}
-                        />
-                      );
-                    })}
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
+            {/* Chart rendering moved to subcomponent */}
+            <LeaderboardChartGraph
+              chartData={chartData}
+              selectedTools={selectedTools}
+              devtools={devtools}
+              stats={stats}
+              scaleType={scaleType}
+              theme={theme}
+              getToolDisplayName={getToolDisplayName}
+              getToolColor={getToolColor}
+              getXAxisTicks={getXAxisTicks}
+              xAxisTickFormatter={xAxisTickFormatter}
+              resolvedTheme={resolvedTheme}
+            />
           </CardContent>
         </Card>
-
         {/* Rankings Section */}
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between w-full">
-              <CardTitle className="">Current Rankings</CardTitle>
-              <span className="text-xs text-muted-foreground pr-2">
-                {chartTitle}
-              </span>
-            </div>
-            <CardDescription className="text-xs">
-              {metric === 'pr_reviews'
-                ? 'Total PR reviews by bot in the selected window.'
-                : `There were ${ACTIVE_REPOS_MONTHLY} public repos with pull requests last month.`}
-            </CardDescription>
-          </CardHeader>
-
-          <CardContent>
-            <div className="grid gap-2">
-              {(() => {
-                const latestIndex = filteredStats.timestamps.length - 1;
-                const rankings = Object.entries(filteredStats.tools)
-                  .map(([toolIdStr, counts]) => {
-                    const toolId = Number(toolIdStr);
-                    const countsArray = counts as number[];
-                    const currentCount = countsArray[latestIndex] || 0;
-
-                    return {
-                      id: toolId,
-                      current_count: currentCount,
-                    };
-                  })
-                  .sort((a, b) => b.current_count - a.current_count);
-
-                return rankings.map((tool, index) => {
-                  const devtool = devtools.find(
-                    (dt: DevTool) => dt.id === tool.id
-                  );
-                  const avatarUrl = devtool?.avatar_url;
-                  const displayName = getToolDisplayName(tool.id);
-                  const websiteUrl = getToolWebsiteUrl(tool.id);
-
-                  return (
-                    <div
-                      key={tool.id}
-                      className="flex flex-col p-2 rounded-lg border hover:bg-muted/50 transition-colors"
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-2 pl-2">
-                          <span className="text-xs font-bold text-muted-foreground min-w-[1.0rem]">
-                            {index + 1}
-                          </span>
-                          {avatarUrl && (
-                            <Image
-                              src={avatarUrl}
-                              alt={`${displayName} avatar`}
-                              width={24}
-                              height={24}
-                              className="w-6 h-6 rounded-full"
-                              onError={(e) => {
-                                e.currentTarget.style.display = 'none';
-                              }}
-                            />
-                          )}
-                          {websiteUrl ? (
-                            <a
-                              href={websiteUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-sm font-medium hover:text-blue-600 hover:underline transition-colors"
-                            >
-                              {displayName}
-                            </a>
-                          ) : (
-                            <span className="text-sm font-medium">
-                              {displayName}
-                            </span>
-                          )}
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <span className="text-xs text-muted-foreground">
-                            {tool.current_count.toLocaleString()}
-                          </span>
-                          {/* Mobile toggle button */}
-                          {topRepos &&
-                            topRepos[tool.id.toString()] &&
-                            topRepos[tool.id.toString()].length > 0 && (
-                              <Popover
-                                open={openRepoPopover === tool.id}
-                                onOpenChange={(open) => {
-                                  setOpenRepoPopover(open ? tool.id : null);
-                                }}
-                              >
-                                <PopoverTrigger asChild>
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="h-6 w-6 p-0 md:hidden"
-                                  >
-                                    <ChevronDown className="h-3 w-3" />
-                                  </Button>
-                                </PopoverTrigger>
-                                <PopoverContent className="w-64 p-0">
-                                  <div className="p-3">
-                                    <div className="text-xs font-medium mb-2">
-                                      Top Repositories
-                                    </div>
-                                    <div className="space-y-2">
-                                      {topRepos[tool.id.toString()].map(
-                                        (repo) => (
-                                          <div
-                                            key={repo.repo_name}
-                                            className="flex items-center justify-between"
-                                          >
-                                            <a
-                                              href={`https://github.com/${repo.repo_name}`}
-                                              target="_blank"
-                                              rel="noopener noreferrer"
-                                              className="text-xs hover:text-blue-600 hover:underline transition-colors truncate max-w-[180px]"
-                                            >
-                                              {repo.repo_name}
-                                            </a>
-                                            <span className="text-xs text-muted-foreground flex items-center">
-                                              {formatStarCount(repo.star_count)}
-                                              <Star className="inline w-3 h-3 ml-1 text-muted-foreground" />
-                                            </span>
-                                          </div>
-                                        )
-                                      )}
-                                    </div>
-                                  </div>
-                                </PopoverContent>
-                              </Popover>
-                            )}
-                        </div>
-                      </div>
-                      {/* Desktop inline display */}
-                      {topRepos &&
-                        topRepos[tool.id.toString()] &&
-                        topRepos[tool.id.toString()].length > 0 && (
-                          <div className="mt-1 ml-8 flex-wrap gap-1 text-xs text-muted-foreground hidden md:flex">
-                            {topRepos[tool.id.toString()]
-                              .slice(0, 3)
-                              .map((repo, repoIndex) => (
-                                <span key={repo.repo_name}>
-                                  <a
-                                    href={`https://github.com/${repo.repo_name}`}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="hover:text-blue-600 hover:underline transition-colors"
-                                  >
-                                    {repo.repo_name}
-                                  </a>
-                                  <span className="ml-1">
-                                    ({formatStarCount(repo.star_count)}
-                                    <Star
-                                      className="inline w-3 h-3 text-muted-foreground"
-                                      style={{ verticalAlign: '-0.125em' }}
-                                    />
-                                    )
-                                  </span>
-                                  {repoIndex < 2 &&
-                                    repoIndex <
-                                      topRepos[tool.id.toString()].length -
-                                        1 && <span className="mx-1">•</span>}
-                                </span>
-                              ))}
-                            {topRepos[tool.id.toString()].length > 3 && (
-                              <span className="mx-1">
-                                •
-                                <Popover>
-                                  <PopoverTrigger asChild>
-                                    <button className="ml-1 hover:text-blue-600 hover:underline transition-colors cursor-pointer">
-                                      see more
-                                    </button>
-                                  </PopoverTrigger>
-                                  <PopoverContent className="w-64 p-0">
-                                    <div className="p-3">
-                                      <div className="text-xs font-medium mb-2">
-                                        Top Repositories
-                                      </div>
-                                      <div className="space-y-2">
-                                        {topRepos[tool.id.toString()].map(
-                                          (repo) => (
-                                            <div
-                                              key={repo.repo_name}
-                                              className="flex items-center justify-between"
-                                            >
-                                              <a
-                                                href={`https://github.com/${repo.repo_name}`}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="text-xs hover:text-blue-600 hover:underline transition-colors truncate max-w-[180px]"
-                                              >
-                                                {repo.repo_name}
-                                              </a>
-                                              <span className="text-xs text-muted-foreground flex items-center">
-                                                {formatStarCount(
-                                                  repo.star_count
-                                                )}
-                                                <Star className="inline w-3 h-3 ml-1 text-muted-foreground" />
-                                              </span>
-                                            </div>
-                                          )
-                                        )}
-                                      </div>
-                                    </div>
-                                  </PopoverContent>
-                                </Popover>
-                              </span>
-                            )}
-                          </div>
-                        )}
-                    </div>
-                  );
-                });
-              })()}
-            </div>
-          </CardContent>
-        </Card>
+        <LeaderboardRankings
+          rankings={rankings}
+          devtools={devtools}
+          topRepos={topRepos}
+          getToolDisplayName={(toolId) => getToolDisplayName(toolId, devtools)}
+          getToolWebsiteUrl={(toolId) => getToolWebsiteUrl(toolId, devtools)}
+          chartTitle={chartTitle}
+          metric={metric}
+          activeReposMonthly={ACTIVE_REPOS_MONTHLY}
+        />
       </div>
     );
-  }
-
-  function getXAxisTicks(chartData: ChartDataPoint[]): string[] {
-    if (chartData.length === 0) return [];
-    // If the range is more than 2 years, show only Jan 1 of each year
-    // If the range is more than 6 months, show first of each month
-    // Otherwise, show first of each week (or just use recharts default)
-    const first = chartData[0];
-    const last = chartData[chartData.length - 1];
-    const firstDate = new Date(first.timestamp * 1000);
-    const lastDate = new Date(last.timestamp * 1000);
-    const months =
-      (lastDate.getFullYear() - firstDate.getFullYear()) * 12 +
-      (lastDate.getMonth() - firstDate.getMonth());
-    if (months > 24) {
-      // Show Jan 1 of each year
-      return chartData
-        .filter((d) => {
-          const dt = new Date(d.timestamp * 1000);
-          return dt.getMonth() === 0 && dt.getDate() === 1;
-        })
-        .map((d) => d.date);
-    } else if (months > 6) {
-      // Show first of each month
-      return chartData
-        .filter((d) => {
-          const dt = new Date(d.timestamp * 1000);
-          return dt.getDate() === 1;
-        })
-        .map((d) => d.date);
-    } else {
-      // Show every 2nd or 3rd tick to avoid crowding
-      const step = Math.ceil(chartData.length / 8);
-      return chartData.filter((_, i) => i % step === 0).map((d) => d.date);
-    }
-  }
-
-  function xAxisTickFormatter(dateStr: string) {
-    // Try to parse the date string back to a Date
-    // The current format is 'Apr 6, 25' or 'Apr 6' (from toLocaleDateString)
-    // We'll just show 'MMM yyyy' or 'MMM d' depending on range
-    // But since we control the ticks, we can show 'MMM yyyy' for year/month, 'MMM d' for short
-    // Try to parse as Date
-    const dt = new Date(dateStr);
-    if (isNaN(dt.getTime())) return dateStr;
-    if (dt.getDate() === 1 && dt.getMonth() === 0) {
-      // Jan 1: show year
-      return format(dt, 'yyyy');
-    } else if (dt.getDate() === 1) {
-      // First of month: show month and year
-      return format(dt, 'MMM yyyy');
-    } else {
-      // Otherwise, show month/day
-      return format(dt, 'MMM d');
-    }
   }
 
   return pageStructure;

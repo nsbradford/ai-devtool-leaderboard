@@ -1,5 +1,6 @@
 import { DevTool } from '@/types/api';
 import React from 'react';
+import type { Payload } from 'recharts';
 
 export function CustomLegend({
   payload,
@@ -7,8 +8,7 @@ export function CustomLegend({
   setSelectedTools,
   devtools,
 }: {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  payload?: any[];
+  payload?: Payload[];
   selectedTools: Set<number>;
   setSelectedTools: (tools: Set<number>) => void;
   devtools?: DevTool[];

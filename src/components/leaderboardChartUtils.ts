@@ -1,12 +1,19 @@
 import { DevTool } from '@/types/api';
 import { format } from 'date-fns';
 
-export function getToolDisplayName(toolId: number, devtools: DevTool[]): string {
+export function getToolDisplayName(
+  toolId: number,
+  devtools: DevTool[]
+): string {
   const devtool = devtools.find((dt) => dt.id === toolId);
   return devtool ? devtool.name : `Tool ${toolId}`;
 }
 
-export function getToolColor(toolId: number, devtools: DevTool[], theme?: string): string {
+export function getToolColor(
+  toolId: number,
+  devtools: DevTool[],
+  theme?: string
+): string {
   const devtool = devtools.find((dt) => dt.id === toolId);
   if (!devtool) return '#8884d8';
   if (theme === 'dark' && devtool.brand_color_dark) {
@@ -15,12 +22,17 @@ export function getToolColor(toolId: number, devtools: DevTool[], theme?: string
   return devtool.brand_color;
 }
 
-export function getToolWebsiteUrl(toolId: number, devtools: DevTool[]): string | undefined {
+export function getToolWebsiteUrl(
+  toolId: number,
+  devtools: DevTool[]
+): string | undefined {
   const devtool = devtools.find((dt) => dt.id === toolId);
   return devtool?.website_url;
 }
 
-export function getXAxisTicks(chartData: { timestamp: number; date: string }[]): string[] {
+export function getXAxisTicks(
+  chartData: { timestamp: number; date: string }[]
+): string[] {
   if (chartData.length === 0) return [];
   const first = chartData[0];
   const last = chartData[chartData.length - 1];
@@ -59,4 +71,4 @@ export function xAxisTickFormatter(dateStr: string): string {
   } else {
     return format(dt, 'MMM d');
   }
-} 
+}
