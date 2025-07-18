@@ -1,5 +1,5 @@
 import { DevTool } from '@/types/api';
-import { format } from 'date-fns';
+import { formatInTimeZone } from 'date-fns-tz';
 
 export function getToolDisplayName(
   toolId: number,
@@ -30,49 +30,50 @@ export function getToolWebsiteUrl(
   return devtool?.website_url;
 }
 
-export function getXAxisTicks(
-  chartData: { timestamp: number; date: string }[]
-): string[] {
+export function getXAxisTicksUTC(
+  chartData: { timestampMs: number }[]
+): number[] {
   if (chartData.length === 0) return [];
-  const first = chartData[0];
-  const last = chartData[chartData.length - 1];
-  const firstDate = new Date(first.timestamp * 1000);
-  const lastDate = new Date(last.timestamp * 1000);
+
+  const first = new Date(chartData[0].timestampMs);
+  const last = new Date(chartData[chartData.length - 1].timestampMs);
+
   const months =
-    (lastDate.getUTCFullYear() - firstDate.getUTCFullYear()) * 12 +
-    (lastDate.getUTCMonth() - firstDate.getUTCMonth());
+    (last.getUTCFullYear() - first.getUTCFullYear()) * 12 +
+    (last.getUTCMonth() - first.getUTCMonth());
+
+  const isJan1 = (d: Date) => d.getUTCMonth() === 0 && d.getUTCDate() === 1;
+  const isFirstOfMonth = (d: Date) => d.getUTCDate() === 1;
+
   if (months > 24) {
     return chartData
-      .filter((d) => {
-        const dt = new Date(d.timestamp * 1000);
-        return dt.getUTCMonth() === 0 && dt.getUTCDate() === 1;
-      })
-      .map((d) => d.date);
-  } else if (months > 6) {
+      .filter((p) => isJan1(new Date(p.timestampMs)))
+      .map((p) => p.timestampMs);
+  }
+
+  if (months > 6) {
     return chartData
-      .filter((d) => {
-        const dt = new Date(d.timestamp * 1000);
-        return dt.getUTCDate() === 1;
-      })
-      .map((d) => d.date);
-  } else {
-    const step = Math.ceil(chartData.length / 8);
-    return chartData.filter((_, i) => i % step === 0).map((d) => d.date);
+      .filter((p) => isFirstOfMonth(new Date(p.timestampMs)))
+      .map((p) => p.timestampMs);
   }
+
+  const step = Math.ceil(chartData.length / 8); // ~8 ticks max
+  return chartData.filter((_, i) => i % step === 0).map((p) => p.timestampMs);
 }
 
-export function xAxisTickFormatter(dateStr: string): string {
-  const dt = new Date(dateStr);
-  if (isNaN(dt.getTime())) return dateStr;
-  if (dt.getDate() === 1 && dt.getMonth() === 0) {
-    return format(dt, 'yyyy');
-  } else if (dt.getDate() === 1) {
-    return format(dt, 'MMM yyyy');
-  } else {
-    return format(dt, 'MMM d');
-  }
-}
+export const xAxisTickFormatterUTC = (tsMs: number): string => {
+  const dt = new Date(tsMs);
 
+  if (dt.getUTCDate() === 1 && dt.getUTCMonth() === 0) {
+    return String(dt.getUTCFullYear());
+  }
+
+  if (dt.getUTCDate() === 1) {
+    return formatInTimeZone(dt, 'UTC', 'MMM yyyy'); // “Jul 2025”
+  }
+
+  return formatInTimeZone(dt, 'UTC', 'MMM d'); // “Jul 18”
+};
 export function getChartTitleAndDescription(
   metric: 'active_repos' | 'pr_reviews',
   viewType: 'weekly' | 'monthly'

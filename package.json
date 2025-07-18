@@ -31,7 +31,9 @@
     "@trigger.dev/sdk": "^3.3.17",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "d3-time-format": "^4.1.0",
     "date-fns": "^4.1.0",
+    "date-fns-tz": "^3.2.0",
     "dotenv": "^16.0.0",
     "lucide-react": "^0.525.0",
     "next": "15.3.5",
@@ -49,6 +51,7 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
+    "@types/d3-time-format": "^4.0.3",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",

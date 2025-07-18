@@ -22,12 +22,7 @@ import {
   getToolWebsiteUrl,
 } from './leaderboardChartUtils';
 import { LeaderboardRankings } from './LeaderboardRankings';
-
-interface ChartDataPoint {
-  date: string;
-  timestamp: number;
-  [key: string]: string | number;
-}
+import type { ChartDataPoint } from './interfaces';
 
 interface LeaderboardChartAndRankingsProps {
   filteredStats: {
@@ -40,8 +35,6 @@ interface LeaderboardChartAndRankingsProps {
   scaleType: 'linear' | 'log';
   getToolDisplayName: (toolId: number, devtools: DevTool[]) => string;
   getToolColor: (toolId: number, devtools: DevTool[]) => string;
-  getXAxisTicks: (chartData: ChartDataPoint[]) => string[];
-  xAxisTickFormatter: (dateStr: string) => string;
   resolvedTheme: string | undefined;
   displayDateRange: DateRange;
   setDisplayDateRange: Dispatch<SetStateAction<DateRange>>;
@@ -70,8 +63,6 @@ const LeaderboardChartAndRankings: React.FC<
   scaleType,
   getToolDisplayName,
   getToolColor,
-  getXAxisTicks,
-  xAxisTickFormatter,
   resolvedTheme,
   displayDateRange,
   setDisplayDateRange,
@@ -94,14 +85,15 @@ const LeaderboardChartAndRankings: React.FC<
   // Prepare chartData as before
   const chartData: ChartDataPoint[] = filteredStats.timestamps
     .map((timestamp, index) => {
-      const date = new Date(timestamp * 1000).toLocaleDateString('en-US', {
-        month: 'short',
-        day: 'numeric',
-        year: filteredStats.timestamps.length > 365 ? 'numeric' : undefined,
-      });
+      // const date = new Date(timestamp * 1000).toLocaleDateString('en-US', {
+      //   month: 'short',
+      //   day: 'numeric',
+      //   year: filteredStats.timestamps.length > 365 ? 'numeric' : undefined,
+      // });
       const dataPoint: ChartDataPoint = {
-        date,
+        // date,
         timestamp,
+        timestampMs: timestamp * 1000,
       };
       Object.entries(filteredStats.tools).forEach(([toolIdStr, counts]) => {
         const toolId = Number(toolIdStr);
@@ -184,8 +176,6 @@ const LeaderboardChartAndRankings: React.FC<
             theme={resolvedTheme}
             getToolDisplayName={getToolDisplayName}
             getToolColor={getToolColor}
-            getXAxisTicks={getXAxisTicks}
-            xAxisTickFormatter={xAxisTickFormatter}
             resolvedTheme={resolvedTheme}
           />
         </CardContent>

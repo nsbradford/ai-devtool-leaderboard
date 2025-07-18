@@ -13,12 +13,12 @@ import { DevTool } from '@/types/api';
 import { CustomLegend } from '@/components/ui/CustomLegend';
 import { formatStarCount } from '@/lib/utils';
 import type { LeaderboardData } from '@/types/api';
-
-interface ChartDataPoint {
-  date: string;
-  timestamp: number;
-  [key: string]: string | number;
-}
+import {
+  getXAxisTicksUTC,
+  xAxisTickFormatterUTC,
+} from './leaderboardChartUtils';
+import type { ChartDataPoint } from './interfaces';
+import { formatInTimeZone } from 'date-fns-tz';
 
 interface LeaderboardChartGraphProps {
   chartData: ChartDataPoint[];
@@ -29,8 +29,6 @@ interface LeaderboardChartGraphProps {
   theme: string | undefined;
   getToolDisplayName: (toolId: number, devtools: DevTool[]) => string;
   getToolColor: (toolId: number, devtools: DevTool[], theme?: string) => string;
-  getXAxisTicks: (chartData: ChartDataPoint[]) => string[];
-  xAxisTickFormatter: (dateStr: string) => string;
   resolvedTheme: string | undefined;
 }
 
@@ -43,8 +41,6 @@ export function LeaderboardChartGraph({
   theme,
   getToolDisplayName,
   getToolColor,
-  getXAxisTicks,
-  xAxisTickFormatter,
   resolvedTheme,
 }: LeaderboardChartGraphProps) {
   return (
@@ -53,10 +49,15 @@ export function LeaderboardChartGraph({
         <LineChart data={chartData}>
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis
-            dataKey="date"
+            dataKey="timestampMs"
+            type="number"
+            scale="time"
             tick={{ fontSize: 11 }}
-            ticks={getXAxisTicks(chartData)}
-            tickFormatter={xAxisTickFormatter}
+            domain={['dataMin', 'dataMax']}
+            ticks={getXAxisTicksUTC(chartData)}
+            tickFormatter={xAxisTickFormatterUTC}
+            // ticks={getXAxisTicks(chartData)}
+            // tickFormatter={xAxisTickFormatter}
           />
           <YAxis
             tick={{ fontSize: 11 }}
@@ -73,7 +74,9 @@ export function LeaderboardChartGraph({
                 : value.toLocaleString(),
               name,
             ]}
-            labelFormatter={(label) => `Date: ${label}`}
+            labelFormatter={(label: number) => {
+              return `Date: ${formatInTimeZone(label, 'UTC', 'yyyy-MM-dd')}`;
+            }}
             wrapperStyle={{ zIndex: 1000 }}
             contentStyle={{
               backgroundColor:
