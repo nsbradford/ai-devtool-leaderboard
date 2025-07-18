@@ -19,6 +19,11 @@ The data pipeline runs daily for the previous day, and has been backfilled from 
 - Frontend: NextJS, Tailwind
 - Hosting: Vercel
 
+## Roadmap
+
+- Track # of unique active users
+- Track # of unique PRs reviewed
+
 ## Local development
 
 ### Prerequisites
