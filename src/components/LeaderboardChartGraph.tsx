@@ -18,6 +18,7 @@ import {
   xAxisTickFormatterUTC,
 } from './leaderboardChartUtils';
 import type { ChartDataPoint } from './interfaces';
+import { formatInTimeZone } from 'date-fns-tz';
 
 interface LeaderboardChartGraphProps {
   chartData: ChartDataPoint[];
@@ -74,14 +75,7 @@ export function LeaderboardChartGraph({
               name,
             ]}
             labelFormatter={(label: number) => {
-              const dt = new Date(label);
-              // Format as 'MMM d, yyyy' in UTC
-              return `Date: ${dt.toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'short',
-                day: 'numeric',
-                timeZone: 'UTC',
-              })}`;
+              return `Date: ${formatInTimeZone(label, 'UTC', 'yyyy-MM-dd')}`;
             }}
             wrapperStyle={{ zIndex: 1000 }}
             contentStyle={{

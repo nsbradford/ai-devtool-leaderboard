@@ -30,7 +30,6 @@ export function getToolWebsiteUrl(
   return devtool?.website_url;
 }
 
-
 export function getXAxisTicksUTC(
   chartData: { timestampMs: number }[]
 ): number[] {
