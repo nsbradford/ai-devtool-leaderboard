@@ -94,8 +94,11 @@ const LeaderboardChartAndRankings: React.FC<
   // Prepare chartData as before
   const chartData: ChartDataPoint[] = filteredStats.timestamps
     .map((timestamp, index) => {
-      // Use UTC ISO string for the date field
-      const date = new Date(timestamp * 1000).toISOString().slice(0, 10); // 'YYYY-MM-DD'
+      const date = new Date(timestamp * 1000).toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: filteredStats.timestamps.length > 365 ? 'numeric' : undefined,
+      });
       const dataPoint: ChartDataPoint = {
         date,
         timestamp,

@@ -62,16 +62,13 @@ export function getXAxisTicks(
 }
 
 export function xAxisTickFormatter(dateStr: string): string {
-  const dt = new Date(dateStr); // Always UTC if ISO string
+  const dt = new Date(dateStr);
   if (isNaN(dt.getTime())) return dateStr;
-  if (dt.getUTCDate() === 1 && dt.getUTCMonth() === 0) {
-    // Jan 1: show year only
+  if (dt.getDate() === 1 && dt.getMonth() === 0) {
     return format(dt, 'yyyy');
-  } else if (dt.getUTCDate() === 1) {
-    // First of month: show 'Jul 2024'
+  } else if (dt.getDate() === 1) {
     return format(dt, 'MMM yyyy');
   } else {
-    // All other days: show 'Jul 2'
     return format(dt, 'MMM d');
   }
 }
