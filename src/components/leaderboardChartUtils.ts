@@ -1,4 +1,5 @@
 import { DevTool } from '@/types/api';
+import { format } from 'date-fns';
 
 export function getToolDisplayName(
   toolId: number,
@@ -65,24 +66,13 @@ export function xAxisTickFormatter(dateStr: string): string {
   if (isNaN(dt.getTime())) return dateStr;
   if (dt.getUTCDate() === 1 && dt.getUTCMonth() === 0) {
     // Jan 1: show year only
-    return dt.getUTCFullYear().toString();
+    return format(dt, 'yyyy');
   } else if (dt.getUTCDate() === 1) {
     // First of month: show 'Jul 2024'
-    return dt.toLocaleString('en-US', {
-      month: 'short',
-      year: 'numeric',
-      timeZone: 'UTC',
-    }).replace(',', '');
+    return format(dt, 'MMM yyyy');
   } else {
     // All other days: show 'Jul 2'
-    // Remove any comma and year
-    const str = dt.toLocaleString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      timeZone: 'UTC',
-    });
-    // Remove any trailing ', YYYY' if present
-    return str.replace(/,? ?\d{4}$/, '');
+    return format(dt, 'MMM d');
   }
 }
 
