@@ -15,12 +15,7 @@ import { format, subDays } from 'date-fns';
 import { useTheme } from 'next-themes';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import useSWR, { mutate } from 'swr';
-import {
-  getToolColor,
-  getToolDisplayName,
-  getXAxisTicks,
-  xAxisTickFormatter,
-} from './leaderboardChartUtils';
+import { getToolColor, getToolDisplayName } from './leaderboardChartUtils';
 
 import LeaderboardChartAndRankings from './LeaderboardChartAndRankings';
 import LeaderboardChartSkeleton from './LeaderboardChartSkeleton';
@@ -249,8 +244,6 @@ export default function LeaderboardChart() {
           scaleType={scaleType}
           getToolDisplayName={getToolDisplayName}
           getToolColor={getToolColor}
-          getXAxisTicks={getXAxisTicks}
-          xAxisTickFormatter={xAxisTickFormatter}
           resolvedTheme={resolvedTheme}
           displayDateRange={displayDateRange}
           setDisplayDateRange={setDisplayDateRange}
