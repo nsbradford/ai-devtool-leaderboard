@@ -39,20 +39,20 @@ export function getXAxisTicks(
   const firstDate = new Date(first.timestamp * 1000);
   const lastDate = new Date(last.timestamp * 1000);
   const months =
-    (lastDate.getFullYear() - firstDate.getFullYear()) * 12 +
-    (lastDate.getMonth() - firstDate.getMonth());
+    (lastDate.getUTCFullYear() - firstDate.getUTCFullYear()) * 12 +
+    (lastDate.getUTCMonth() - firstDate.getUTCMonth());
   if (months > 24) {
     return chartData
       .filter((d) => {
         const dt = new Date(d.timestamp * 1000);
-        return dt.getMonth() === 0 && dt.getDate() === 1;
+        return dt.getUTCMonth() === 0 && dt.getUTCDate() === 1;
       })
       .map((d) => d.date);
   } else if (months > 6) {
     return chartData
       .filter((d) => {
         const dt = new Date(d.timestamp * 1000);
-        return dt.getDate() === 1;
+        return dt.getUTCDate() === 1;
       })
       .map((d) => d.date);
   } else {
