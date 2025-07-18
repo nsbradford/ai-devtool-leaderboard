@@ -21,8 +21,14 @@ The data pipeline runs daily for the previous day, and has been backfilled from 
 
 ## Roadmap
 
-- Track # of unique active users
-- Track # of unique PRs reviewed
+- More data to track
+  - Track # of unique active users
+  - Track # of unique PRs reviewed
+  - Track when repos stop using a tool (it stops showing up on new PRs)
+  - Display all repos for each tool, not just the top 10
+- Other kinds of tools to track
+  - Code generation
+  - ...
 
 ## Local development
 
