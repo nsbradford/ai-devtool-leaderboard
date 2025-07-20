@@ -111,5 +111,13 @@
     "avatar_url": "https://avatars.githubusercontent.com/in/322216?v=4",
     "website_url": "https://www.korbit.ai/",
     "brand_color": "#854d0e"
+  },
+  {
+    "id": 209825114,
+    "account_login": "claude[bot]",
+    "name": "Claude",
+    "avatar_url": "https://avatars.githubusercontent.com/in/1236702?v=4",
+    "website_url": "https://claude.ai/",
+    "brand_color": "#FF9F1C"
   }
 ]
