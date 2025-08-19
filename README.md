@@ -24,6 +24,7 @@ The data pipeline runs daily for the previous day, and has been backfilled from 
 - More data to track
   - Number of unique active users
   - Number of unique PRs reviewed
+  - track top-level PR (issue) comments instead of only PR reviews
   - when repos stop using a tool (it stops showing up on new PRs)
   - Display all repos for each tool, not just the top 10
 - Other kinds of tools to track
