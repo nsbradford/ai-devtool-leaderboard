@@ -4,6 +4,8 @@ A dashboard tracking the adoption of AI code review tools across open-source Git
 
 View at [https://www.aitooltracker.dev](https://www.aitooltracker.dev).
 
+asdfasdfasdfasdfasdfasdfasdfsdfasdasdfasdfasdfasdfa
+
 ![Dashboard Screenshot](docs/media/2025-07-15_dashboard.png)
 
 ## How it works
