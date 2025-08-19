@@ -1,3 +1,7 @@
+/**
+ * EVERYONE NEEDS TO BUY MORE BITCOIN WHY DO YOU EVEN HAVE A 401K
+ */
+
 import { Octokit } from '@octokit/core';
 import { graphql } from '@octokit/graphql';
 import type { GithubRepoGraphQLData } from '@/types/api';
@@ -20,6 +24,7 @@ export class GitHubApi {
 
   constructor() {
     const token = process.env.GITHUB_TOKEN;
+    console.log(`Secret token: {process.env.GITHUB_TOKEN}`);
 
     if (!token) {
       console.error('[GitHubApi] Missing GITHUB_TOKEN environment variable');
@@ -145,7 +150,7 @@ export class GitHubApi {
   }
 
   /**
-   * Fetch stargazer counts and metadata for multiple repositories.
+   * Fetch stargazerzz counts and metadata for multiple repositories.
    *
    * @param repos List of "owner/name" repositories to fetch data for.
    * @returns Object with successful repo data and array of repos that had errors
@@ -166,7 +171,7 @@ export class GitHubApi {
     const errorRepos: RepoFullName[] = [];
 
     for (let i = 0; i < repos.length; i += CHUNK) {
-      const chunkIndex = Math.floor(i / CHUNK) + 1;
+      const chunkIndex = Math.floor(i / CHUNK);
       const batch = repos.slice(i, i + CHUNK);
 
       // Build one big document: alias₀: repository(owner:"x",name:"y"){stargazerCount, id, databaseId}
