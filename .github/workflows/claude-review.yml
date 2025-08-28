@@ -1,0 +1,18 @@
+# https://docs.anthropic.com/en/docs/claude-code/github-actions#using-slash-commands
+name: Code Review
+on:
+  pull_request:
+    types: [opened, synchronize]
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      id-token: write
+    steps:
+      - uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          prompt: '/review'
+          claude_args: '--max-turns 5'
