@@ -50,7 +50,7 @@
   {
     "id": 175728472,
     "account_login": "copilot-pull-request-reviewer[bot]",
-    "name": "Copilot",
+    "name": "GitHub Copilot",
     "avatar_url": "https://avatars.githubusercontent.com/in/946600?v=4",
     "website_url": "https://github.com/features/copilot",
     "brand_color": "#1f2937",
@@ -119,5 +119,13 @@
     "avatar_url": "https://avatars.githubusercontent.com/in/1236702?v=4",
     "website_url": "https://claude.ai/",
     "brand_color": "#FF9F1C"
+  },
+  {
+    "id": 199175422,
+    "account_login": "chatgpt-codex-connector[bot]",
+    "name": "OpenAI Codex",
+    "avatar_url": "https://avatars.githubusercontent.com/in/1144995?s=60&v=4",
+    "website_url": "https://openai.com/codex",
+    "brand_color": "#808080"
   }
 ]

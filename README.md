@@ -79,6 +79,27 @@ The data pipeline runs daily for the previous day, and has been backfilled from 
 - `pnpm lint` - Run ESLint
 - `pnpm format` - Run Prettier
 
+
+# Adding a new bot
+
+## Find its ID
+
+First, find an example of the bot out there in the wild to get its username. Then, use this command to get the bot's actual ID:
+
+```bash
+# for `claude[bot]`:
+curl -s -H "Accept: application/vnd.github.v3+json"  "https://api.github.com/users/claude%5Bbot%5D"
+```
+
+## Backfilling data
+
+```bash
+pnpm run backfill-bot-reviews --start 2025-01-01 --end 2025-05-01
+
+# If you want to only backfill bots with their brand_color === '#000000' ('new bots')
+pnpm run backfill-bot-reviews --start 2025-01-01 --end 2025-05-01  --new-bots-only
+```
+
 ## License
 
 This project is open source and available under the [MIT License](LICENSE).
