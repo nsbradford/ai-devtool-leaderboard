@@ -79,7 +79,6 @@ The data pipeline runs daily for the previous day, and has been backfilled from 
 - `pnpm lint` - Run ESLint
 - `pnpm format` - Run Prettier
 
-
 # Adding a new bot
 
 ## Find its ID
