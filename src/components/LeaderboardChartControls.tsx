@@ -231,7 +231,6 @@ export function LeaderboardChartControls({
                               width={12}
                               height={12}
                               className="w-3 h-3 rounded-full"
-                              unoptimized // https://vercel.com/docs/image-optimization/managing-image-optimization-costs
                               onError={(e) => {
                                 e.currentTarget.style.display = 'none';
                               }}
