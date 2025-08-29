@@ -84,6 +84,7 @@ export function LeaderboardRankings({
                         width={24}
                         height={24}
                         className="w-6 h-6 rounded-full"
+                        unoptimized // https://vercel.com/docs/image-optimization/managing-image-optimization-costs
                         onError={(e) => {
                           e.currentTarget.style.display = 'none';
                         }}
