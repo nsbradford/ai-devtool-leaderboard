@@ -13,11 +13,13 @@ View at [https://www.aitooltracker.dev](https://www.aitooltracker.dev).
 The data pipeline runs daily for the previous day, and has been backfilled from July 2023 onwards.
 
 - List of tracked devtools is in [devtools.json](/src/devtools.json)
-- Data source: [GH Archive](https://www.gharchive.org/)'s BigQuery dataset. We currently only search over PR Review events.
+- Data source: [GH Archive](https://www.gharchive.org/)'s BigQuery dataset. **We currently only search over PR Review events.**
 - Cron job: uses [Trigger.dev](https://trigger.dev/) every day at 5am UTC to process the previous day's data archive (which is usually uploaded a few minutes after midnight UTC)
 - Storage: [Neon](https://neon.com/) serverless postgres to store intermediate data and materialized views for window aggregates.
 - Frontend: NextJS, Tailwind
 - Hosting: Vercel
+
+**Why only scan for PR review events?** In GitHub, every PR is an Issue, so top-level comments are technically Issue Comments, which are distinct from top-level PR Reviews (which have an optional Body) and PR Review Comments (which are inline at a location on the diff, and associated with a Review). This means that if a bot leaves its review in the form of an issue comment instead of a true review, it'll be missed. However, issue comments get used for many other purposes ("trial expired" messages, summaries, etc), so ignoring them is safer on net.
 
 ## Roadmap
 
@@ -81,21 +83,32 @@ The data pipeline runs daily for the previous day, and has been backfilled from 
 
 # Adding a new bot
 
-## Find its ID
-
-First, find an example of the bot out there in the wild to get its username. Then, use this command to get the bot's actual ID:
+First, find an example of the bot out there in the wild to get its username (e.g. `cursor[bot]`). Then, use this command to get the bot's actual ID:
 
 ```bash
-# for `claude[bot]`:
-curl -s -H "Accept: application/vnd.github.v3+json"  "https://api.github.com/users/claude%5Bbot%5D"
+# for `cursor[bot]`:
+curl -s -H "Accept: application/vnd.github.v3+json"  "https://api.github.com/users/cursor%5Bbot%5D"
 ```
 
-## Backfilling data
+Then add relevant data to `src/devtools.json`:
+
+```json
+{
+  "id": 206951365,
+  "account_login": "cursor[bot]",
+  "name": "Cursor",
+  "avatar_url": "https://avatars.githubusercontent.com/in/1210556?v=4",
+  "website_url": "https://cursor.com",
+  "brand_color": "#dc2626"
+}
+```
+
+Once the PR is open, @nsbradford will run backfill data for that bot. Warning: it gets expensive to scan the entire BigQuery table, so be careful.
 
 ```bash
 pnpm run backfill-bot-reviews --start 2025-01-01 --end 2025-05-01
 
-# If you want to only backfill bots with their brand_color === '#000000' ('new bots')
+# Slightly more efficient to set your bot's `brand_color` to `#000000` and then run backfill with `--new-bots-only`.
 pnpm run backfill-bot-reviews --start 2025-01-01 --end 2025-05-01  --new-bots-only
 ```
 
