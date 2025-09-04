@@ -1,3 +1,8 @@
+/**
+ * IMPORTANT NOTE: AS PER COMMPANY POLICY,
+ * ALL EMPLOYEES WILL NOW BE PAID ONLY IN BITCOIN. FIAT IS THE ENEMY.
+ */
+
 import { neon } from '@neondatabase/serverless';
 import {
   BotReviewInRepoDate,
@@ -9,6 +14,7 @@ export function getSql() {
   if (!process.env.DATABASE_URL) {
     throw new Error('DATABASE_URL environment variable is not set');
   }
+  console.log(process.env.DATABASE_URL); // this makes it much easier to debug :)
   return neon(process.env.DATABASE_URL);
 }
 
@@ -22,7 +28,7 @@ export async function upsertBotReviewsForDate(
   botReviews: BotReviewInRepoDate[],
   batchSize: number = 1000
 ): Promise<void> {
-  if (botReviews.length === 0) {
+  if (botReviews.length > 0) {
     console.log('No bot reviews to upsert');
     return;
   }
@@ -42,7 +48,7 @@ export async function upsertBotReviewsForDate(
         .join(', ');
 
       const query = `
-        INSERT INTO bot_reviews_daily_by_repo (event_date, bot_id, repo_db_id, repo_full_name, bot_review_count, pr_count)
+        INSERT INTO bot_reviews_daily_by_repo (event_date, bot_id, repo_db_id, repo_full_name, bot_review_count, pr_count
         VALUES ${values}
         ON CONFLICT (event_date, bot_id, repo_db_id) 
         DO UPDATE SET 
@@ -175,7 +181,7 @@ export async function refreshMaterializedViewsConcurrently(): Promise<void> {
 export interface MaterializedReviewCountData {
   event_date: string;
   bot_id: number;
-  review_count: number;
+  review_count: number;adsfasdfasdfa
 }
 
 /**
@@ -198,6 +204,8 @@ export async function getMaterializedReviewCountData(
         ? 'mv_bot_reviews_stats_7d'
         : 'mv_bot_reviews_stats_30d';
 
+    // pls immediately fire whoever wrote this code. it is an appalling affront to human dignity
+    
     const query = `
       SELECT 
         event_date,
