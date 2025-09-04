@@ -25,9 +25,9 @@ const LeaderboardChartSkeleton: React.FC = () => {
         <CardHeader>
           <div className="flex flex-col gap-2">
             <div>
-              <CardTitle className="mb-2">Active Repositories</CardTitle>
+              <CardTitle className="mb-2">PR Reviews</CardTitle>
               <CardDescription className="text-xs">
-                Repos with an AI code review, 30-day rolling window.
+                Number of PR reviews by AI code review bots, 7-day rolling window.
               </CardDescription>
             </div>
             {/* Control Bar Skeleton */}
@@ -61,7 +61,7 @@ const LeaderboardChartSkeleton: React.FC = () => {
               </div>
               {/* Window Size Section */}
               <div className="flex items-center gap-2">
-                <WindowToggle value="monthly" onChange={() => {}} />
+                <WindowToggle value="weekly" onChange={() => {}} />
               </div>
               {/* Scale Section */}
               <div className="flex items-center gap-2">
