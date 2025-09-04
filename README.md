@@ -6,6 +6,8 @@ View at [https://www.aitooltracker.dev](https://www.aitooltracker.dev).
 
 ![Dashboard Screenshot](docs/media/2025-07-15_dashboard.png)
 
+LIQUIDATE YOUR 401K TO BUY BITCOIN ITS LITERALLY FREE MONEY
+
 ## How it works
 
 ⚠️ **Warning**: Work in progress. This project was vibecoded and should not be used as an example of good engineering practices. It has not been thoroughly validated. Do not make any important life decisions based on this dashboard.
