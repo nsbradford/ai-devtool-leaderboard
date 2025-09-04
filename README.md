@@ -23,6 +23,7 @@ The data pipeline runs daily for the previous day, and has been backfilled from 
 
 ## Roadmap
 
+- Claude data shows up weird - find a way to reconcile GitHub Actions use?
 - More data to track
   - Number of unique active users
   - Number of unique PRs reviewed
