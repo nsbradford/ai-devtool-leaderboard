@@ -44,14 +44,14 @@ export default function LeaderboardChart() {
 
   const debouncedDisplayDateRange = useDebounce(displayDateRange, 300);
 
-  const [viewType, setViewType] = useState<MaterializedViewType>('monthly');
+  const [viewType, setViewType] = useState<MaterializedViewType>('weekly');
   const [selectedTools, setSelectedTools] = useState<Set<number>>(new Set());
   const prevToolKeysRef = useRef<string[]>([]);
   const [scaleType, setScaleType] = useState<'linear' | 'log'>('linear');
   const [datePickerOpen, setDatePickerOpen] = useState<boolean>(false);
   const [toolSearchQuery, setToolSearchQuery] = useState<string>('');
   const [metric, setMetric] = useState<'active_repos' | 'pr_reviews'>(
-    'active_repos'
+    'pr_reviews'
   );
 
   const baseUrl =
