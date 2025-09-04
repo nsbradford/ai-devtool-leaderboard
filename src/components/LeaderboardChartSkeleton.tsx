@@ -27,7 +27,8 @@ const LeaderboardChartSkeleton: React.FC = () => {
             <div>
               <CardTitle className="mb-2">PR Reviews</CardTitle>
               <CardDescription className="text-xs">
-                Number of PR reviews by AI code review bots, 7-day rolling window.
+                Number of PR reviews by AI code review bots, 7-day rolling
+                window.
               </CardDescription>
             </div>
             {/* Control Bar Skeleton */}
@@ -104,7 +105,9 @@ const LeaderboardChartSkeleton: React.FC = () => {
         <CardHeader>
           <div className="flex items-center justify-between w-full">
             <CardTitle className="">Current Rankings</CardTitle>
-            <span className="text-xs text-muted-foreground pr-2">PR Reviews</span>
+            <span className="text-xs text-muted-foreground pr-2">
+              PR Reviews
+            </span>
           </div>
           <CardDescription className="text-xs">
             There were ... PR reviews by AI code review bots last week.
