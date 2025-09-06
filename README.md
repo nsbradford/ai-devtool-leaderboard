@@ -23,6 +23,9 @@ The data pipeline runs daily for the previous day, and has been backfilled from 
 
 ## Roadmap
 
+- OpenAI data not showing up after Aug 28?
+  - Weird, bot `chatgpt-codex-connector[bot]` with id `199175422` still seems active, see https://github.com/nsbradford/ai-devtool-leaderboard/pull/32#pullrequestreview-3188009219
+- Claude is not showing up anymore? (some issues there bc Claude is done through GitHub actions, unclear if there's an easy way to track)
 - More data to track
   - Number of unique active users
   - Number of unique PRs reviewed
