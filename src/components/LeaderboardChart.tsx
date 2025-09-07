@@ -51,7 +51,7 @@ export default function LeaderboardChart() {
   const [datePickerOpen, setDatePickerOpen] = useState<boolean>(false);
   const [toolSearchQuery, setToolSearchQuery] = useState<string>('');
   const [metric, setMetric] = useState<'active_repos' | 'pr_reviews'>(
-    'pr_reviews'
+    'active_repos'
   );
 
   const baseUrl =
