@@ -135,5 +135,13 @@
     "avatar_url": "https://avatars.githubusercontent.com/in/1231820?v=4",
     "website_url": "https://jazzberry.ai/",
     "brand_color": "#000000"
+  },
+  {
+    "id": 187716431,
+    "account_login": "mesa-dot-dev[bot]",
+    "name": "Mesa",
+    "avatar_url": "https://avatars.githubusercontent.com/in/1050077?v=4",
+    "website_url": "https://mesa.dev",
+    "brand_color": "#973c00"
   }
 ]
