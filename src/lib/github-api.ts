@@ -43,7 +43,7 @@ export class GitHubApi {
    * @param repos List of "owner/name" repositories to fetch metadata for.
    * @returns Object with successful metadata and array of repos that had errors
    */
-  async fetchRepoMetadata(repos: RepoFullName[]): Promise<{
+  async fetchRepoMetadata(repos: any[]): Promise<{
     repoMetadata: Record<
       RepoFullName,
       { database_id: number; node_id: string }
