@@ -50,7 +50,7 @@ function getBigQueryClient(): BigQuery {
 export async function getBotReviewsForDay(
   targetDate: string,
   botIds?: number[]
-): Promise<BotReviewInRepoDate[]> {
+): Promise<any[]> {
   try {
     const bigquery = getBigQueryClient();
 
