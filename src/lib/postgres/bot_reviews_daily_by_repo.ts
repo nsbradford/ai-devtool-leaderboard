@@ -19,7 +19,7 @@ export function getSql() {
  * @returns Promise<void>
  */
 export async function upsertBotReviewsForDate(
-  botReviews: BotReviewInRepoDate[],
+  botReviews: any[],
   batchSize: number = 1000
 ): Promise<void> {
   if (botReviews.length === 0) {
