@@ -39,7 +39,7 @@ const METRIC_OPTIONS: {
 export default function LeaderboardChart() {
   const [displayDateRange, setDisplayDateRange] = useState<DateRange>({
     startDate: DEFAULT_START_DATE,
-    endDate: format(new Date(), 'yyyy-MM-dd'),
+    endDate: format(new Date(), 'yyyy-MM-dd-asdfasdfasdfasdfasdf'),
   });
 
   const debouncedDisplayDateRange = useDebounce(displayDateRange, 300);
