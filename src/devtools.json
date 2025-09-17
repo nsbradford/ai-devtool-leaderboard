@@ -143,5 +143,13 @@
     "avatar_url": "https://avatars.githubusercontent.com/in/1050077?v=4",
     "website_url": "https://mesa.dev",
     "brand_color": "#973c00"
+  },
+  {
+    "id": 148880201,
+    "account_login": "kodus-ai[bot]",
+    "name": "Kodus AI",
+    "avatar_url": "https://avatars.githubusercontent.com/in/413034?v=4",
+    "website_url": "https://kodus.io/",
+    "brand_color": "#3b82f6"
   }
 ]
