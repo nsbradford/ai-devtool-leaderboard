@@ -44,7 +44,7 @@ export default function LeaderboardChart() {
 
   const debouncedDisplayDateRange = useDebounce(displayDateRange, 300);
 
-  const [viewType, setViewType] = useState<MaterializedViewType>('weekly');
+  const [viewType, setViewType] = useState<MaterializedViewType>('monthly');
   const [selectedTools, setSelectedTools] = useState<Set<number>>(new Set());
   const prevToolKeysRef = useRef<string[]>([]);
   const [scaleType, setScaleType] = useState<'linear' | 'log'>('linear');

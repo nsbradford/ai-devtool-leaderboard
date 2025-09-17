@@ -12,7 +12,7 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const viewType =
-      (searchParams.get('viewType') as MaterializedViewType) || 'weekly';
+      (searchParams.get('viewType') as MaterializedViewType) || 'monthly';
 
     // Validate viewType
     if (!['weekly', 'monthly'].includes(viewType)) {

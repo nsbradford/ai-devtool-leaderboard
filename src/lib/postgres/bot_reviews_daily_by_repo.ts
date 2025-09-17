@@ -123,7 +123,7 @@ export async function getMaterializedViewData(
 export async function getLeaderboardDataForDateRange(
   startDate: string,
   endDate: string,
-  viewType: MaterializedViewType = 'weekly'
+  viewType: MaterializedViewType = 'monthly'
 ): Promise<MaterializedViewData[]> {
   try {
     const data = await getMaterializedViewData(viewType, startDate, endDate);
