@@ -152,4 +152,13 @@
     "website_url": "https://kodus.io/",
     "brand_color": "#3b82f6"
   }
+  ,
+  {
+    "id": 177048263,
+    "account_login": "prassoai[bot]",
+    "name": "Macroscope",
+    "avatar_url": "https://avatars.githubusercontent.com/u/139157646?v=4",
+    "website_url": "https://macroscope.com/",
+    "brand_color": "#000000"
+  }
 ]
