@@ -77,3 +77,22 @@ jobs:
 
       - name: Run format check
         run: pnpm run format:check
+
+  test-setup-10:
+    name: Setup job - 10 seconds
+    runs-on: ubuntu-latest
+    steps:
+      - name: Sleep for 10 seconds
+        run: sleep 10
+      - name: Fail the workflow
+        run: exit 1
+
+  test-setup-30:
+    name: Setup job - 30 seconds
+    runs-on: ubuntu-latest
+    steps:
+      - name: Sleep for 30 seconds
+        run: sleep 30
+
+      - name: Fail the workflow
+        run: exit 1
