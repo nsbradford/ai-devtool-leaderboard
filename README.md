@@ -87,6 +87,22 @@ The data pipeline runs daily for the previous day, and has been backfilled from 
 - `pnpm start` - Start production server
 - `pnpm lint` - Run ESLint
 - `pnpm format` - Run Prettier
+- `pnpm test` - Run unit tests with Vitest
+- `pnpm test:watch` - Run tests in watch mode
+- `pnpm test:coverage` - Run tests with coverage report
+
+### Testing
+
+This project uses [Vitest](https://vitest.dev/) for unit testing with comprehensive test coverage for all utility functions. The test suite includes:
+
+- **Utility functions**: `src/lib/utils.ts` - class name merging, date calculations, number formatting
+- **Chart utilities**: `src/components/leaderboardChartUtils.ts` - chart data processing and formatting
+- **React hooks**: `src/lib/client-utils.ts` - custom hooks like `useDebounce`
+- **API integrations**: `src/lib/github-api.ts`, `src/lib/bigquery.ts` - external service interactions with proper mocking
+- **Data processing**: `src/lib/backfill/bot-reviews.ts` - date utilities and data processing functions
+- **Constants**: `src/lib/constants.ts` - application constants and configuration
+
+Tests are located in `src/__tests__/` and mirror the source directory structure. All external dependencies (BigQuery, GitHub API, environment variables) are properly mocked to ensure reliable and fast test execution.
 
 # Adding a new bot
 
