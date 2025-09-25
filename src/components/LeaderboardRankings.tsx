@@ -70,7 +70,7 @@ export function LeaderboardRankings({
             return (
               <div
                 key={tool.id}
-                className="flex flex-col p-2 rounded-lg border hover:bg-muted/50 transition-colors"
+                className="flex flex-col p-2 rounded-lg border transition-colors"
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2 pl-2">
