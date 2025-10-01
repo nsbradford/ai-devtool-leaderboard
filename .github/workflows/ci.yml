@@ -79,19 +79,19 @@ jobs:
         run: pnpm run format:check
 
   test-setup-10:
-    name: Setup job - 10 seconds
+    name: Setup job - 1 second
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
       - name: Run test setup
-        run: ./scripts/test-setup.sh 10 1200000
+        run: ./scripts/test-setup.sh 1 1200000
 
   test-setup-30:
-    name: Setup job - 30 seconds
+    name: Setup job - 600 seconds
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
       - name: Run test setup
-        run: ./scripts/test-setup.sh 30 1200000
+        run: ./scripts/test-setup.sh 600 1200000
