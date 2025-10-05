@@ -81,6 +81,7 @@ jobs:
   test-setup-10:
     name: Setup job - 10 seconds
     runs-on: ubuntu-latest
+    if: false
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -90,6 +91,7 @@ jobs:
   test-setup-30:
     name: Setup job - 30 seconds
     runs-on: ubuntu-latest
+    if: false
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
