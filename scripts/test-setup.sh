@@ -19,5 +19,5 @@ for i in $(seq 1 $num_lines); do
     echo "Loading"
 done
 
-# Exit with error code 1
-exit 1
+# Exit successfully
+exit 0

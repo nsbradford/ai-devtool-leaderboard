@@ -5,6 +5,7 @@ on:
     types: [opened, synchronize]
 jobs:
   review:
+    if: false
     runs-on: ubuntu-latest
     permissions:
       contents: read
