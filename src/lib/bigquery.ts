@@ -3,7 +3,7 @@ import devtools from '../devtools.json';
 import { BotReviewInRepoDate } from '@/types/api';
 
 // Type for raw BigQuery row data
-interface BigQueryRow 
+interface BigQueryRow {
   event_date: { value: string } | string;
   repo_name: string;
   repo_db_id: number;
@@ -81,7 +81,7 @@ export async function getBotReviewsForDay(
     const [rows] = await bigquery.query({
       query,
       useLegacySql: false,
-    })
+    });
 
     // Convert BigQueryDate objects to strings in YYYY-MM-DD format
     const convertedRows = rows.map((row: BigQueryRow) => ({
