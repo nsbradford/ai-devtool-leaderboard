@@ -75,8 +75,6 @@ export async function getBotReviewsForDay(
       GROUP BY repo.id, actor.id, target_date;
     `;
 
-    // console.log(`Running bot reviews query for ${targetDate}...`);
-    // console.log(`Bot IDs: ${botIdList.join(', ')}`);
 
     const [rows] = await bigquery.query({
       query,
