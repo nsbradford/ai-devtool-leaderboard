@@ -12,10 +12,6 @@ interface BigQueryRow
   pr_count: number;
 }
 
-/**
- * Parse base64-encoded Google Cloud service account credentials
- * @returns Parsed credentials object or undefined if not available
- */
 function parseGoogleCredentials(): object | undefined {
   const credentialsBase64 = process.env.GOOGLE_APPLICATION_CREDENTIALS;
   if (!credentialsBase64) {
