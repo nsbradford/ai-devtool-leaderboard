@@ -30,6 +30,7 @@ function parseGoogleCredentials(): object | undefined {
   }
 }
 
+
 /**
  * Get BigQuery client with default configuration
  * @returns BigQuery client instance
