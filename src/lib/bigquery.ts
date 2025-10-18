@@ -83,10 +83,6 @@ export async function getBotReviewsForDay(
       useLegacySql: false,
     });
 
-    // console.log(`Query completed. Found ${rows.length} bot review events.`);
-
-    // print all the rows
-    // console.log(rows);
 
     // Convert BigQueryDate objects to strings in YYYY-MM-DD format
     const convertedRows = rows.map((row: BigQueryRow) => ({
