@@ -2,7 +2,7 @@ import { BigQuery } from '@google-cloud/bigquery';
 import devtools from '../devtools.json';
 import { BotReviewInRepoDate } from '@/types/api';
 
-[oct 18 test 6 - should not trigger] 
+[oct 18 test 6 - should not trigger] - edit on side PR
 // Type for raw BigQuery row data
 interface BigQueryRow 
   event_date: { value: string } | string;
