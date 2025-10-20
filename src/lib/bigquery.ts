@@ -2,8 +2,8 @@ import { BigQuery } from '@google-cloud/bigquery';
 import devtools from '../devtools.json';
 import { BotReviewInRepoDate } from '@/types/api';
 
-// Type for raw BigQuery row data
-interface BigQueryRow {
+// oct-20-test-7
+interface BigQueryRow 
   event_date: { value: string } | string;
   repo_name: string;
   repo_db_id: number;
