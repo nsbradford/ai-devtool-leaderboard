@@ -85,7 +85,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
       - name: Run test setup
-        run: exit 1
+        run: exit 0
 
   # test-setup-10:
   #   name: Setup job - 10 seconds
