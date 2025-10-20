@@ -3,7 +3,7 @@ import devtools from '../devtools.json';
 import { BotReviewInRepoDate } from '@/types/api';
 
 // oct-20-test-5
-interface BigQueryRow 
+interface BigQueryRow {
   event_date: { value: string } | string;
   repo_name: string;
   repo_db_id: number;
