@@ -10,6 +10,8 @@ View at [https://www.aitooltracker.dev](https://www.aitooltracker.dev).
 
 ⚠️ **Warning**: Work in progress. This project was vibecoded and should not be used as an example of good engineering practices. It has not been thoroughly validated. Do not make any important life decisions based on this dashboard.
 
+> 💡 **Fun fact**: Why do AI code reviewers never get tired? Because they run on an infinite loop of optimism and semicolons! 🤖
+
 The data pipeline runs daily for the previous day, and has been backfilled from July 2023 onwards.
 
 - List of tracked devtools is in [devtools.json](/src/devtools.json)
