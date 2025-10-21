@@ -120,4 +120,9 @@ pnpm run backfill-bot-reviews --start 2025-01-01 --end 2025-05-01  --new-bots-on
 
 This project is open source and available under the [MIT License](LICENSE).
 
-test 2
+```python
+def fib(n):
+    if n <= 1:
+        return n
+    return fib(n - 1) + fib(n - 2)
+```
