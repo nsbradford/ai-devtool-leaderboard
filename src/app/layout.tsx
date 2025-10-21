@@ -112,6 +112,12 @@ export const metadata: Metadata = {
   },
 };
 
+/**
+ * Root layout component that wraps all pages with common layout elements.
+ * Includes theme provider, Google Analytics, and structured data for SEO.
+ * @param children - Child components to render within the layout
+ * @returns JSX element containing the root HTML structure
+ */
 export default function RootLayout({
   children,
 }: Readonly<{

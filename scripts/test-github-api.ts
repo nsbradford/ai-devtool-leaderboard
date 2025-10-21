@@ -6,6 +6,10 @@ config({ path: resolve(process.cwd(), '.env.local') });
 
 import { GitHubApi } from '../src/lib/github-api';
 
+/**
+ * Test script for GitHub API functionality.
+ * Fetches star counts for a sample of popular repositories to verify API integration.
+ */
 async function testGitHubApi() {
   try {
     const github = new GitHubApi();

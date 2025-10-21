@@ -4,6 +4,13 @@ import { getMaterializedReviewCountData } from '@/lib/postgres/bot_reviews_daily
 import { getSecondsUntilCacheReset } from '@/lib/utils';
 import { DEFAULT_START_DATE } from '@/lib/constants';
 
+/**
+ * GET /api/leaderboard-reviews
+ * Returns leaderboard data showing PR review counts for each tool over time.
+ * Supports both weekly and monthly rolling window views.
+ * @param request - Request object with optional viewType query parameter
+ * @returns JSON response with timestamps and tool review counts, or error
+ */
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);

@@ -5,6 +5,11 @@ import {
   MaterializedViewType,
 } from '@/types/api';
 
+/**
+ * Get a configured SQL client for the Neon database.
+ * @throws Error if DATABASE_URL environment variable is not set
+ * @returns Neon SQL client instance
+ */
 export function getSql() {
   if (!process.env.DATABASE_URL) {
     throw new Error('DATABASE_URL environment variable is not set');
@@ -172,9 +177,15 @@ export async function refreshMaterializedViewsConcurrently(): Promise<void> {
   console.log('Materialized views refreshed successfully');
 }
 
+/**
+ * Data structure for PR review counts from materialized views.
+ */
 export interface MaterializedReviewCountData {
+  /** Date of the aggregated data in YYYY-MM-DD format */
   event_date: string;
+  /** Bot's numeric ID */
   bot_id: number;
+  /** Total number of reviews in the time window */
   review_count: number;
 }
 

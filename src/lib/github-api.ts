@@ -5,9 +5,15 @@ import type { GithubRepoGraphQLData } from '@/types/api';
 /** A repo string in the form "owner/name" */
 export type RepoFullName = `${string}/${string}`;
 
+/**
+ * Extended Error type for GraphQL errors with additional metadata.
+ */
 interface GraphQLError extends Error {
+  /** HTTP status code if available */
   status?: number;
+  /** Error code if available */
   code?: string;
+  /** Additional error data, potentially including partial results */
   data?: Record<string, unknown>;
 }
 
@@ -18,6 +24,10 @@ export class GitHubApi {
   private readonly octokit: Octokit;
   private readonly gql: typeof graphql;
 
+  /**
+   * Initialize the GitHub API client with authentication.
+   * @throws Error if GITHUB_TOKEN environment variable is not set
+   */
   constructor() {
     const token = process.env.GITHUB_TOKEN;
 

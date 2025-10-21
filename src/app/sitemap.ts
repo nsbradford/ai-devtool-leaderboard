@@ -1,5 +1,10 @@
 import { MetadataRoute } from 'next';
 
+/**
+ * Generates the sitemap.xml for search engine optimization.
+ * Currently includes the homepage with daily update frequency.
+ * @returns Array of sitemap entries
+ */
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = 'https://www.aitooltracker.dev';
 

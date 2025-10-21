@@ -11,6 +11,10 @@ import { Calendar, ChevronDown } from 'lucide-react';
 import { WindowToggle } from './ui/WindowToggle';
 import { ScaleToggle } from './ui/ScaleToggle';
 
+/**
+ * Skeleton loading state component for the leaderboard chart.
+ * Displays placeholder UI while data is being fetched.
+ */
 const LeaderboardChartSkeleton: React.FC = () => {
   // Date presets skeleton (static for now)
   const presets = [

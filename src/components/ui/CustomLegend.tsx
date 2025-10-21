@@ -2,6 +2,14 @@ import { DevTool } from '@/types/api';
 import React from 'react';
 import type { LegendPayload } from 'recharts/types/component/DefaultLegendContent';
 
+/**
+ * Custom legend component for the chart with interactive tool selection.
+ * Allows users to click on legend items to show/hide specific tools in the chart.
+ * @param payload - Legend data from Recharts
+ * @param selectedTools - Set of currently selected tool IDs
+ * @param setSelectedTools - Function to update selected tools
+ * @param devtools - Array of available devtools for mapping names to IDs
+ */
 export function CustomLegend({
   payload,
   selectedTools,

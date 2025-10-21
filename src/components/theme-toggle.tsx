@@ -11,6 +11,10 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 
+/**
+ * Theme toggle component with popover menu for selecting light, dark, or system theme.
+ * Displays a sun/moon icon that changes based on the current theme.
+ */
 export function ThemeToggle() {
   const { setTheme, theme } = useTheme();
 

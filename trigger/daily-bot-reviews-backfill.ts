@@ -6,6 +6,10 @@ import {
 import { refreshMaterializedViewsConcurrently } from '@/lib/postgres/bot_reviews_daily_by_repo';
 import { backfillStarCounts } from '@/lib/backfill/github-repositories';
 
+/**
+ * Scheduled task that runs daily at 5:00 AM UTC to backfill bot review data.
+ * Processes yesterday's bot reviews, refreshes materialized views, and updates star counts.
+ */
 export const dailyBotReviewsBackfill = schedules.task({
   id: 'daily-bot-reviews-backfill',
   cron: '0 5 * * *',

@@ -11,6 +11,12 @@ import {
 import { GitHubApi } from '../../src/lib/github-api';
 import type { GithubRepoGraphQLData } from '../../src/types/api';
 
+/**
+ * Backfill top repositories metadata from old to new database table.
+ * Fetches repo metadata from GitHub API and upserts to the new table structure.
+ * @param limit - Number of top repos to process per devtool
+ * @param daysBack - Number of days to look back for activity
+ */
 async function backfillTopReposToNewTable(limit: number, daysBack: number) {
   console.log(
     `Fetching top ${limit} repos per devtool from last ${daysBack} days...`
@@ -59,6 +65,10 @@ async function backfillTopReposToNewTable(limit: number, daysBack: number) {
   console.log('Backfill complete.');
 }
 
+/**
+ * Main entry point for the backfill script (deprecated).
+ * Migrates top repository data from old table structure to new schema.
+ */
 async function main() {
   const argv = await yargs(hideBin(process.argv))
     .option('limit', {

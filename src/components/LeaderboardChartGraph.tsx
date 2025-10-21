@@ -20,6 +20,9 @@ import {
 import type { ChartDataPoint } from './interfaces';
 import { formatInTimeZone } from 'date-fns-tz';
 
+/**
+ * Props for the LeaderboardChartGraph component.
+ */
 interface LeaderboardChartGraphProps {
   chartData: ChartDataPoint[];
   selectedTools: Set<number>;
@@ -32,6 +35,10 @@ interface LeaderboardChartGraphProps {
   resolvedTheme: string | undefined;
 }
 
+/**
+ * Graph component that renders the time series line chart using Recharts.
+ * Displays data for selected tools over time with customizable scale and theme.
+ */
 export function LeaderboardChartGraph({
   chartData,
   selectedTools,

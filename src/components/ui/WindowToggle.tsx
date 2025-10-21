@@ -1,6 +1,11 @@
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { cn } from '@/lib/utils';
 
+/**
+ * Toggle component for switching between 7-day and 30-day rolling window views.
+ * @param value - Current window type ('weekly' or 'monthly')
+ * @param onChange - Callback function when window type changes
+ */
 export function WindowToggle({
   value,
   onChange,

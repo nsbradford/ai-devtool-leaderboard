@@ -8,6 +8,13 @@ import { getLeaderboardDataForDateRange } from '@/lib/postgres/bot_reviews_daily
 import { getSecondsUntilCacheReset } from '@/lib/utils';
 import { DEFAULT_START_DATE } from '@/lib/constants';
 
+/**
+ * GET /api/leaderboard
+ * Returns leaderboard data showing active repository counts for each tool over time.
+ * Supports both weekly and monthly rolling window views.
+ * @param request - Request object with optional viewType query parameter
+ * @returns JSON response with timestamps and tool data, or error
+ */
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
