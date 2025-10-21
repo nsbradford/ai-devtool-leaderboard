@@ -1,3 +1,4 @@
+-- Copyright 2025 Anysphere Inc.
 -- run this sample query with
 -- $ bq query \
 --   --use_legacy_sql=false \

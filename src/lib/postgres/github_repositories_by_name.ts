@@ -1,3 +1,4 @@
+// Copyright 2025 Anysphere Inc.
 import { getSql } from '@/lib/postgres/bot_reviews_daily_by_repo';
 import type { TopReposByDevtool } from '@/types/api';
 import type { GithubRepoGraphQLData } from '@/types/api';

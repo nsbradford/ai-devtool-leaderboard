@@ -1,3 +1,4 @@
+// Copyright 2025 Anysphere Inc.
 import { dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { FlatCompat } from '@eslint/eslintrc';

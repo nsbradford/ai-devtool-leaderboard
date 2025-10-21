@@ -1,3 +1,4 @@
+// Copyright 2025 Anysphere Inc.
 import dotenv from 'dotenv';
 dotenv.config({ path: '.env.local' });
 

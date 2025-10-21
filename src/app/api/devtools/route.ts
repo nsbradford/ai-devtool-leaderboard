@@ -1,3 +1,4 @@
+// Copyright 2025 Anysphere Inc.
 import devtoolsData from '@/devtools.json';
 import { getSecondsUntilCacheReset } from '@/lib/utils';
 

@@ -1,3 +1,4 @@
+// Copyright 2025 Anysphere Inc.
 import { config } from 'dotenv';
 import { resolve } from 'path';
 

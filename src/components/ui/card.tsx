@@ -1,3 +1,4 @@
+// Copyright 2025 Anysphere Inc.
 import * as React from 'react';
 
 import { cn } from '@/lib/utils';

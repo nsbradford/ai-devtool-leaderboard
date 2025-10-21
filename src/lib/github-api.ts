@@ -1,3 +1,4 @@
+// Copyright 2025 Anysphere Inc.
 import { Octokit } from '@octokit/core';
 import { graphql } from '@octokit/graphql';
 import type { GithubRepoGraphQLData } from '@/types/api';

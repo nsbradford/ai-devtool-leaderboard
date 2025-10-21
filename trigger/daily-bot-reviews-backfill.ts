@@ -1,3 +1,4 @@
+// Copyright 2025 Anysphere Inc.
 import { schedules } from '@trigger.dev/sdk/v3';
 import {
   processBotReviewsForDate,

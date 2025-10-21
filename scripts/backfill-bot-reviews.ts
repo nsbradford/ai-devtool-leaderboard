@@ -1,3 +1,4 @@
+// Copyright 2025 Anysphere Inc.
 import dotenv from 'dotenv';
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';

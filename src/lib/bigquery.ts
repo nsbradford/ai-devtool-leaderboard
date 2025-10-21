@@ -1,3 +1,4 @@
+// Copyright 2025 Anysphere Inc.
 import { BigQuery } from '@google-cloud/bigquery';
 import devtools from '../devtools.json';
 import { BotReviewInRepoDate } from '@/types/api';

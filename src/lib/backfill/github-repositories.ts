@@ -1,3 +1,4 @@
+// Copyright 2025 Anysphere Inc.
 import {
   getReposNeedingStarCounts,
   upsertGithubRepoGraphQLData,
