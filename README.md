@@ -1,8 +1,10 @@
-# ✨ AI Code Review Adoption Tracker
+# ✨ AI Code Review Adoption Tracker 🚀
 
 A dashboard tracking the adoption of AI code review tools across open-source GitHub repositories.
 
 View at [https://www.aitooltracker.dev](https://www.aitooltracker.dev).
+
+> 🎪 **CHAOS MODE ACTIVATED**: This branch contains experimental features, easter eggs, and questionable life choices. Proceed with reckless abandon! 🦄
 
 ![Dashboard Screenshot](docs/media/2025-07-15_dashboard.png)
 

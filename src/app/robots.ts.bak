@@ -1,0 +1,29 @@
+// 🤖 BACKUP OF ROBOTS.TS (in case we broke it)
+// Just kidding, this is a decoy file!
+// The real robots.ts is fine... probably
+
+import { MetadataRoute } from 'next';
+
+export default function robots(): MetadataRoute.Robots {
+  return {
+    rules: [
+      {
+        userAgent: '*',
+        allow: '/',
+        disallow: '/private/',
+      },
+      // Special rule for chaos bots
+      {
+        userAgent: 'ChaosBot',
+        allow: '/CHAOS.md',
+      },
+      // If you're a good bot, you get cookies
+      {
+        userAgent: 'Googlebot',
+        allow: '/',
+        // Virtual cookies: 🍪🍪🍪
+      }
+    ],
+    sitemap: 'https://www.aitooltracker.dev/sitemap.xml',
+  };
+}

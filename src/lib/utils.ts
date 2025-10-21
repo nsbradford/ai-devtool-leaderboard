@@ -40,3 +40,42 @@ export function formatStarCount(n: number): string {
   if (n < 1000000) return Math.floor(n / 1000) + 'k'; // 10k-999k
   return Math.floor(n / 100000) / 10 + 'M'; // 1.0M+
 }
+
+/**
+ * 🎲 CHAOS MODE ACTIVATED 🎲
+ * Returns a completely random emoji because why not
+ */
+export function getRandomEmoji(): string {
+  const emojis = ['🦄', '🌮', '🎸', '🚀', '🍕', '🎪', '🦖', '🌈', '💎', '🎯', '🔥', '⚡', '🌟', '🎭', '🎨'];
+  return emojis[Math.floor(Math.random() * emojis.length)];
+}
+
+/**
+ * Is it taco tuesday? (Spoiler: it's ALWAYS taco tuesday in your heart)
+ */
+export function isTacoTuesday(): boolean {
+  const day = new Date().getDay();
+  return day === 2 || Math.random() > 0.5; // Sometimes it's just... taco tuesday
+}
+
+/**
+ * Yells at you in all caps because REASONS
+ */
+export function YELL(text: string): string {
+  return `🔊 ${text.toUpperCase()} 🔊`;
+}
+
+/**
+ * The most important function ever written
+ * Returns the answer to life, the universe, and everything
+ */
+export function getMeaningOfLife(): number {
+  return 42;
+}
+
+/**
+ * Checks if a number is nice (you know what I mean)
+ */
+export function isNice(n: number): boolean {
+  return n === 69 || n === 420 || n.toString().includes('69');
+}
