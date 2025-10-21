@@ -4,6 +4,12 @@ import { ThemeToggle } from '@/components/theme-toggle';
 import { Card, CardContent } from '@/components/ui/card';
 import { useDebounce } from '@/lib/client-utils';
 import { DEFAULT_START_DATE } from '@/lib/constants';
+import { 
+  KonamiCodeDetector, 
+  logConsoleArt, 
+  getSpecialDay,
+  EASTER_EGG_MESSAGES 
+} from '@/lib/chaos-mode';
 import type {
   DateRange,
   DevTool,
@@ -53,6 +59,11 @@ export default function LeaderboardChart() {
   const [metric, setMetric] = useState<'active_repos' | 'pr_reviews'>(
     'pr_reviews'
   );
+  
+  // 🎪 CHAOS MODE STATES 🎪
+  const [chaosMode, setChaosMode] = useState<boolean>(false);
+  const [partyMode, setPartyMode] = useState<boolean>(false);
+  const konamiDetectorRef = useRef<KonamiCodeDetector | null>(null);
 
   const baseUrl =
     typeof window !== 'undefined' && window.location.hostname !== 'localhost'
@@ -137,6 +148,44 @@ export default function LeaderboardChart() {
     }
   }, [stats]);
 
+  // 🎪 EASTER EGG: Konami Code Detection 🎪
+  useEffect(() => {
+    if (!konamiDetectorRef.current) {
+      konamiDetectorRef.current = new KonamiCodeDetector(() => {
+        setChaosMode(true);
+        setPartyMode(true);
+        logConsoleArt();
+        alert(EASTER_EGG_MESSAGES[Math.floor(Math.random() * EASTER_EGG_MESSAGES.length)] + 
+          "\n\n🎉 PARTY MODE ACTIVATED! 🎉\n\nPress 'C' to toggle chaos mode!");
+      });
+    }
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      konamiDetectorRef.current?.handleKeyPress(e.key);
+      
+      // Press 'C' to toggle chaos mode (if unlocked)
+      if (chaosMode && e.key.toLowerCase() === 'c') {
+        setPartyMode(prev => !prev);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [chaosMode]);
+
+  // 🎨 Log special day messages
+  useEffect(() => {
+    const specialDay = getSpecialDay();
+    if (specialDay) {
+      console.log(`%c${specialDay}`, 'font-size: 20px; color: #ff00ff; font-weight: bold;');
+    }
+    
+    // Secret console message for curious developers
+    console.log('%c👋 Hey there, curious developer!', 'font-size: 16px; color: #00ffff; font-weight: bold;');
+    console.log('%cTry the Konami code: ↑ ↑ ↓ ↓ ← → ← → B A', 'color: #ffaa00;');
+    console.log('%cOr just check out the source on GitHub! 🚀', 'color: #00ff00;');
+  }, []);
+
   // TODO not sure if this is working properly
   // After the main stats load, prefetch the other window type in the background
   useEffect(() => {
@@ -185,14 +234,33 @@ export default function LeaderboardChart() {
   // Remove passthroughs for getXAxisTicks and xAxisTickFormatter
 
   return (
-    <div className="w-full max-w-none xl:max-w-7xl xl:mx-auto space-y-6">
+    <div className={`w-full max-w-none xl:max-w-7xl xl:mx-auto space-y-6 ${partyMode ? 'party-mode-active' : ''}`}>
+      {partyMode && (
+        <style>{`
+          @keyframes rainbow-bg {
+            0% { filter: hue-rotate(0deg); }
+            100% { filter: hue-rotate(360deg); }
+          }
+          .party-mode-active {
+            animation: rainbow-bg 5s linear infinite;
+          }
+          @keyframes wiggle {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(1deg); }
+            75% { transform: rotate(-1deg); }
+          }
+          .party-mode-active h1 {
+            animation: wiggle 0.5s ease-in-out infinite;
+          }
+        `}</style>
+      )}
       <div className="text-center relative mx-4 sm:mx-6 mt-4 sm:mt-6">
         <div className="absolute top-[-0.5em] right-[-0.5em] sm:top-0 sm:right-0">
           <ThemeToggle />
         </div>
         <div className="flex justify-center">
           <h1 className="text-2xl sm:text-4xl font-bold mb-2 max-w-[70%]">
-            AI Code Review Adoption Tracker
+            AI Code Review Adoption Tracker {partyMode && '🎉🎊✨'}
           </h1>
         </div>
         {/* <p className="text-muted-foreground text-sm sm:text-base">

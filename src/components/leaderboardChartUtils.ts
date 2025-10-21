@@ -1,21 +1,32 @@
+// 🛠️ Leaderboard Chart Utilities
+// Where we make numbers look pretty and charts go brrr 📊
+
 import { DevTool } from '@/types/api';
 import { formatInTimeZone } from 'date-fns-tz';
 
+/**
+ * Get the display name for a tool
+ * Because showing "Tool 42" is so... uninspiring
+ */
 export function getToolDisplayName(
   toolId: number,
   devtools: DevTool[]
 ): string {
   const devtool = devtools.find((dt) => dt.id === toolId);
-  return devtool ? devtool.name : `Tool ${toolId}`;
+  return devtool ? devtool.name : `Tool ${toolId}`; // Mystery tool! 🕵️
 }
 
+/**
+ * Get the color for a tool based on theme
+ * Dark mode users are people too! 🌙
+ */
 export function getToolColor(
   toolId: number,
   devtools: DevTool[],
   theme?: string
 ): string {
   const devtool = devtools.find((dt) => dt.id === toolId);
-  if (!devtool) return '#8884d8';
+  if (!devtool) return '#8884d8'; // Default mystery color 🎨
   if (theme === 'dark' && devtool.brand_color_dark) {
     return devtool.brand_color_dark;
   }

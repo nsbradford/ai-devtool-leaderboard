@@ -116,6 +116,46 @@ pnpm run backfill-bot-reviews --start 2025-01-01 --end 2025-05-01
 pnpm run backfill-bot-reviews --start 2025-01-01 --end 2025-05-01  --new-bots-only
 ```
 
+## 🎪 Easter Eggs & Fun Features
+
+Because every serious project needs a little chaos! 🎉
+
+### Secret Features
+- **Konami Code**: Try entering `↑ ↑ ↓ ↓ ← → ← → B A` on the main page for a surprise!
+- **Chaos API**: Hit `/api/chaos` for random developer wisdom and questionable advice
+- **Hidden Console Messages**: Open your browser console to find secret messages for curious developers
+- **Party Mode**: After unlocking chaos mode, press 'C' to toggle party mode! 🎊
+
+### Chaos API Examples
+
+Get random chaos:
+```bash
+curl https://aitooltracker.dev/api/chaos
+```
+
+Ask the Magic 8-Ball:
+```bash
+curl -X POST https://aitooltracker.dev/api/chaos \
+  -H "Content-Type: application/json" \
+  -d '{"question": "Should I push to production on Friday?"}'
+```
+
+### Fun Utilities
+
+Check out `src/lib/utils.ts` for:
+- `generateRandomExcuse()` - Random excuses for broken code
+- `canDeployToProduction()` - Checks if it's safe to deploy (spoiler: never on Friday!)
+- `calculateDeveloperHappiness()` - Based on coffee, bugs, and meetings
+- `getDebugMotivation()` - Motivational messages for debugging sessions
+
+### The Secret File
+
+Check out `.secrets-but-not-really.md` for a complete guide to all the hidden features!
+
+---
+
+*Remember: The chaos is optional, but the fun is mandatory!* ✨
+
 ## License
 
 This project is open source and available under the [MIT License](LICENSE).

@@ -15,7 +15,9 @@
     "backfill-bot-reviews": "tsx scripts/backfill-bot-reviews.ts",
     "backfill-star-counts": "tsx scripts/backfill-star-counts.ts",
     "backfill-active-repos": "tsx scripts/backfill-active-repos.ts",
-    "setup-db": "tsx scripts/setup-database.ts"
+    "setup-db": "tsx scripts/setup-database.ts",
+    "chaos": "tsx scripts/chaos-generator.ts",
+    "fortune": "tsx scripts/chaos-generator.ts"
   },
   "dependencies": {
     "@google-cloud/bigquery": "^7.0.0",

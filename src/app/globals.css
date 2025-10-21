@@ -120,3 +120,58 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* 🎪 CHAOS MODE STYLES - Where the magic happens ✨ */
+/* Hidden animations activated by chaos mode! */
+
+@keyframes wiggle {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(1deg); }
+  50% { transform: rotate(0deg); }
+  75% { transform: rotate(-1deg); }
+}
+
+@keyframes rainbow-text {
+  0% { filter: hue-rotate(0deg); }
+  100% { filter: hue-rotate(360deg); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 5px rgba(139, 92, 246, 0.5); }
+  50% { box-shadow: 0 0 20px rgba(139, 92, 246, 0.8); }
+}
+
+@keyframes bounce-subtle {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+/* Secret chaos utility classes! Add these to elements for instant fun! */
+.chaos-wiggle { animation: wiggle 0.5s ease-in-out infinite; }
+.chaos-rainbow { animation: rainbow-text 3s linear infinite; }
+.chaos-glow { animation: pulse-glow 2s ease-in-out infinite; }
+.chaos-bounce { animation: bounce-subtle 1s ease-in-out infinite; }
+
+/* Even more chaos utilities (use responsibly!) */
+.rotate-slightly { transform: rotate(0.5deg); }
+.rotate-slightly-reverse { transform: rotate(-0.5deg); }
+
+/* Matrix mode (for future features) */
+.matrix-text {
+  font-family: 'Courier New', monospace;
+  color: #00ff00;
+  text-shadow: 0 0 5px #00ff00;
+}
+
+/* Glitch effect */
+@keyframes glitch {
+  0% { transform: translate(0); }
+  20% { transform: translate(-2px, 2px); }
+  40% { transform: translate(-2px, -2px); }
+  60% { transform: translate(2px, 2px); }
+  80% { transform: translate(2px, -2px); }
+  100% { transform: translate(0); }
+}
+.glitch { animation: glitch 0.3s infinite; }
+
+/* 🎨 End of chaos - Resume normal programming */
