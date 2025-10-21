@@ -1,0 +1,7 @@
+def snake_to_camel(value: str) -> str:
+    """Convert a snake_case string to camelCase."""
+    parts = value.split('_')
+    if not parts:
+        return ''
+    first, *rest = parts
+    return first.lower() + ''.join(p.capitalize() for p in rest)
