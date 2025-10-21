@@ -8,6 +8,14 @@ import { getLeaderboardDataForDateRange } from '@/lib/postgres/bot_reviews_daily
 import { getSecondsUntilCacheReset } from '@/lib/utils';
 import { DEFAULT_START_DATE } from '@/lib/constants';
 
+/**
+ * API endpoint to fetch leaderboard data showing active repository counts by bot.
+ * 
+ * Query parameters:
+ * - viewType: 'weekly' | 'monthly' (default: 'weekly') - Time window for aggregation
+ * 
+ * @returns LeaderboardData with timestamps and tool repository counts
+ */
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);

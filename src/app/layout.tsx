@@ -112,6 +112,15 @@ export const metadata: Metadata = {
   },
 };
 
+/**
+ * Root layout component that wraps all pages in the application.
+ * 
+ * Features:
+ * - Sets up fonts (Geist Sans and Geist Mono)
+ * - Configures theme provider for dark/light mode
+ * - Includes Google Analytics tracking
+ * - Adds structured data (JSON-LD) for SEO
+ */
 export default function RootLayout({
   children,
 }: Readonly<{

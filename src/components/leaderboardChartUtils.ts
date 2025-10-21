@@ -1,6 +1,13 @@
 import { DevTool } from '@/types/api';
 import { formatInTimeZone } from 'date-fns-tz';
 
+/**
+ * Get the display name for a development tool.
+ * 
+ * @param toolId - The ID of the tool
+ * @param devtools - Array of all dev tools
+ * @returns The tool's display name or a fallback string
+ */
 export function getToolDisplayName(
   toolId: number,
   devtools: DevTool[]
@@ -9,6 +16,14 @@ export function getToolDisplayName(
   return devtool ? devtool.name : `Tool ${toolId}`;
 }
 
+/**
+ * Get the brand color for a development tool based on the current theme.
+ * 
+ * @param toolId - The ID of the tool
+ * @param devtools - Array of all dev tools
+ * @param theme - Current theme ('dark' or 'light')
+ * @returns The tool's brand color or a default color
+ */
 export function getToolColor(
   toolId: number,
   devtools: DevTool[],
@@ -22,6 +37,13 @@ export function getToolColor(
   return devtool.brand_color;
 }
 
+/**
+ * Get the website URL for a development tool.
+ * 
+ * @param toolId - The ID of the tool
+ * @param devtools - Array of all dev tools
+ * @returns The tool's website URL or undefined
+ */
 export function getToolWebsiteUrl(
   toolId: number,
   devtools: DevTool[]
@@ -30,6 +52,12 @@ export function getToolWebsiteUrl(
   return devtool?.website_url;
 }
 
+/**
+ * Calculate optimal X-axis tick positions for a chart based on the data range.
+ * 
+ * @param chartData - Array of chart data points with timestamps
+ * @returns Array of timestamp values in milliseconds to use as tick positions
+ */
 export function getXAxisTicksUTC(
   chartData: { timestampMs: number }[]
 ): number[] {
@@ -61,6 +89,12 @@ export function getXAxisTicksUTC(
   return chartData.filter((_, i) => i % step === 0).map((p) => p.timestampMs);
 }
 
+/**
+ * Format a timestamp for X-axis tick labels in UTC.
+ * 
+ * @param tsMs - Timestamp in milliseconds
+ * @returns Formatted date string
+ */
 export const xAxisTickFormatterUTC = (tsMs: number): string => {
   const dt = new Date(tsMs);
 
@@ -74,6 +108,14 @@ export const xAxisTickFormatterUTC = (tsMs: number): string => {
 
   return formatInTimeZone(dt, 'UTC', 'MMM d'); // “Jul 18”
 };
+
+/**
+ * Get the title and description for a chart based on metric and view type.
+ * 
+ * @param metric - The metric being displayed ('active_repos' or 'pr_reviews')
+ * @param viewType - The time window type ('weekly' or 'monthly')
+ * @returns Object containing chartTitle and chartDescription
+ */
 export function getChartTitleAndDescription(
   metric: 'active_repos' | 'pr_reviews',
   viewType: 'weekly' | 'monthly'

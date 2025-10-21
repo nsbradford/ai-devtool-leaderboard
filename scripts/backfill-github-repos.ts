@@ -5,6 +5,10 @@ import { backfillStarCounts } from '../src/lib/backfill/github-repositories';
 
 dotenv.config({ path: '.env.local' });
 
+/**
+ * Main entry point for the GitHub repositories star count backfill script.
+ * Parses command-line arguments and triggers the backfill process.
+ */
 async function main(): Promise<void> {
   const argv = await yargs(hideBin(process.argv))
     .option('repos', {

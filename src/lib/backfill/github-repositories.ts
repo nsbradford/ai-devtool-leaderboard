@@ -5,6 +5,14 @@ import {
 } from '@/lib/postgres/github_repositories_by_name';
 import { GitHubApi } from '../github-api';
 
+/**
+ * Backfill star counts for repositories in batches with rate limiting.
+ * 
+ * @param repos - Maximum number of repositories to process
+ * @param daysBack - Number of days to look back for active repositories (default: 30)
+ * @param maxAgeDays - Maximum age of existing star count data before refresh (default: 7)
+ * @returns Promise that resolves when backfill is complete
+ */
 export async function backfillStarCounts(
   repos: number,
   daysBack: number = 30,

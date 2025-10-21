@@ -12,6 +12,9 @@ import Image from 'next/image';
 import React from 'react';
 import { DevTool } from '@/types/api';
 
+/**
+ * Props for the LeaderboardChartControls component.
+ */
 interface LeaderboardChartControlsProps {
   displayDateRange: { startDate: string; endDate: string };
   setDisplayDateRange: (range: { startDate: string; endDate: string }) => void;
@@ -36,6 +39,16 @@ interface LeaderboardChartControlsProps {
   METRIC_OPTIONS: { value: string; label: string }[];
 }
 
+/**
+ * Control panel component for the leaderboard chart.
+ * 
+ * Provides UI controls for:
+ * - Date range selection (presets and custom dates)
+ * - Time window toggle (weekly/monthly)
+ * - Scale type toggle (linear/log)
+ * - Tool/series selection with search
+ * - Metric selection (active repos vs PR reviews)
+ */
 export function LeaderboardChartControls({
   displayDateRange,
   setDisplayDateRange,

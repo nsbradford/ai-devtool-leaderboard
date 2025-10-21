@@ -1,6 +1,10 @@
-// Sourcery is the only tool with data before CodeRabbit (which starts ~2023-07-01).
-// And had relatively stable review counts before that, so not super interesting to render.
-// export const BACKFILL_START_DATE = '2022-11-29'; // we have populated data in the DB back until this date
+/**
+ * Default start date for leaderboard data.
+ * 
+ * Sourcery is the only tool with data before CodeRabbit (which starts ~2023-07-01).
+ * And had relatively stable review counts before that, so not super interesting to render.
+ * Note: we have populated data in the DB back until 2022-11-29.
+ */
 export const DEFAULT_START_DATE = '2023-07-01';
 
 /**
@@ -22,4 +26,9 @@ WHERE
 2025-05: 981448
 2025-06: 964915
 */
+
+/**
+ * Approximate number of active repositories monthly.
+ * Based on GitHub Archive data showing repos with opened PRs.
+ */
 export const ACTIVE_REPOS_MONTHLY = '~1M';

@@ -2,6 +2,19 @@ import { DevTool } from '@/types/api';
 import React from 'react';
 import type { LegendPayload } from 'recharts/types/component/DefaultLegendContent';
 
+/**
+ * Custom legend component for the chart with interactive tool selection.
+ * 
+ * Features:
+ * - Displays colored boxes with tool names
+ * - Click to toggle visibility of individual tools
+ * - Visual feedback for selected/deselected state
+ * 
+ * @param payload - Legend data from Recharts
+ * @param selectedTools - Set of currently selected tool IDs
+ * @param setSelectedTools - Callback to update selected tools
+ * @param devtools - Array of dev tool metadata
+ */
 export function CustomLegend({
   payload,
   selectedTools,

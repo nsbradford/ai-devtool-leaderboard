@@ -1,5 +1,10 @@
 import { MetadataRoute } from 'next';
 
+/**
+ * Generates the sitemap for search engines.
+ * 
+ * @returns Array of sitemap entries with URLs, priorities, and update frequencies
+ */
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = 'https://www.aitooltracker.dev';
 

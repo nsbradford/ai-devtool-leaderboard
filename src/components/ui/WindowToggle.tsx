@@ -1,6 +1,12 @@
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { cn } from '@/lib/utils';
 
+/**
+ * Toggle component for switching between weekly (7-day) and monthly (30-day) time windows.
+ * 
+ * @param value - Current window type ('weekly' or 'monthly')
+ * @param onChange - Callback when window type changes
+ */
 export function WindowToggle({
   value,
   onChange,

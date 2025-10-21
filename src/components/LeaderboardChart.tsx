@@ -20,6 +20,13 @@ import { getToolColor, getToolDisplayName } from './leaderboardChartUtils';
 import LeaderboardChartAndRankings from './LeaderboardChartAndRankings';
 import LeaderboardChartSkeleton from './LeaderboardChartSkeleton';
 
+/**
+ * Fetcher function for SWR data fetching.
+ * 
+ * @param url - URL to fetch data from
+ * @returns Promise with the parsed JSON response
+ * @throws Error if the fetch request fails
+ */
 const fetcher = async (url: string) => {
   const response = await fetch(url);
   if (!response.ok) {
@@ -36,6 +43,13 @@ const METRIC_OPTIONS: {
   { value: 'pr_reviews', label: 'PR Reviews' },
 ];
 
+/**
+ * Main leaderboard chart component that orchestrates data fetching, filtering,
+ * and rendering of the AI code review adoption tracker dashboard.
+ * 
+ * Manages state for date ranges, view types, selected tools, and chart scale.
+ * Fetches leaderboard data, devtools metadata, and top repositories.
+ */
 export default function LeaderboardChart() {
   const [displayDateRange, setDisplayDateRange] = useState<DateRange>({
     startDate: DEFAULT_START_DATE,

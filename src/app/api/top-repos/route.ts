@@ -3,6 +3,15 @@ import type { TopReposByDevtool } from '@/types/api';
 import { getTopStarredReposByDevtool } from '@/lib/postgres/github_repositories_by_name';
 import { getSecondsUntilCacheReset } from '@/lib/utils';
 
+/**
+ * API endpoint to fetch top starred repositories for each dev tool.
+ * 
+ * Query parameters:
+ * - limit: number (1-20, default: 5) - Number of top repos to return per tool
+ * - daysBack: number (1-365, default: 30) - Number of days to look back for activity
+ * 
+ * @returns TopReposByDevtool mapping tool IDs to their top repositories
+ */
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);

@@ -24,6 +24,9 @@ import {
 import { LeaderboardRankings } from './LeaderboardRankings';
 import type { ChartDataPoint } from './interfaces';
 
+/**
+ * Props for the LeaderboardChartAndRankings component.
+ */
 interface LeaderboardChartAndRankingsProps {
   filteredStats: {
     timestamps: number[];
@@ -53,6 +56,14 @@ interface LeaderboardChartAndRankingsProps {
   topRepos: TopReposByDevtool | undefined;
 }
 
+/**
+ * Combined component that displays both the chart and rankings panels.
+ * 
+ * Orchestrates:
+ * - Chart controls (date range, view type, scale, filters)
+ * - Line chart visualization
+ * - Current rankings list with top repositories
+ */
 const LeaderboardChartAndRankings: React.FC<
   LeaderboardChartAndRankingsProps
 > = ({

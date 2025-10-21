@@ -17,11 +17,19 @@ import { formatStarCount } from '@/lib/utils';
 import { DevTool, TopReposByDevtool } from '@/types/api';
 import React, { useState } from 'react';
 
+/**
+ * Represents a single item in the rankings list.
+ */
 interface RankingItem {
+  /** Tool/bot ID */
   id: number;
+  /** Current count value (repos or reviews) */
   current_count: number;
 }
 
+/**
+ * Props for the LeaderboardRankings component.
+ */
 interface LeaderboardRankingsProps {
   rankings: RankingItem[];
   devtools: DevTool[];
@@ -33,6 +41,15 @@ interface LeaderboardRankingsProps {
   activeReposMonthly: string;
 }
 
+/**
+ * Rankings display component showing current leaderboard standings.
+ * 
+ * Features:
+ * - Displays ranked list of dev tools with current counts
+ * - Shows tool avatars and names with website links
+ * - Displays top repositories for each tool (with star counts)
+ * - Responsive layout with mobile popover and desktop inline views
+ */
 export function LeaderboardRankings({
   rankings,
   devtools,

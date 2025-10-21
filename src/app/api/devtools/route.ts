@@ -1,6 +1,11 @@
 import devtoolsData from '@/devtools.json';
 import { getSecondsUntilCacheReset } from '@/lib/utils';
 
+/**
+ * API endpoint to fetch the list of tracked development tools/bots.
+ * 
+ * @returns Array of DevTool objects with metadata for each tracked bot
+ */
 export async function GET() {
   const ttlSeconds = getSecondsUntilCacheReset(); // e.g. 86 400-now()
   const swrSeconds = 60; // how long to serve stale while revalidating

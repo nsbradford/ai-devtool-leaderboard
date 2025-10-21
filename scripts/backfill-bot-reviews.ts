@@ -27,15 +27,24 @@ function getNewlyAddedBotIds(): number[] {
     .map((bot) => bot.id);
 }
 
-// Semaphore class for controlling concurrency
+/**
+ * Semaphore class for controlling concurrency of async operations.
+ */
 class Semaphore {
   private permits: number;
   private waitQueue: Array<() => void> = [];
 
+  /**
+   * Create a new Semaphore.
+   * @param permits - Maximum number of concurrent operations allowed
+   */
   constructor(permits: number) {
     this.permits = permits;
   }
 
+  /**
+   * Acquire a permit, waiting if none are available.
+   */
   async acquire(): Promise<void> {
     if (this.permits > 0) {
       this.permits--;
@@ -47,6 +56,9 @@ class Semaphore {
     });
   }
 
+  /**
+   * Release a permit, allowing waiting operations to proceed.
+   */
   release(): void {
     this.permits++;
     if (this.waitQueue.length > 0) {
@@ -59,16 +71,33 @@ class Semaphore {
   }
 }
 
+/**
+ * Format a Date object as YYYY-MM-DD string.
+ * @param date - Date to format
+ * @returns Formatted date string
+ */
 function formatDate(date: Date): string {
   return date.toISOString().split('T')[0];
 }
 
+/**
+ * Add days to a date.
+ * @param date - Starting date
+ * @param days - Number of days to add (can be negative)
+ * @returns New date object
+ */
 function addDays(date: Date, days: number): Date {
   const result = new Date(date);
   result.setDate(result.getDate() + days);
   return result;
 }
 
+/**
+ * Process bot reviews for a single date with semaphore control.
+ * @param targetDate - Date to process in YYYY-MM-DD format
+ * @param semaphore - Semaphore for controlling concurrency
+ * @param botIds - Optional array of bot IDs to filter by
+ */
 async function processDate(
   targetDate: string,
   semaphore: Semaphore,
@@ -86,6 +115,14 @@ async function processDate(
   }
 }
 
+/**
+ * Backfill bot reviews data for a date range with controlled concurrency.
+ * 
+ * @param startDate - Start date of the range
+ * @param endDate - End date of the range (inclusive)
+ * @param maxConcurrency - Maximum number of concurrent operations (default: 4)
+ * @param botIds - Optional array of bot IDs to filter by
+ */
 async function backfillBotReviewsDateRange(
   startDate: Date,
   endDate: Date,
@@ -150,6 +187,10 @@ async function backfillBotReviewsDateRange(
   await refreshMaterializedViewsConcurrently();
 }
 
+/**
+ * Main entry point for the bot reviews backfill script.
+ * Parses command-line arguments and orchestrates the backfill process.
+ */
 async function main(): Promise<void> {
   const argv = await yargs(hideBin(process.argv))
     .option('days', {

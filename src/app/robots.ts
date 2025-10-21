@@ -1,5 +1,10 @@
 import { MetadataRoute } from 'next';
 
+/**
+ * Generates the robots.txt configuration for search engine crawlers.
+ * 
+ * @returns Robots metadata with crawling rules and sitemap location
+ */
 export default function robots(): MetadataRoute.Robots {
   return {
     rules: {

@@ -20,6 +20,9 @@ import {
 import type { ChartDataPoint } from './interfaces';
 import { formatInTimeZone } from 'date-fns-tz';
 
+/**
+ * Props for the LeaderboardChartGraph component.
+ */
 interface LeaderboardChartGraphProps {
   chartData: ChartDataPoint[];
   selectedTools: Set<number>;
@@ -32,6 +35,15 @@ interface LeaderboardChartGraphProps {
   resolvedTheme: string | undefined;
 }
 
+/**
+ * Line chart graph component for displaying leaderboard data over time.
+ * 
+ * Features:
+ * - Responsive chart with configurable linear/log scale
+ * - Custom tooltips with formatted dates and values
+ * - Custom legend with tool selection
+ * - Theme-aware styling
+ */
 export function LeaderboardChartGraph({
   chartData,
   selectedTools,

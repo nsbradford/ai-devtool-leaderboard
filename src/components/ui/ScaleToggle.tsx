@@ -1,6 +1,12 @@
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { cn } from '@/lib/utils';
 
+/**
+ * Toggle component for switching between linear and logarithmic chart scales.
+ * 
+ * @param value - Current scale type ('linear' or 'log')
+ * @param onChange - Callback when scale changes
+ */
 export function ScaleToggle({
   value,
   onChange,
