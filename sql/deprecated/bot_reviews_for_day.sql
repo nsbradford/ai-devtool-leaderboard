@@ -1,3 +1,5 @@
+-- Copyright 2025 Anysphere Inc.
+
 -- bot_reviews_for_day.sql
 -- Call with:  --parameter='target_date:DATE:2025-07-12'
 

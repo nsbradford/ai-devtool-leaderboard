@@ -1,3 +1,5 @@
+// Copyright 2025 Anysphere Inc.
+
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { cn } from '@/lib/utils';
 

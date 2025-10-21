@@ -1,3 +1,5 @@
+// Copyright 2025 Anysphere Inc.
+
 'use client';
 
 import { useEffect, useState } from 'react';

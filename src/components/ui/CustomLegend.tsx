@@ -1,3 +1,5 @@
+// Copyright 2025 Anysphere Inc.
+
 import { DevTool } from '@/types/api';
 import React from 'react';
 import type { LegendPayload } from 'recharts/types/component/DefaultLegendContent';

@@ -1,5 +1,7 @@
+-- Copyright 2025 Anysphere Inc.
+
 /* -----------------------------------------------------------------
-   One row per GitHub repository (full “owner/name” string)
+   One row per GitHub repository (full "owner/name" string)
    ----------------------------------------------------------------- */
 CREATE TABLE IF NOT EXISTS github_repositories (
   node_id     TEXT        PRIMARY KEY,
@@ -127,4 +129,3 @@ GROUP BY c.event_date, bu.bot_id;
 
 CREATE UNIQUE INDEX mv_bot_reviews_user_30d_pk
   ON mv_bot_reviews_user_30d (event_date, bot_id);
-

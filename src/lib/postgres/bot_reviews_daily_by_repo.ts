@@ -1,3 +1,5 @@
+// Copyright 2025 Anysphere Inc.
+
 import { neon } from '@neondatabase/serverless';
 import {
   BotReviewInRepoDate,

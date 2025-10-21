@@ -1,3 +1,5 @@
+// Copyright 2025 Anysphere Inc.
+
 import { DevTool } from '@/types/api';
 import { formatInTimeZone } from 'date-fns-tz';
 

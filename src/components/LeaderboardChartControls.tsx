@@ -1,3 +1,5 @@
+// Copyright 2025 Anysphere Inc.
+
 import { Button } from '@/components/ui/button';
 import {
   Popover,

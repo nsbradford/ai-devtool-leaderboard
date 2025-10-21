@@ -1,3 +1,5 @@
+// Copyright 2025 Anysphere Inc.
+
 import { NextResponse } from 'next/server';
 import type { LeaderboardData, MaterializedViewType } from '@/types/api';
 import { getMaterializedReviewCountData } from '@/lib/postgres/bot_reviews_daily_by_repo';

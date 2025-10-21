@@ -1,3 +1,5 @@
+// Copyright 2025 Anysphere Inc.
+
 import React from 'react';
 import {
   Card,

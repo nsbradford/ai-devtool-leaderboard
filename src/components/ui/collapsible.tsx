@@ -1,3 +1,5 @@
+// Copyright 2025 Anysphere Inc.
+
 'use client';
 
 import * as CollapsiblePrimitive from '@radix-ui/react-collapsible';

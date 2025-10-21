@@ -1,3 +1,5 @@
+// Copyright 2025 Anysphere Inc.
+
 import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {

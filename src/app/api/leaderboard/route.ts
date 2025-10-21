@@ -1,3 +1,5 @@
+// Copyright 2025 Anysphere Inc.
+
 import { NextResponse } from 'next/server';
 import type {
   LeaderboardData,

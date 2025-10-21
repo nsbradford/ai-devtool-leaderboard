@@ -1,3 +1,5 @@
+// Copyright 2025 Anysphere Inc.
+
 export interface BotReviewInRepoDate {
   event_date: string;
   repo_db_id: number;

@@ -1,5 +1,7 @@
+-- Copyright 2025 Anysphere Inc.
+
 /* -----------------------------------------------------------------
-   One row per GitHub repository (full “owner/name” string)
+   One row per GitHub repository (full "owner/name" string)
    ----------------------------------------------------------------- */
 
 -- graphql doesn't allow fetching by database_id, and BigQuery doesn't include node_id.
@@ -181,4 +183,3 @@ GROUP BY c.event_date, br.bot_id;
 
 CREATE UNIQUE INDEX mv_bot_reviews_stats_30d_pk
   ON mv_bot_reviews_stats_30d (event_date, bot_id);
-

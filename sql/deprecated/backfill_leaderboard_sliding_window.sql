@@ -1,3 +1,5 @@
+-- Copyright 2025 Anysphere Inc.
+
 -- backfill_leaderboard_by_bot_id.sql
 -- Example invocation:
 --   bq query --use_legacy_sql=false \

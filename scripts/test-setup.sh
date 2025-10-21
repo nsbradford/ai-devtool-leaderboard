@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# Copyright 2025 Anysphere Inc.
+
 # Script to simulate test setup with configurable sleep time and loading messages
 # Usage: ./test-setup.sh <sleep_seconds> <num_lines>
 

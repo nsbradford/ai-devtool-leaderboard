@@ -1,3 +1,5 @@
+// Copyright 2025 Anysphere Inc.
+
 import { MetadataRoute } from 'next';
 
 export default function sitemap(): MetadataRoute.Sitemap {

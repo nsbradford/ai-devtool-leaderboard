@@ -1,3 +1,5 @@
+-- Copyright 2025 Anysphere Inc.
+
 -- bot_reviews_daily.sql   (handles any year span)
 
 DECLARE period_start DATE DEFAULT @period_start;   -- inclusive

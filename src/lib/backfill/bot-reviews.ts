@@ -1,3 +1,5 @@
+// Copyright 2025 Anysphere Inc.
+
 import { getBotReviewsForDay } from '../bigquery';
 import { upsertBotReviewsForDate } from '../postgres/bot_reviews_daily_by_repo';
 

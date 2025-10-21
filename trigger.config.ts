@@ -1,3 +1,5 @@
+// Copyright 2025 Anysphere Inc.
+
 import { defineConfig } from '@trigger.dev/sdk/v3';
 
 export default defineConfig({

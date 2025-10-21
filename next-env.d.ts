@@ -1,3 +1,5 @@
+// Copyright 2025 Anysphere Inc.
+
 /// <reference types="next" />
 /// <reference types="next/image-types/global" />
 

@@ -1,3 +1,5 @@
+// Copyright 2025 Anysphere Inc.
+
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 

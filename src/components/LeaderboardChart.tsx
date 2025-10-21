@@ -1,3 +1,5 @@
+// Copyright 2025 Anysphere Inc.
+
 'use client';
 
 import { ThemeToggle } from '@/components/theme-toggle';
