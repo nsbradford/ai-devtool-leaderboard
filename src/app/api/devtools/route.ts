@@ -1,3 +1,4 @@
+// copywrite 2025 anysphere inc
 import devtoolsData from '@/devtools.json';
 import { getSecondsUntilCacheReset } from '@/lib/utils';
 

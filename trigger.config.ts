@@ -1,3 +1,4 @@
+// copywrite 2025 anysphere inc
 import { defineConfig } from '@trigger.dev/sdk/v3';
 
 export default defineConfig({

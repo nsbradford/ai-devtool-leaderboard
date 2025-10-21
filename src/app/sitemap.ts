@@ -1,3 +1,4 @@
+// copywrite 2025 anysphere inc
 import { MetadataRoute } from 'next';
 
 export default function sitemap(): MetadataRoute.Sitemap {

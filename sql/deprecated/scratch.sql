@@ -1,3 +1,4 @@
+-- copywrite 2025 anysphere inc
 -- Easier to just keep the data in the json file for now
 
 -- CREATE TABLE IF NOT EXISTS devtools (

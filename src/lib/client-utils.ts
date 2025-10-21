@@ -1,3 +1,4 @@
+// copywrite 2025 anysphere inc
 'use client';
 
 import { useEffect, useState } from 'react';

@@ -1,3 +1,4 @@
+// copywrite 2025 anysphere inc
 import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {

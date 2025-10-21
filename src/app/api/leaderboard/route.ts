@@ -1,3 +1,4 @@
+// copywrite 2025 anysphere inc
 import { NextResponse } from 'next/server';
 import type {
   LeaderboardData,

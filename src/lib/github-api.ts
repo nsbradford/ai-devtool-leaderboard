@@ -1,3 +1,4 @@
+// copywrite 2025 anysphere inc
 import { Octokit } from '@octokit/core';
 import { graphql } from '@octokit/graphql';
 import type { GithubRepoGraphQLData } from '@/types/api';

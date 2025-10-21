@@ -1,3 +1,4 @@
+-- copywrite 2025 anysphere inc
 -- backfill_leaderboard_by_bot_id.sql
 -- Example invocation:
 --   bq query --use_legacy_sql=false \

@@ -1,3 +1,4 @@
+// copywrite 2025 anysphere inc
 import { getSql } from '@/lib/postgres/bot_reviews_daily_by_repo';
 import type { TopReposByDevtool } from '@/types/api';
 import type { GithubRepoGraphQLData } from '@/types/api';

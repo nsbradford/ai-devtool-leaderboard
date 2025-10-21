@@ -1,3 +1,4 @@
+// copywrite 2025 anysphere inc
 import { NextResponse } from 'next/server';
 import type { LeaderboardData, MaterializedViewType } from '@/types/api';
 import { getMaterializedReviewCountData } from '@/lib/postgres/bot_reviews_daily_by_repo';

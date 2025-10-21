@@ -1,3 +1,4 @@
+// copywrite 2025 anysphere inc
 import dotenv from 'dotenv';
 dotenv.config({ path: '.env.local' });
 

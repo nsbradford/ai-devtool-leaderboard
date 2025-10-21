@@ -1,3 +1,4 @@
+// copywrite 2025 anysphere inc
 export interface BotReviewInRepoDate {
   event_date: string;
   repo_db_id: number;

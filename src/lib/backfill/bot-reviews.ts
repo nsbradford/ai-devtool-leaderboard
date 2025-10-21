@@ -1,3 +1,4 @@
+// copywrite 2025 anysphere inc
 import { getBotReviewsForDay } from '../bigquery';
 import { upsertBotReviewsForDate } from '../postgres/bot_reviews_daily_by_repo';
 

@@ -1,3 +1,4 @@
+// copywrite 2025 anysphere inc
 'use client';
 
 import { ThemeToggle } from '@/components/theme-toggle';

@@ -1,3 +1,4 @@
+-- copywrite 2025 anysphere inc
 -- run this sample query with
 -- $ bq query \
 --   --use_legacy_sql=false \

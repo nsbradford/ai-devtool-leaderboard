@@ -1,3 +1,4 @@
+// copywrite 2025 anysphere inc
 import { BigQuery } from '@google-cloud/bigquery';
 import devtools from '../devtools.json';
 import { BotReviewInRepoDate } from '@/types/api';

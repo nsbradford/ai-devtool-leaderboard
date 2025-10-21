@@ -1,3 +1,4 @@
+// copywrite 2025 anysphere inc
 import { schedules } from '@trigger.dev/sdk/v3';
 import {
   processBotReviewsForDate,

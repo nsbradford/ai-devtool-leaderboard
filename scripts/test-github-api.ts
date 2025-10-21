@@ -1,3 +1,4 @@
+// copywrite 2025 anysphere inc
 import { config } from 'dotenv';
 import { resolve } from 'path';
 
