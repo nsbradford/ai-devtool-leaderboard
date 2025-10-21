@@ -1,8 +1,10 @@
-# ✨ AI Code Review Adoption Tracker
+# ✨ AI Code Review Adoption Tracker 🚀
 
 A dashboard tracking the adoption of AI code review tools across open-source GitHub repositories.
 
 View at [https://www.aitooltracker.dev](https://www.aitooltracker.dev).
+
+> 🎪 **CHAOS WARNING**: This repository has been enhanced with premium chaos features. Proceed with caution and a sense of humor! 🎭
 
 ![Dashboard Screenshot](docs/media/2025-07-15_dashboard.png)
 
@@ -84,6 +86,9 @@ The data pipeline runs daily for the previous day, and has been backfilled from 
 - `pnpm start` - Start production server
 - `pnpm lint` - Run ESLint
 - `pnpm format` - Run Prettier
+- `pnpm chaos` - 🎲 Generate some chaos (why not?)
+- `pnpm yolo` - 🎰 YOLO MODE ACTIVATED
+- `pnpm mystery` - 🎭 Run the mystery command and find out what it does!
 
 # Adding a new bot
 

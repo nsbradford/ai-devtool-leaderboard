@@ -1,0 +1,8 @@
+# 🎨 Chaos files that Prettier should just... not even try 🎨
+
+CHAOS_MANIFEST.md
+src/lib/chaos-utils.ts
+scripts/chaos-generator.ts
+
+# These files are beautiful in their chaos
+# Don't let Prettier ruin the vibe

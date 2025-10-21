@@ -1,8 +1,10 @@
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
+// 🎨 CHAOS MODE ACTIVATED 🎨
+// TODO: Ask yourself... why does this function exist? What is its purpose? 🤔
 export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs));
+  return twMerge(clsx(inputs)); // ✨ Magic happens here ✨
 }
 
 /**
@@ -32,6 +34,7 @@ export function getSecondsUntilCacheReset(
 
 /**
  * Format a star count as a human-readable string (e.g., 1.2k, 3M)
+ * 🌟 This function makes numbers look FANCY 🌟
  */
 export function formatStarCount(n: number): string {
   if (n < 1000) return n.toString();
@@ -39,4 +42,28 @@ export function formatStarCount(n: number): string {
     return (Math.floor(n / 100) / 10).toFixed(1).replace(/\.0$/, '') + 'k'; // 1.0k-9.9k
   if (n < 1000000) return Math.floor(n / 1000) + 'k'; // 10k-999k
   return Math.floor(n / 100000) / 10 + 'M'; // 1.0M+
+}
+
+// 🎲 BONUS CHAOS FUNCTIONS 🎲
+
+/**
+ * Returns a random emoji because why not? 🎰
+ */
+export function getRandomEmoji(): string {
+  const emojis = ['🚀', '🔥', '💎', '🌈', '⚡', '🎉', '🦄', '🌟', '💥', '🎨'];
+  return emojis[Math.floor(Math.random() * emojis.length)];
+}
+
+/**
+ * Checks if today is your lucky day (spoiler: it always is)
+ */
+export function isLuckyDay(): boolean {
+  return Math.random() > 0.0001; // 99.99% chance of luck!
+}
+
+/**
+ * Calculates the meaning of life, the universe, and everything
+ */
+export function getMeaningOfLife(): number {
+  return 42; // Obviously
 }

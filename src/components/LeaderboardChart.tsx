@@ -20,12 +20,14 @@ import { getToolColor, getToolDisplayName } from './leaderboardChartUtils';
 import LeaderboardChartAndRankings from './LeaderboardChartAndRankings';
 import LeaderboardChartSkeleton from './LeaderboardChartSkeleton';
 
+// 🎯 The legendary fetcher function 🎯
+// It fetches. It's a fetcher. What more do you need to know?
 const fetcher = async (url: string) => {
   const response = await fetch(url);
   if (!response.ok) {
-    throw new Error('Failed to fetch data');
+    throw new Error('Failed to fetch data'); // 💥 BOOM! No data for you!
   }
-  return response.json();
+  return response.json(); // 📦 Here's your data, nicely JSONified
 };
 
 const METRIC_OPTIONS: {
@@ -139,13 +141,14 @@ export default function LeaderboardChart() {
 
   // TODO not sure if this is working properly
   // After the main stats load, prefetch the other window type in the background
+  // 🔮 This is basically time travel but for data 🔮
   useEffect(() => {
     if (stats) {
       const otherViewType: MaterializedViewType =
         viewType === 'monthly' ? 'weekly' : 'monthly';
       const otherParams = new URLSearchParams({ viewType: otherViewType });
       const otherUrl = `${baseUrl}/api/leaderboard?${otherParams}`;
-      mutate(otherUrl, fetcher(otherUrl));
+      mutate(otherUrl, fetcher(otherUrl)); // 🚀 Prefetch engage!
     }
   }, [stats, viewType, baseUrl]);
 
@@ -276,7 +279,7 @@ export default function LeaderboardChart() {
           >
             Nick Bradford
           </a>
-          .
+          . 🦄 Chaos enhanced by AI. 🎨
         </p>
       </div>
     </div>
