@@ -15,7 +15,16 @@
     "backfill-bot-reviews": "tsx scripts/backfill-bot-reviews.ts",
     "backfill-star-counts": "tsx scripts/backfill-star-counts.ts",
     "backfill-active-repos": "tsx scripts/backfill-active-repos.ts",
-    "setup-db": "tsx scripts/setup-database.ts"
+    "setup-db": "tsx scripts/setup-database.ts",
+    "🚀": "echo '🚀 BLAST OFF! Launching development server...' && npm run dev",
+    "yolo": "echo '🎲 YOLO MODE ACTIVATED! Building without tests...' && npm run build",
+    "pray": "echo '🙏 Praying to the code gods...' && npm run lint && npm run build",
+    "chaos": "echo '🌪️ CHAOS MODE! Running random scripts...' && npm run lint",
+    "coffee": "echo '☕ Brewing coffee... Please wait...' && sleep 3 && echo '☕ Coffee ready! Time to code!'",
+    "motivation": "echo '💪 You got this! Keep coding!' && echo '🌟 Remember: There are no bugs, only happy accidents!'",
+    "rage-quit": "echo '😤 Taking a break... Come back when you are ready!' && exit 1",
+    "ship-it": "echo '🚢 SHIPPING IT! No regrets!' && npm run build && echo '📦 Shipped! Good luck! 🍀'",
+    "debug-life": "echo '🐛 Debugging life choices...' && npm run lint"
   },
   "dependencies": {
     "@google-cloud/bigquery": "^7.0.0",

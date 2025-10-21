@@ -14,6 +14,10 @@ const geistMono = Geist_Mono({
   subsets: ['latin'],
 });
 
+// 🎨 METADATA: The digital business card of our app!
+// Fun fact: Good metadata can increase your SEO by up to 300%! (citation needed 😅)
+// 🚀 This metadata is so good, it could write its own blog post!
+
 export const metadata: Metadata = {
   title: 'AI Code Review Adoption Tracker',
   description:
@@ -26,6 +30,8 @@ export const metadata: Metadata = {
     'code analysis',
     'machine learning',
     'software development',
+    // 🎉 Secret keywords for the algorithm gods:
+    // 'konami code', 'easter eggs', 'chaos mode', 'rainbow party' 🌈
   ],
   authors: [
     { name: 'Nick Bradford', url: 'https://www.nsbradford.com/#person' },
@@ -112,13 +118,21 @@ export const metadata: Metadata = {
   },
 };
 
+// 🏗️ ROOT LAYOUT: The foundation of all chaos and order!
+// This is where the magic happens. All roads lead to Rome, and all components lead here.
+// 💡 Pro tip: If you see weird stuff happening, it probably started here!
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // 🎪 Welcome to the circus! I mean... the layout!
+  // 🌟 Fun fact: This layout wraps around EVERYTHING. It's like a warm hug for your components.
+  
   return (
     <html lang="en" suppressHydrationWarning>
+      {/* 🎯 suppressHydrationWarning is here because we like to live dangerously */}
       <head>
         <Script
           src="https://www.googletagmanager.com/gtag/js?id=G-Y1ZFB5L3CP"

@@ -85,6 +85,44 @@ The data pipeline runs daily for the previous day, and has been backfilled from 
 - `pnpm lint` - Run ESLint
 - `pnpm format` - Run Prettier
 
+### 🎉 Secret Chaotic Scripts (Use at Your Own Risk!)
+
+- `pnpm 🚀` - BLAST OFF! Launches dev server with extra enthusiasm
+- `pnpm yolo` - Build without tests (living on the edge!)
+- `pnpm pray` - Pray to the code gods, then lint and build
+- `pnpm chaos` - Embrace the chaos (runs lint... for now)
+- `pnpm coffee` - Brew virtual coffee while you wait
+- `pnpm motivation` - Get a motivational boost when you need it
+- `pnpm rage-quit` - Take a break (exits with style)
+- `pnpm ship-it` - Ship it NOW! No regrets! 🚢
+- `pnpm debug-life` - Debug your life choices (runs lint)
+
+## 🎮 Easter Eggs & Hidden Features
+
+This application is LOADED with secret features! Can you find them all?
+
+### 🕹️ Konami Code
+Type the classic Konami code: `↑ ↑ ↓ ↓ ← → ← → B A` to unlock MAXIMUM CHAOS mode!
+
+### 🌈 Rainbow Mode  
+Press `Shift + R` to activate Rainbow Mode and watch your screen transform into a beautiful color party!
+
+### 🎨 Secret Themes
+Click the theme toggle button **5 times** to unlock secret theme options:
+- 🕺 **Disco Mode** - Party like it's 1999
+- 👾 **Matrix Mode** - Enter the Matrix
+- 🌈 **Rainbow Mode** - Taste the rainbow
+- 📼 **Retro Mode** - Welcome to 1995
+
+### 🎲 Developer Mantras
+Check your browser console for random developer wisdom! Every page load gives you a new mantra to live by.
+
+### 💡 Pro Tips
+- All keyboard shortcuts work anywhere in the app
+- Check HTML comments in the page source for more hints
+- The chaos indicator appears in the bottom-right when easter eggs are active
+- Some features might cause your screen to shake... that's a feature, not a bug!
+
 # Adding a new bot
 
 First, find an example of the bot out there in the wild to get its username (e.g. `cursor[bot]`). Then, use this command to get the bot's actual ID:

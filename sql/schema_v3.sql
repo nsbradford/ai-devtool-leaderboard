@@ -16,8 +16,11 @@ CREATE TABLE IF NOT EXISTS github_repositories_by_name (
 
 /* -----------------------------------------------------------------
    Core data
+   🚀 THE MAIN EVENT: Where the magic numbers live!
    ----------------------------------------------------------------- */
 -- we track # of reviews by repo to allow summing total number of reviews by bot.
+-- 🎪 This is where the party happens! Every review, every bot, every day!
+-- 💻 If this table could talk, it would say: "I've seen things you people wouldn't believe..."
 CREATE TABLE IF NOT EXISTS bot_reviews_daily_by_repo (
   event_date    DATE    NOT NULL,
   bot_id        BIGINT  NOT NULL,
@@ -39,6 +42,9 @@ CREATE TABLE IF NOT EXISTS bot_reviews_daily_by_user (
 
 /* -----------------------------------------------------------------
    Materialized views for repo data
+   📊 MATERIALIZED VIEWS: Pre-computed awesomeness!
+   🎯 These views are so fast, they make The Flash jealous!
+   ⚡ Fun fact: Materialized views are like meal prep for your database
    ----------------------------------------------------------------- */
 CREATE MATERIALIZED VIEW mv_bot_reviews_repo_7d AS
 WITH calendar AS (

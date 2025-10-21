@@ -120,3 +120,92 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* 🎨 CHAOS CSS ANIMATIONS 🎨 */
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-10px); }
+  20%, 40%, 60%, 80% { transform: translateX(10px); }
+}
+
+@keyframes disco-spin {
+  0% { transform: rotate(0deg); filter: hue-rotate(0deg); }
+  100% { transform: rotate(360deg); filter: hue-rotate(360deg); }
+}
+
+@keyframes rainbow-party {
+  0% { filter: hue-rotate(0deg) saturate(1.5); }
+  50% { filter: hue-rotate(180deg) saturate(2); }
+  100% { filter: hue-rotate(360deg) saturate(1.5); }
+}
+
+@keyframes matrix-rain {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100vh); }
+}
+
+@keyframes glitch {
+  0% { transform: translate(0); }
+  20% { transform: translate(-2px, 2px); }
+  40% { transform: translate(-2px, -2px); }
+  60% { transform: translate(2px, 2px); }
+  80% { transform: translate(2px, -2px); }
+  100% { transform: translate(0); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-20px); }
+}
+
+@keyframes pulse-rainbow {
+  0% { box-shadow: 0 0 5px #ff0000; }
+  16% { box-shadow: 0 0 10px #ff7f00; }
+  32% { box-shadow: 0 0 15px #ffff00; }
+  48% { box-shadow: 0 0 10px #00ff00; }
+  64% { box-shadow: 0 0 15px #0000ff; }
+  80% { box-shadow: 0 0 10px #4b0082; }
+  100% { box-shadow: 0 0 5px #9400d3; }
+}
+
+.animate-shake {
+  animation: shake 0.5s ease-in-out;
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.animate-glitch {
+  animation: glitch 0.3s infinite;
+}
+
+.animate-pulse-rainbow {
+  animation: pulse-rainbow 2s infinite;
+}
+
+/* 🌟 Secret theme styles */
+.theme-transition {
+  transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+/* 🎮 Retro mode */
+.retro-mode {
+  font-family: 'Courier New', monospace !important;
+  filter: sepia(50%) contrast(120%);
+  background-image: repeating-linear-gradient(
+    0deg,
+    rgba(0, 0, 0, 0.1) 0px,
+    rgba(0, 0, 0, 0.1) 1px,
+    transparent 1px,
+    transparent 2px
+  );
+}
+
+/* 🕺 Disco mode */
+.disco-mode {
+  animation: disco-spin 10s infinite;
+  background: linear-gradient(45deg, #ff0080, #ff8c00, #40e0d0, #ff0080);
+  background-size: 400% 400%;
+}
