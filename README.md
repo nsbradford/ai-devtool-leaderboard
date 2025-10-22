@@ -54,13 +54,13 @@ The data pipeline runs daily for the previous day, and has been backfilled from 
    cd ai-devtool-leaderboard
    ```
 
-1. **Install dependencies**
+2. **Install dependencies**
 
    ```bash
    pnpm install
    ```
 
-1. **Environment configuration**
+3. **Environment configuration**
 
    ```bash
    cp .env.local.example .env.local
@@ -68,13 +68,13 @@ The data pipeline runs daily for the previous day, and has been backfilled from 
 
    Fill in the required environment variables.
 
-1. **Start the development server**
+4. **Start the development server**
 
    ```bash
    pnpm dev
    ```
 
-1. **Open the application**
+5. **Open the application**
    Navigate to [http://localhost:3000](http://localhost:3000)
 
 ### Available scripts
@@ -83,9 +83,9 @@ The data pipeline runs daily for the previous day, and has been backfilled from 
 - `pnpm build` - Build for production
 - `pnpm start` - Start production server
 - `pnpm lint` - Run ESLint
-- `pnpm format` - Run Prettier
+- `pnpm format` - Run Prettier.
 
-# Adding a new bot
+## Adding a new bot
 
 First, find an example of the bot out there in the wild to get its username (e.g. `cursor[bot]`). Then, use this command to get the bot's actual ID:
 
