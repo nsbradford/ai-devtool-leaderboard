@@ -1,3 +1,11 @@
+/**
+ * General utility functions
+ * 
+ * This module provides common utility functions used throughout the application,
+ * including CSS class merging, cache timing calculations, and number formatting
+ * for display purposes.
+ */
+
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 

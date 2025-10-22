@@ -1,3 +1,11 @@
+/**
+ * GitHub API client
+ * 
+ * This module provides a client for interacting with the GitHub GraphQL API to fetch
+ * repository metadata including star counts, database IDs, and node IDs. It handles
+ * authentication, rate limiting, and error recovery for batch operations.
+ */
+
 import { Octokit } from '@octokit/core';
 import { graphql } from '@octokit/graphql';
 import type { GithubRepoGraphQLData } from '@/types/api';

@@ -1,3 +1,12 @@
+/**
+ * GitHub repositories data access layer
+ * 
+ * This module provides PostgreSQL database operations for GitHub repository metadata,
+ * including star counts, repository names, and database IDs. It handles querying top
+ * repositories by devtool, identifying repositories needing updates, and upserting
+ * repository data and error states.
+ */
+
 import { getSql } from '@/lib/postgres/bot_reviews_daily_by_repo';
 import type { TopReposByDevtool } from '@/types/api';
 import type { GithubRepoGraphQLData } from '@/types/api';

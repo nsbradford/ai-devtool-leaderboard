@@ -1,3 +1,11 @@
+/**
+ * BigQuery data access layer
+ * 
+ * This module provides functions for querying GitHub Archive data stored in BigQuery.
+ * It handles authentication, query execution, and data transformation for PR review
+ * events from AI code review bots.
+ */
+
 import { BigQuery } from '@google-cloud/bigquery';
 import devtools from '../devtools.json';
 import { BotReviewInRepoDate } from '@/types/api';

@@ -1,3 +1,12 @@
+/**
+ * Bot reviews daily data access layer
+ * 
+ * This module provides PostgreSQL database operations for bot review data, including
+ * upserting daily review counts, querying materialized views for time-windowed aggregates,
+ * and refreshing materialized views. Supports both weekly (7-day) and monthly (30-day)
+ * rolling window queries for leaderboard data.
+ */
+
 import { neon } from '@neondatabase/serverless';
 import {
   BotReviewInRepoDate,

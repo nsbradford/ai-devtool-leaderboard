@@ -1,3 +1,11 @@
+/**
+ * Bot reviews backfill utilities
+ * 
+ * This module provides functions for processing and backfilling bot review data
+ * from BigQuery into the PostgreSQL database. It handles daily batch processing
+ * of PR review events for AI code review tools.
+ */
+
 import { getBotReviewsForDay } from '../bigquery';
 import { upsertBotReviewsForDate } from '../postgres/bot_reviews_daily_by_repo';
 

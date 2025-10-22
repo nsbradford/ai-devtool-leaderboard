@@ -1,3 +1,10 @@
+/**
+ * Application-wide constants and configuration values
+ * 
+ * This module contains constant values used throughout the application, including
+ * default date ranges for data visualization and statistics about GitHub activity.
+ */
+
 // Sourcery is the only tool with data before CodeRabbit (which starts ~2023-07-01).
 // And had relatively stable review counts before that, so not super interesting to render.
 // export const BACKFILL_START_DATE = '2022-11-29'; // we have populated data in the DB back until this date

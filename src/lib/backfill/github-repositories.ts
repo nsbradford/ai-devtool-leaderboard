@@ -1,3 +1,11 @@
+/**
+ * GitHub repositories backfill utilities
+ * 
+ * This module handles backfilling and updating star counts and metadata for GitHub
+ * repositories. It fetches data from the GitHub GraphQL API and stores it in the
+ * PostgreSQL database for repositories that have been reviewed by AI code review tools.
+ */
+
 import {
   getReposNeedingStarCounts,
   upsertGithubRepoGraphQLData,
