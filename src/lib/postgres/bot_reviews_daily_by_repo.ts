@@ -5,6 +5,12 @@ import {
   MaterializedViewType,
 } from '@/types/api';
 
+/**
+ * Get a configured Neon SQL client instance.
+ * 
+ * @returns Neon SQL client
+ * @throws Error if DATABASE_URL environment variable is not set
+ */
 export function getSql() {
   if (!process.env.DATABASE_URL) {
     throw new Error('DATABASE_URL environment variable is not set');
