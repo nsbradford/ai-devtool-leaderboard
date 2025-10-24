@@ -5,6 +5,15 @@ import {
 } from '@/lib/postgres/github_repositories_by_name';
 import { GitHubApi } from '../github-api';
 
+/**
+ * Backfill star counts for repositories in batches with rate limiting.
+ * Processes repositories that need star count updates from the database.
+ * 
+ * @param repos - Number of repositories to process
+ * @param daysBack - Number of days to look back for repositories (default: 30)
+ * @param maxAgeDays - Maximum age of existing star count entries in days (default: 7)
+ * @returns Promise<void>
+ */
 export async function backfillStarCounts(
   repos: number,
   daysBack: number = 30,
@@ -55,15 +64,17 @@ export async function backfillStarCounts(
   console.log(
     `\nStar counts backfill completed in ${duration.toFixed(2)} seconds`
   );
-} /**
- * Process star count updates for repositories
- * Combines getting repos from database, fetching star counts from GitHub API, and upserting them
- * @param daysBack Number of days to look back for repos (default: 30)
- * @param maxAgeDays Maximum age of existing star count entries in days (default: 7)
- * @param limit Maximum number of repos to process (default: 1000)
+}
+
+/**
+ * Process star count updates for repositories.
+ * Combines getting repos from database, fetching star counts from GitHub API, and upserting them.
+ * 
+ * @param daysBack - Number of days to look back for repos (default: 30)
+ * @param maxAgeDays - Maximum age of existing star count entries in days (default: 7)
+ * @param limit - Maximum number of repos to process (default: 1000)
  * @returns Promise<void>
  */
-
 export async function processStarCountUpdates(
   daysBack: number = 30,
   maxAgeDays: number = 7,
