@@ -1,0 +1,21 @@
+[package]
+name = "devtools-api-rust"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+axum = { version = "0.7", features = ["macros", "json"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+tokio = { version = "1", features = ["full"] }
+sqlx = { version = "0.7", features = ["postgres", "runtime-tokio-rustls"] }
+dotenvy = "0.15"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+tower-http = { version = "0.5", features = ["cors", "trace"] }
+chrono = { version = "0.4", default-features = false, features = ["clock", "std"] }
+reqwest = { version = "0.12", features = ["json", "http2", "rustls-tls"] }
+gcp-bigquery-client = "0.16"
+base64 = "0.22"
+clap = { version = "4", features = ["derive"] }
+anyhow = "1"

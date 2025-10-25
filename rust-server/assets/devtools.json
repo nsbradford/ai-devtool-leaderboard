@@ -1,0 +1,155 @@
+[
+  {
+    "id": 65095814,
+    "account_login": "ellipsis-dev[bot]",
+    "name": "Ellipsis",
+    "avatar_url": "https://avatars.githubusercontent.com/in/64358?v=4",
+    "website_url": "https://ellipsis.dev",
+    "brand_color": "#06b6d4"
+  },
+  {
+    "id": 96075541,
+    "account_login": "graphite-app[bot]",
+    "name": "Graphite",
+    "avatar_url": "https://avatars.githubusercontent.com/in/158384?v=4",
+    "website_url": "https://graphite.dev",
+    "brand_color": "#2563eb"
+  },
+  {
+    "id": 136622811,
+    "account_login": "coderabbitai[bot]",
+    "name": "CodeRabbit",
+    "avatar_url": "https://avatars.githubusercontent.com/in/347564?v=4",
+    "website_url": "https://coderabbit.ai",
+    "brand_color": "#f97316"
+  },
+  {
+    "id": 151058649,
+    "account_login": "qodo-merge-pro[bot]",
+    "name": "Qodo",
+    "avatar_url": "https://avatars.githubusercontent.com/in/484649?v=4",
+    "website_url": "https://qodo.ai",
+    "brand_color": "#f0b6fc"
+  },
+  {
+    "id": 151821869,
+    "account_login": "codeant-ai[bot]",
+    "name": "CodeAnt",
+    "avatar_url": "https://avatars.githubusercontent.com/in/646884?v=4",
+    "website_url": "https://codeant.ai",
+    "brand_color": "#a855f7"
+  },
+  {
+    "id": 165735046,
+    "account_login": "greptile-apps[bot]",
+    "name": "Greptile",
+    "avatar_url": "https://avatars.githubusercontent.com/in/867647?v=4",
+    "website_url": "https://greptile.com",
+    "brand_color": "#22c55e"
+  },
+  {
+    "id": 175728472,
+    "account_login": "copilot-pull-request-reviewer[bot]",
+    "name": "GitHub Copilot",
+    "avatar_url": "https://avatars.githubusercontent.com/in/946600?v=4",
+    "website_url": "https://github.com/features/copilot",
+    "brand_color": "#1f2937",
+    "brand_color_dark": "#e5e7eb"
+  },
+  {
+    "id": 189301087,
+    "account_login": "windsurf-bot[bot]",
+    "name": "Windsurf",
+    "avatar_url": "https://avatars.githubusercontent.com/in/1066231?v=4",
+    "website_url": "https://windsurf.com",
+    "brand_color": "#0d9488"
+  },
+  {
+    "id": 191113872,
+    "account_login": "cubic-dev-ai[bot]",
+    "name": "Cubic",
+    "avatar_url": "https://avatars.githubusercontent.com/in/1082092?v=4",
+    "website_url": "https://cubic.dev",
+    "brand_color": "#edc00c"
+  },
+  {
+    "id": 206951365,
+    "account_login": "cursor[bot]",
+    "name": "Cursor Bugbot",
+    "avatar_url": "https://avatars.githubusercontent.com/in/1210556?v=4",
+    "website_url": "https://cursor.com/bugbot",
+    "brand_color": "#dc2626"
+  },
+  {
+    "id": 176961590,
+    "account_login": "gemini-code-assist[bot]",
+    "name": "Gemini Code Assist",
+    "avatar_url": "https://avatars.githubusercontent.com/in/956858?v=4",
+    "website_url": "https://developers.google.com/gemini-code-assist",
+    "brand_color": "#ec4899"
+  },
+  {
+    "id": 58596630,
+    "account_login": "sourcery-ai[bot]",
+    "name": "Sourcery",
+    "avatar_url": "https://avatars.githubusercontent.com/in/48477?v=4",
+    "website_url": "https://sourcery.ai/",
+    "brand_color": "#65a30d"
+  },
+  {
+    "id": 188872107,
+    "account_login": "bito-code-review[bot]",
+    "name": "Bito",
+    "avatar_url": "https://avatars.githubusercontent.com/in/1061978?v=4",
+    "website_url": "https://bito.ai/",
+    "brand_color": "#94a3b8"
+  },
+  {
+    "id": 131444098,
+    "account_login": "korbit-ai[bot]",
+    "name": "Korbit",
+    "avatar_url": "https://avatars.githubusercontent.com/in/322216?v=4",
+    "website_url": "https://www.korbit.ai/",
+    "brand_color": "#854d0e"
+  },
+  {
+    "id": 209825114,
+    "account_login": "claude[bot]",
+    "name": "Claude",
+    "avatar_url": "https://avatars.githubusercontent.com/in/1236702?v=4",
+    "website_url": "https://claude.ai/",
+    "brand_color": "#FF9F1C"
+  },
+  {
+    "id": 199175422,
+    "account_login": "chatgpt-codex-connector[bot]",
+    "name": "OpenAI Codex",
+    "avatar_url": "https://avatars.githubusercontent.com/in/1144995?s=60&v=4",
+    "website_url": "https://openai.com/codex",
+    "brand_color": "#808080"
+  },
+  {
+    "id": 209297164,
+    "account_login": "jazzberry-ai[bot]",
+    "name": "Jazzberry",
+    "avatar_url": "https://avatars.githubusercontent.com/in/1231820?v=4",
+    "website_url": "https://jazzberry.ai/",
+    "brand_color": "#bd0048"
+  },
+  {
+    "id": 187716431,
+    "account_login": "mesa-dot-dev[bot]",
+    "name": "Mesa",
+    "avatar_url": "https://avatars.githubusercontent.com/in/1050077?v=4",
+    "website_url": "https://mesa.dev",
+    "brand_color": "#973c00"
+  },
+  {
+    "id": 148880201,
+    "account_login": "kodus-ai[bot]",
+    "name": "Kodus AI",
+    "avatar_url": "https://avatars.githubusercontent.com/in/413034?v=4",
+    "website_url": "https://kodus.io/",
+    "brand_color": "#3b82f6"
+  }
+]
