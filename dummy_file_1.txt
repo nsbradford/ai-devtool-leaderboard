@@ -1,0 +1,4 @@
+This is a dummy text file created for testing purposes.
+File number: 1
+Created at: $(date)
+Content: Lorem ipsum dolor sit amet, consectetur adipiscing elit.
