@@ -1,0 +1,3 @@
+This is dummy file number 1.
+It contains some sample text for testing purposes.
+Created at random as part of a file generation task.
