@@ -15,7 +15,3 @@ RUN apt-get update && \
     npm install -g pnpm && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
-
-# 
-# git \
-# RUN apt-get update && apt-get install -y unzip
