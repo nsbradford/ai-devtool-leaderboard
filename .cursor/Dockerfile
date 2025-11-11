@@ -4,9 +4,8 @@ FROM ubuntu:24.04@sha256:80dd3c3b9c6cecb9f1667e9290b3bc61b78c2678c02cbdae5f0fea9
 RUN apt-get update && \
     apt-get install -y \
         curl \
+        git \
         build-essential \
-        python3 \
-        python3-pip \
         ca-certificates \
         gnupg \
         lsb-release && \
@@ -15,3 +14,7 @@ RUN apt-get update && \
     npm install -g pnpm && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
+
+# python3 \
+# python3-pip \
+# RUN apt-get update && apt-get install -y unzip
