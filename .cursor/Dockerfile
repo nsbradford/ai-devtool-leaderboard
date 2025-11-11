@@ -9,6 +9,7 @@ RUN apt-get update && \
         ca-certificates \
         gnupg \
         lsb-release && \
+        unzip && \
     curl -fsSL https://deb.nodesource.com/setup_lts.x | bash - && \
     apt-get install -y nodejs && \
     npm install -g pnpm && \
