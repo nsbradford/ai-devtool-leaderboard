@@ -16,6 +16,8 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
+RUN echo "v01" > test.txt
+
 # python3 \
 # python3-pip \
 # RUN apt-get update && apt-get install -y unzip
