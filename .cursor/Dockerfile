@@ -16,7 +16,7 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-RUN echo "v03" > test.txt
+RUN echo "v04" > test.txt
 
 # python3 \
 # python3-pip \
