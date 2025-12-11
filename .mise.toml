@@ -1,0 +1,6 @@
+[tools]
+# Keep in sync with .node-version
+node = "22.16.0"
+
+# Pin pnpm so mise shims work per-repo (no global pnpm needed)
+pnpm = "10.22.0"
