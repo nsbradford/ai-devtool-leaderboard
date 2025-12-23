@@ -1,6 +1,6 @@
 # ✨ AI Code Review Adoption Tracker
 
-[test A - by human]
+[test B - cursor]
 
 A dashboard tracking the adoption of AI code review tools across open-source GitHub repositories.
 
