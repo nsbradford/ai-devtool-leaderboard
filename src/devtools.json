@@ -151,5 +151,21 @@
     "avatar_url": "https://avatars.githubusercontent.com/in/413034?v=4",
     "website_url": "https://kodus.io/",
     "brand_color": "#3b82f6"
+  },
+  {
+    "id": 5890272,
+    "account_login": "linearb",
+    "name": "LinearB",
+    "avatar_url": "https://avatars.githubusercontent.com/in/1658443?v=4",
+    "website_url": "https://linearb.io",
+    "brand_color": "#5b66fb"
+  },
+  {
+    "id": 152894079,
+    "account_login": "gitstream-cm",
+    "name": "gitStream",
+    "avatar_url": "https://avatars.githubusercontent.com/ml/13414?v=4",
+    "website_url": "https://gitstream.cm",
+    "brand_color": "#1e293b"
   }
 ]
