@@ -1,0 +1,5 @@
+{
+  "snapshot": "snapshot-20260109-d669567e-6d44-4bc7-97ca-a7da069f1305",
+  "terminals": [],
+  "install": "echo \"about to run pnpm install\"\npnpm install\necho \"finished pnpm install\""
+}
