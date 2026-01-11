@@ -84,6 +84,7 @@ export function LeaderboardRankings({
                         width={24}
                         height={24}
                         className="w-6 h-6 rounded-full"
+                        unoptimized
                         onError={(e) => {
                           e.currentTarget.style.display = 'none';
                         }}
