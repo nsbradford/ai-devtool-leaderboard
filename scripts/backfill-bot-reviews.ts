@@ -69,6 +69,17 @@ function addDays(date: Date, days: number): Date {
   return result;
 }
 
+function formatDuration(totalSeconds: number): string {
+  if (!isFinite(totalSeconds) || totalSeconds < 0) {
+    return '--:--:--';
+  }
+  const seconds = Math.floor(totalSeconds);
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const secs = seconds % 60;
+  return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+}
+
 async function processDate(
   targetDate: string,
   semaphore: Semaphore,
@@ -100,10 +111,6 @@ async function backfillBotReviewsDateRange(
   );
   console.log(`Max concurrency: ${maxConcurrency}`);
 
-  if (botIds) {
-    console.log(`Newly added bot IDs: ${botIds.join(', ')}`);
-  }
-
   const semaphore = new Semaphore(maxConcurrency);
   const finalDate = new Date(endDate);
   const datePromises: Promise<void>[] = [];
@@ -117,24 +124,51 @@ async function backfillBotReviewsDateRange(
   }
 
   console.log(`Total dates to process: ${allDates.length}`);
-  // console.log(`DEBUG: First 5 dates: ${allDates.slice(0, 5).join(', ')}`);
-  // console.log(`DEBUG: Last 5 dates: ${allDates.slice(-5).join(', ')}`);
 
   // Process all dates with controlled concurrency
   const startTime = Date.now();
+  const totalDates = allDates.length;
+  let completed = 0;
+  let failed = 0;
+  const barWidth = 30;
+  const updateProgress = (): void => {
+    const elapsedSeconds = (Date.now() - startTime) / 1000;
+    const progress = totalDates === 0 ? 1 : completed / totalDates;
+    const filled = Math.round(progress * barWidth);
+    const bar = `${'#'.repeat(filled)}${'-'.repeat(barWidth - filled)}`;
+    const percent = Math.round(progress * 100);
+    const rate =
+      elapsedSeconds > 0 ? (completed / elapsedSeconds).toFixed(2) : '0.00';
+    const remaining = totalDates - completed;
+    const etaSeconds =
+      elapsedSeconds > 0 && completed > 0
+        ? (remaining / completed) * elapsedSeconds
+        : Number.POSITIVE_INFINITY;
+    process.stdout.write(
+      `\r[${bar}] ${percent}% (${completed}/${totalDates}) failed: ${failed} | rate: ${rate}/s | ETA: ${formatDuration(etaSeconds)}`
+    );
+  };
+  updateProgress();
 
   for (const dateString of allDates) {
     const promise = processDate(dateString, semaphore, botIds).catch(
       (error) => {
+        failed += 1;
+        process.stdout.write('\r');
         console.error(`Failed to process ${dateString}:`, error);
-        // Don't re-throw to allow other dates to continue processing
+        updateProgress();
       }
     );
+    promise.finally(() => {
+      completed += 1;
+      updateProgress();
+    });
     datePromises.push(promise);
   }
 
   // Wait for all dates to complete
   await Promise.all(datePromises);
+  process.stdout.write('\n');
 
   const endTime = Date.now();
   const duration = (endTime - startTime) / 1000;
