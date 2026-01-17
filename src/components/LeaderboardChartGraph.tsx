@@ -1,4 +1,3 @@
-import React from 'react';
 import {
   ResponsiveContainer,
   LineChart,
@@ -53,8 +52,7 @@ const CustomTooltip = ({
       const bValue = typeof b.value === 'number' ? b.value : 0;
       return bValue - aValue;
     });
-    const labelValue =
-      typeof label === 'number' ? label : Number(label ?? NaN);
+    const labelValue = typeof label === 'number' ? label : Number(label ?? NaN);
     const labelText = Number.isFinite(labelValue)
       ? formatInTimeZone(labelValue, 'UTC', 'yyyy-MM-dd')
       : '--';
@@ -148,12 +146,13 @@ export function LeaderboardChartGraph({
             tickFormatter={formatStarCount}
           />
           <Tooltip
-            content={
+            content={(props) => (
               <CustomTooltip
+                {...props}
                 scaleType={scaleType}
                 resolvedTheme={resolvedTheme}
               />
-            }
+            )}
             wrapperStyle={{ zIndex: 1000 }}
           />
           <Legend
