@@ -161,6 +161,14 @@
     "brand_color": "#3b82f6"
   },
   {
+    "id": 39604003,
+    "account_login": "sentry[bot]",
+    "name": "Sentry",
+    "avatar_url": "https://avatars.githubusercontent.com/u/1396951?v=4",
+    "website_url": "https://sentry.io",
+    "brand_color": "#362d59"
+  },
+  {
     "id": 5890272,
     "account_login": "linearb[bot]",
     "name": "LinearB",
