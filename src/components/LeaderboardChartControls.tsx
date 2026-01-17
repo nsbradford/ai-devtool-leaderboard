@@ -231,6 +231,7 @@ export function LeaderboardChartControls({
                               width={12}
                               height={12}
                               className="w-3 h-3 rounded-full"
+                              unoptimized
                               onError={(e) => {
                                 e.currentTarget.style.display = 'none';
                               }}
