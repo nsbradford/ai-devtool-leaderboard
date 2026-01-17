@@ -5,7 +5,6 @@ import {
   XAxis,
   YAxis,
   Tooltip,
-  Legend,
   Line,
 } from 'recharts';
 import type { TooltipContentProps } from 'recharts/types/component/Tooltip';
@@ -23,6 +22,7 @@ import {
 } from './leaderboardChartUtils';
 import type { ChartDataPoint } from './interfaces';
 import { formatInTimeZone } from 'date-fns-tz';
+import type { LegendPayload } from 'recharts/types/component/DefaultLegendContent';
 
 interface LeaderboardChartGraphProps {
   chartData: ChartDataPoint[];
@@ -34,6 +34,7 @@ interface LeaderboardChartGraphProps {
   getToolDisplayName: (toolId: number, devtools: DevTool[]) => string;
   getToolColor: (toolId: number, devtools: DevTool[], theme?: string) => string;
   resolvedTheme: string | undefined;
+  setSelectedTools: (tools: Set<number>) => void;
 }
 
 const CustomTooltip = ({
@@ -120,76 +121,89 @@ export function LeaderboardChartGraph({
   getToolDisplayName,
   getToolColor,
   resolvedTheme,
+  setSelectedTools,
 }: LeaderboardChartGraphProps) {
+  const legendPayload: LegendPayload[] = Object.keys(stats?.tools || {}).map(
+    (toolIdStr) => {
+      const toolId = Number(toolIdStr);
+      const displayName = getToolDisplayName(toolId, devtools);
+      const color = getToolColor(toolId, devtools, theme);
+      return {
+        value: displayName,
+        color,
+        type: 'line',
+      };
+    }
+  );
+
   return (
-    <div className="h-82 sm:h-128">
-      <ResponsiveContainer width="100%" height="100%">
-        <LineChart data={chartData}>
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis
-            dataKey="timestampMs"
-            type="number"
-            scale="time"
-            tick={{ fontSize: 11 }}
-            domain={['dataMin', 'dataMax']}
-            ticks={getXAxisTicksUTC(chartData)}
-            tickFormatter={xAxisTickFormatterUTC}
-            // ticks={getXAxisTicks(chartData)}
-            // tickFormatter={xAxisTickFormatter}
-          />
-          <YAxis
-            tick={{ fontSize: 11 }}
-            scale={scaleType}
-            domain={
-              scaleType === 'log' ? [0.5, 'dataMax'] : ['dataMin', 'dataMax']
-            }
-            tickFormatter={formatStarCount}
-          />
-          <Tooltip
-            content={(props) => (
-              <CustomTooltip
-                {...props}
-                scaleType={scaleType}
-                resolvedTheme={resolvedTheme}
-              />
-            )}
-            wrapperStyle={{ zIndex: 1000 }}
-          />
-          <Legend
-            content={
-              <CustomLegend
-                selectedTools={selectedTools}
-                setSelectedTools={() => {}}
-                devtools={devtools}
-              />
-            }
-          />
-          {Object.keys(stats?.tools || {})
-            .filter((toolIdStr) => {
-              const toolId = Number(toolIdStr);
-              return selectedTools.size === 0
-                ? false
-                : selectedTools.has(toolId);
-            })
-            .map((toolIdStr) => {
-              const toolId = Number(toolIdStr);
-              const displayName = getToolDisplayName(toolId, devtools);
-              const color = getToolColor(toolId, devtools, theme);
-              return (
-                <Line
-                  key={toolId}
-                  type="monotone"
-                  dataKey={displayName}
-                  stroke={color}
-                  strokeWidth={2}
-                  name={displayName}
-                  dot={false}
-                  animationDuration={400}
+    <div>
+      <div className="h-82 sm:h-128">
+        <ResponsiveContainer width="100%" height="100%">
+          <LineChart data={chartData}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis
+              dataKey="timestampMs"
+              type="number"
+              scale="time"
+              tick={{ fontSize: 11 }}
+              domain={['dataMin', 'dataMax']}
+              ticks={getXAxisTicksUTC(chartData)}
+              tickFormatter={xAxisTickFormatterUTC}
+              // ticks={getXAxisTicks(chartData)}
+              // tickFormatter={xAxisTickFormatter}
+            />
+            <YAxis
+              tick={{ fontSize: 11 }}
+              scale={scaleType}
+              domain={
+                scaleType === 'log' ? [0.5, 'dataMax'] : ['dataMin', 'dataMax']
+              }
+              tickFormatter={formatStarCount}
+            />
+            <Tooltip
+              content={(props) => (
+                <CustomTooltip
+                  {...props}
+                  scaleType={scaleType}
+                  resolvedTheme={resolvedTheme}
                 />
-              );
-            })}
-        </LineChart>
-      </ResponsiveContainer>
+              )}
+              wrapperStyle={{ zIndex: 1000 }}
+            />
+            {Object.keys(stats?.tools || {})
+              .filter((toolIdStr) => {
+                const toolId = Number(toolIdStr);
+                return selectedTools.size === 0
+                  ? false
+                  : selectedTools.has(toolId);
+              })
+              .map((toolIdStr) => {
+                const toolId = Number(toolIdStr);
+                const displayName = getToolDisplayName(toolId, devtools);
+                const color = getToolColor(toolId, devtools, theme);
+                return (
+                  <Line
+                    key={toolId}
+                    type="monotone"
+                    dataKey={displayName}
+                    stroke={color}
+                    strokeWidth={2}
+                    name={displayName}
+                    dot={false}
+                    animationDuration={400}
+                  />
+                );
+              })}
+          </LineChart>
+        </ResponsiveContainer>
+      </div>
+      <CustomLegend
+        payload={legendPayload}
+        selectedTools={selectedTools}
+        setSelectedTools={setSelectedTools}
+        devtools={devtools}
+      />
     </div>
   );
 }
