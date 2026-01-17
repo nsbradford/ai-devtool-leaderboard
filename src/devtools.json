@@ -8,6 +8,14 @@
     "brand_color": "#06b6d4"
   },
   {
+    "id": 174234987,
+    "account_login": "baz-reviewer[bot]",
+    "name": "Baz",
+    "avatar_url": "https://avatars.githubusercontent.com/in/933528?s=60&v=4",
+    "website_url": "https://baz.co",
+    "brand_color": "#39FF14"
+  },
+  {
     "id": 96075541,
     "account_login": "graphite-app[bot]",
     "name": "Graphite",
@@ -159,5 +167,29 @@
     "avatar_url": "https://avatars.githubusercontent.com/u/1396951?v=4",
     "website_url": "https://sentry.io",
     "brand_color": "#362d59"
+  },
+  {
+    "id": 5890272,
+    "account_login": "linearb[bot]",
+    "name": "LinearB",
+    "avatar_url": "https://avatars.githubusercontent.com/in/1658443?v=4",
+    "website_url": "https://linearb.io",
+    "brand_color": "#5b66fb"
+  },
+  {
+    "id": 152894079,
+    "account_login": "gitstream-cm[bot]",
+    "name": "gitStream",
+    "avatar_url": "https://avatars.githubusercontent.com/ml/13414?v=4",
+    "website_url": "https://gitstream.cm",
+    "brand_color": "#1e293b"
+  },
+  {
+    "id": 185243770,
+    "account_login": "augmentcode[bot]",
+    "name": "Augment Code",
+    "avatar_url": "https://avatars.githubusercontent.com/in/1027498?v=4",
+    "website_url": "https://www.augmentcode.com",
+    "brand_color": "#968CFF"
   }
 ]
