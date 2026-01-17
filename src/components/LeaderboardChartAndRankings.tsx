@@ -177,6 +177,7 @@ const LeaderboardChartAndRankings: React.FC<
             getToolDisplayName={getToolDisplayName}
             getToolColor={getToolColor}
             resolvedTheme={resolvedTheme}
+            setSelectedTools={setSelectedTools}
           />
         </CardContent>
       </Card>
