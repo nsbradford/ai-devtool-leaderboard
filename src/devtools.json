@@ -151,5 +151,13 @@
     "avatar_url": "https://avatars.githubusercontent.com/in/413034?v=4",
     "website_url": "https://kodus.io/",
     "brand_color": "#3b82f6"
+  },
+  {
+    "id": 185243770,
+    "account_login": "augmentcode[bot]",
+    "name": "Augment Code",
+    "avatar_url": "https://avatars.githubusercontent.com/in/1027498?v=4",
+    "website_url": "https://www.augmentcode.com",
+    "brand_color": "#968CFF"
   }
 ]
