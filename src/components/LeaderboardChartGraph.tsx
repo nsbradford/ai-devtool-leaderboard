@@ -1,4 +1,3 @@
-import React from 'react';
 import {
   ResponsiveContainer,
   LineChart,
@@ -9,6 +8,11 @@ import {
   Legend,
   Line,
 } from 'recharts';
+import type { TooltipContentProps } from 'recharts/types/component/Tooltip';
+import type {
+  NameType,
+  ValueType,
+} from 'recharts/types/component/DefaultTooltipContent';
 import { DevTool } from '@/types/api';
 import { CustomLegend } from '@/components/ui/CustomLegend';
 import { formatStarCount } from '@/lib/utils';
@@ -31,6 +35,80 @@ interface LeaderboardChartGraphProps {
   getToolColor: (toolId: number, devtools: DevTool[], theme?: string) => string;
   resolvedTheme: string | undefined;
 }
+
+const CustomTooltip = ({
+  active,
+  payload,
+  label,
+  scaleType,
+  resolvedTheme,
+}: TooltipContentProps<ValueType, NameType> & {
+  scaleType: 'linear' | 'log';
+  resolvedTheme: string | undefined;
+}) => {
+  if (active && payload && payload.length) {
+    const sortedPayload = [...payload].sort((a, b) => {
+      const aValue = typeof a.value === 'number' ? a.value : 0;
+      const bValue = typeof b.value === 'number' ? b.value : 0;
+      return bValue - aValue;
+    });
+    const labelValue = typeof label === 'number' ? label : Number(label ?? NaN);
+    const labelText = Number.isFinite(labelValue)
+      ? formatInTimeZone(labelValue, 'UTC', 'yyyy-MM-dd')
+      : '--';
+
+    return (
+      <div
+        style={{
+          backgroundColor:
+            resolvedTheme === 'dark' ? 'oklch(0.205 0 0)' : 'oklch(1 0 0)',
+          color:
+            resolvedTheme === 'dark' ? 'oklch(0.985 0 0)' : 'oklch(0.145 0 0)',
+          border:
+            resolvedTheme === 'dark'
+              ? '1px solid oklch(1 0 0 / 10%)'
+              : '1px solid oklch(0.922 0 0)',
+          borderRadius: '0.625rem',
+          padding: '10px',
+          boxShadow:
+            resolvedTheme === 'dark'
+              ? '0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.15)'
+              : '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+        }}
+      >
+        <p
+          style={{
+            margin: '0 0 8px 0',
+            color:
+              resolvedTheme === 'dark'
+                ? 'oklch(0.985 0 0)'
+                : 'oklch(0.145 0 0)',
+          }}
+        >
+          {`Date: ${labelText}`}
+        </p>
+        {sortedPayload.map((entry, index) => {
+          const value = typeof entry.value === 'number' ? entry.value : 0;
+          const displayValue =
+            scaleType === 'log' && value === 0.5 ? '0' : value.toLocaleString();
+          return (
+            <p
+              key={`item-${index}`}
+              style={{
+                margin: '4px 0',
+                color: entry.color,
+              }}
+            >
+              {`${entry.name}: ${displayValue}`}
+            </p>
+          );
+        })}
+      </div>
+    );
+  }
+
+  return null;
+};
 
 export function LeaderboardChartGraph({
   chartData,
@@ -68,39 +146,14 @@ export function LeaderboardChartGraph({
             tickFormatter={formatStarCount}
           />
           <Tooltip
-            formatter={(value: number, name: string) => [
-              scaleType === 'log' && value === 0.5
-                ? '0'
-                : value.toLocaleString(),
-              name,
-            ]}
-            labelFormatter={(label: number) => {
-              return `Date: ${formatInTimeZone(label, 'UTC', 'yyyy-MM-dd')}`;
-            }}
+            content={(props) => (
+              <CustomTooltip
+                {...props}
+                scaleType={scaleType}
+                resolvedTheme={resolvedTheme}
+              />
+            )}
             wrapperStyle={{ zIndex: 1000 }}
-            contentStyle={{
-              backgroundColor:
-                resolvedTheme === 'dark' ? 'oklch(0.205 0 0)' : 'oklch(1 0 0)',
-              color:
-                resolvedTheme === 'dark'
-                  ? 'oklch(0.985 0 0)'
-                  : 'oklch(0.145 0 0)',
-              border:
-                resolvedTheme === 'dark'
-                  ? '1px solid oklch(1 0 0 / 10%)'
-                  : '1px solid oklch(0.922 0 0)',
-              borderRadius: '0.625rem',
-              boxShadow:
-                resolvedTheme === 'dark'
-                  ? '0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.15)'
-                  : '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
-            }}
-            labelStyle={{
-              color:
-                resolvedTheme === 'dark'
-                  ? 'oklch(0.985 0 0)'
-                  : 'oklch(0.145 0 0)',
-            }}
           />
           <Legend
             content={
