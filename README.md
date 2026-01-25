@@ -2,6 +2,8 @@
 
 A dashboard tracking the adoption of AI code review tools across open-source GitHub repositories.
 
+howdy partner
+
 View at [https://www.aitooltracker.dev](https://www.aitooltracker.dev).
 
 ![Dashboard Screenshot](docs/media/2025-07-15_dashboard.png)
