@@ -191,5 +191,13 @@
     "avatar_url": "https://avatars.githubusercontent.com/in/1027498?v=4",
     "website_url": "https://www.augmentcode.com",
     "brand_color": "#968CFF"
+  },
+  {
+    "id": 240665456,
+    "account_login": "kiloconnect[bot]",
+    "name": "Kilo Review",
+    "avatar_url": "https://avatars.githubusercontent.com/in/21937927?v=4",
+    "website_url": "https://kilocode.ai",
+    "brand_color": "#000000"
   }
 ]
