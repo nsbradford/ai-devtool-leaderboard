@@ -105,10 +105,11 @@ export async function getTopStarredReposByDevtool(
         FROM bot_reviews_daily_by_repo br
         WHERE br.event_date >= $1
       ),
-      latest_repo_names AS (
+      latest_repo_info AS (
         SELECT DISTINCT ON (database_id)
           database_id,
           full_name AS repo_name,
+          star_count,
           updated_at
         FROM github_repositories_by_name
         WHERE is_error = false
@@ -117,18 +118,16 @@ export async function getTopStarredReposByDevtool(
       ranked_repos AS (
         SELECT 
           rba.bot_id,
-          grbn.database_id AS repo_db_id,
-          lrn.repo_name,
-          grbn.star_count,
+          lri.database_id AS repo_db_id,
+          lri.repo_name,
+          lri.star_count,
           ROW_NUMBER() OVER (
             PARTITION BY rba.bot_id 
-            ORDER BY grbn.star_count DESC NULLS LAST
+            ORDER BY lri.star_count DESC NULLS LAST
           ) as rank
         FROM recent_bot_activity rba
-        LEFT JOIN github_repositories_by_name grbn ON rba.repo_db_id = grbn.database_id
-        LEFT JOIN latest_repo_names lrn ON grbn.database_id = lrn.database_id
-        WHERE grbn.star_count IS NOT NULL 
-          AND grbn.is_error = false
+        INNER JOIN latest_repo_info lri ON rba.repo_db_id = lri.database_id
+        WHERE lri.star_count IS NOT NULL
       )
       SELECT 
         bot_id,

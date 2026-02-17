@@ -14,8 +14,8 @@ import {
 import { Star, ChevronDown } from 'lucide-react';
 import Image from 'next/image';
 import { formatStarCount } from '@/lib/utils';
-import { DevTool, TopReposByDevtool } from '@/types/api';
-import React, { useState } from 'react';
+import { DevTool, TopRepo, TopReposByDevtool } from '@/types/api';
+import React, { useMemo, useState } from 'react';
 
 interface RankingItem {
   id: number;
@@ -44,6 +44,23 @@ export function LeaderboardRankings({
   activeReposMonthly,
 }: LeaderboardRankingsProps) {
   const [openRepoPopover, setOpenRepoPopover] = useState<number | null>(null);
+
+  const deduplicatedTopRepos = useMemo(() => {
+    if (!topRepos) return undefined;
+    const result: TopReposByDevtool = {};
+    for (const [devtoolId, repos] of Object.entries(topRepos)) {
+      const seen = new Set<number>();
+      const unique: TopRepo[] = [];
+      for (const repo of repos) {
+        if (!seen.has(repo.repo_db_id)) {
+          seen.add(repo.repo_db_id);
+          unique.push(repo);
+        }
+      }
+      result[devtoolId] = unique;
+    }
+    return result;
+  }, [topRepos]);
 
   return (
     <Card>
@@ -108,9 +125,9 @@ export function LeaderboardRankings({
                       {tool.current_count.toLocaleString()}
                     </span>
                     {/* Mobile toggle button */}
-                    {topRepos &&
-                      topRepos[tool.id.toString()] &&
-                      topRepos[tool.id.toString()].length > 0 && (
+                    {deduplicatedTopRepos &&
+                      deduplicatedTopRepos[tool.id.toString()] &&
+                      deduplicatedTopRepos[tool.id.toString()].length > 0 && (
                         <Popover
                           open={openRepoPopover === tool.id}
                           onOpenChange={(open) => {
@@ -132,25 +149,27 @@ export function LeaderboardRankings({
                                 Top Repositories
                               </div>
                               <div className="space-y-2">
-                                {topRepos[tool.id.toString()].map((repo) => (
-                                  <div
-                                    key={repo.repo_name}
-                                    className="flex items-center justify-between"
-                                  >
-                                    <a
-                                      href={`https://github.com/${repo.repo_name}`}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="text-xs hover:text-blue-600 hover:underline transition-colors truncate max-w-[180px]"
+                                {deduplicatedTopRepos[tool.id.toString()].map(
+                                  (repo) => (
+                                    <div
+                                      key={repo.repo_db_id}
+                                      className="flex items-center justify-between"
                                     >
-                                      {repo.repo_name}
-                                    </a>
-                                    <span className="text-xs text-muted-foreground flex items-center">
-                                      {formatStarCount(repo.star_count)}
-                                      <Star className="inline w-3 h-3 ml-1 text-muted-foreground" />
-                                    </span>
-                                  </div>
-                                ))}
+                                      <a
+                                        href={`https://github.com/${repo.repo_name}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-xs hover:text-blue-600 hover:underline transition-colors truncate max-w-[180px]"
+                                      >
+                                        {repo.repo_name}
+                                      </a>
+                                      <span className="text-xs text-muted-foreground flex items-center">
+                                        {formatStarCount(repo.star_count)}
+                                        <Star className="inline w-3 h-3 ml-1 text-muted-foreground" />
+                                      </span>
+                                    </div>
+                                  )
+                                )}
                               </div>
                             </div>
                           </PopoverContent>
@@ -159,14 +178,14 @@ export function LeaderboardRankings({
                   </div>
                 </div>
                 {/* Desktop inline display */}
-                {topRepos &&
-                  topRepos[tool.id.toString()] &&
-                  topRepos[tool.id.toString()].length > 0 && (
+                {deduplicatedTopRepos &&
+                  deduplicatedTopRepos[tool.id.toString()] &&
+                  deduplicatedTopRepos[tool.id.toString()].length > 0 && (
                     <div className="mt-1 ml-8 flex-wrap gap-1 text-xs text-muted-foreground hidden md:flex">
-                      {topRepos[tool.id.toString()]
+                      {deduplicatedTopRepos[tool.id.toString()]
                         .slice(0, 3)
                         .map((repo, repoIndex) => (
-                          <span key={repo.repo_name}>
+                          <span key={repo.repo_db_id}>
                             <a
                               href={`https://github.com/${repo.repo_name}`}
                               target="_blank"
@@ -185,12 +204,12 @@ export function LeaderboardRankings({
                             </span>
                             {repoIndex < 2 &&
                               repoIndex <
-                                topRepos[tool.id.toString()].length - 1 && (
-                                <span className="mx-1">•</span>
-                              )}
+                                deduplicatedTopRepos[tool.id.toString()]
+                                  .length -
+                                  1 && <span className="mx-1">•</span>}
                           </span>
                         ))}
-                      {topRepos[tool.id.toString()].length > 3 && (
+                      {deduplicatedTopRepos[tool.id.toString()].length > 3 && (
                         <span className="mx-1">
                           •
                           <Popover>
@@ -205,25 +224,27 @@ export function LeaderboardRankings({
                                   Top Repositories
                                 </div>
                                 <div className="space-y-2">
-                                  {topRepos[tool.id.toString()].map((repo) => (
-                                    <div
-                                      key={repo.repo_name}
-                                      className="flex items-center justify-between"
-                                    >
-                                      <a
-                                        href={`https://github.com/${repo.repo_name}`}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="text-xs hover:text-blue-600 hover:underline transition-colors truncate max-w-[180px]"
+                                  {deduplicatedTopRepos[tool.id.toString()].map(
+                                    (repo) => (
+                                      <div
+                                        key={repo.repo_db_id}
+                                        className="flex items-center justify-between"
                                       >
-                                        {repo.repo_name}
-                                      </a>
-                                      <span className="text-xs text-muted-foreground flex items-center">
-                                        {formatStarCount(repo.star_count)}
-                                        <Star className="inline w-3 h-3 ml-1 text-muted-foreground" />
-                                      </span>
-                                    </div>
-                                  ))}
+                                        <a
+                                          href={`https://github.com/${repo.repo_name}`}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          className="text-xs hover:text-blue-600 hover:underline transition-colors truncate max-w-[180px]"
+                                        >
+                                          {repo.repo_name}
+                                        </a>
+                                        <span className="text-xs text-muted-foreground flex items-center">
+                                          {formatStarCount(repo.star_count)}
+                                          <Star className="inline w-3 h-3 ml-1 text-muted-foreground" />
+                                        </span>
+                                      </div>
+                                    )
+                                  )}
                                 </div>
                               </div>
                             </PopoverContent>
