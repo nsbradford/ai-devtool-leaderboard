@@ -1,5 +1,5 @@
 // Auto-generated stub file with placeholder implementation.
-export type StubState = "idle" | "running" | "completed";
+export type StubState = 'idle' | 'running' | 'completed';
 
 export interface StubRecord {
   id: string;
