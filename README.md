@@ -119,3 +119,10 @@ pnpm run backfill-bot-reviews --start 2025-01-01 --end 2025-05-01  --new-bots-on
 ## License
 
 This project is open source and available under the [MIT License](LICENSE).
+
+## Poem
+
+Across the pull requests, small lanterns glow,  
+Bots leave careful notes where tangled changes flow.  
+From midnight logs to morning charts we climb,  
+And teach our code to keep a steadier time.
