@@ -348,3 +348,8 @@ pyrightconfig.json
 
 ## Trigger.dev
 .trigger
+
+## Playwright
+/test-results/
+/playwright-report/
+/blob-report/

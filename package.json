@@ -10,6 +10,8 @@
     "lint": "next lint",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
+    "test:e2e": "playwright test",
+    "test:e2e:video": "playwright test e2e/usage-demo.spec.ts",
     "trigger:dev": "npx trigger.dev@latest dev",
     "trigger:deploy": "npx trigger.dev@latest deploy",
     "backfill": "tsx scripts/backfill.ts",
@@ -50,6 +52,7 @@
     "yargs": "^18.0.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.51.1",
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
     "@types/d3-time-format": "^4.0.3",
