@@ -1,3 +1,8 @@
+/**
+ * Daily scheduled job that backfills AI code review bot adoption data.
+ * Runs at 5:00 AM UTC to process yesterday's reviews, refresh aggregated views,
+ * and update repository star counts.
+ */
 import { schedules } from '@trigger.dev/sdk';
 import {
   processBotReviewsForDate,
@@ -8,21 +13,23 @@ import { backfillStarCounts } from '@/lib/backfill/github-repositories';
 
 export const dailyBotReviewsBackfill = schedules.task({
   id: 'daily-bot-reviews-backfill',
+  // 5:00 AM UTC every day (minute hour day month weekday)
   cron: '0 5 * * *',
   run: async (payload) => {
     console.log(`Starting daily bot reviews backfill at ${payload.timestamp}`);
     console.log(`Timezone: ${payload.timezone}`);
 
     try {
+      // Process yesterday's bot reviews (GitHub day boundaries are UTC-based)
       const targetDate = getYesterdayDateString();
       console.log(`Processing bot reviews for ${targetDate}`);
 
       await processBotReviewsForDate(targetDate);
 
-      // Refresh materialized views after upsert
+      // Refresh materialized views so leaderboard/charts reflect new data
       await refreshMaterializedViewsConcurrently();
 
-      // Backfill star counts for 10,000 repos
+      // Backfill star counts for up to 10,000 repos (incremental update)
       await backfillStarCounts(10000);
 
       console.log(
