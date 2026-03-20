@@ -27,3 +27,7 @@ Without a valid `DATABASE_URL`, the dashboard shows "Error: Failed to fetch data
 ### CI
 
 GitHub Actions runs `pnpm lint` and `pnpm format:check` on PRs. The build job is currently commented out in `.github/workflows/ci.yml`.
+
+### Pull requests (`ManagePullRequest`)
+
+When creating or updating PRs with the ManagePullRequest tool: **do not** copy walkthrough screenshots into `public/` or commit other image assets just so the PR description can show an `<img>`. That is unnecessary. Use a URL GitHub can load without adding files to the repo (for example an image uploaded in the GitHub PR/issue UI, which yields a `user-images.githubusercontent.com` URL), or omit the image from the automated PR body and add it manually.
