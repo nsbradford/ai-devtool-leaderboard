@@ -1,0 +1,8 @@
+{
+    "name": "Dockerfile Development",
+    "build": {
+      "dockerfileContents": "FROM ubuntu:24.04@sha256:80dd3c3b9c6cecb9f1667e9290b3bc61b78c2678c02cbdae5f0fea92cc6734ab\n\n# Install system dependencies and development tools\nRUN apt-get update && \\\n    apt-get install -y \\\n        curl \\\n        git \\\n        build-essential \\\n        python3 \\\n        python3-pip \\\n        ca-certificates \\\n        gnupg \\\n        lsb-release && \\\n    curl -fsSL https://deb.nodesource.com/setup_lts.x | bash - && \\\n    apt-get install -y nodejs && \\\n    npm install -g pnpm && \\\n    apt-get clean && \\\n    rm -rf /var/lib/apt/lists/*\n\n",
+      "context": "."
+    }
+  }
+  
