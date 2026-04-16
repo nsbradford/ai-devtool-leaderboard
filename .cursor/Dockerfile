@@ -17,3 +17,10 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
+WORKDIR /workspace
+
+# Copy dependency manifests first to leverage Docker layer caching
+COPY package.json pnpm-lock.yaml ./
+
+# Install project dependencies
+RUN pnpm install --frozen-lockfile
