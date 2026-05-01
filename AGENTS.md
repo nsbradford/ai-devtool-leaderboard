@@ -27,3 +27,9 @@ Without a valid `DATABASE_URL`, the dashboard shows "Error: Failed to fetch data
 ### CI
 
 GitHub Actions runs `pnpm lint` and `pnpm format:check` on PRs. The build job is currently commented out in `.github/workflows/ci.yml`.
+
+### Gotchas
+
+- `.env.local.example` sets `NODE_ENV="production"`. The dev server will emit a warning about non-standard `NODE_ENV`; this is harmless and can be ignored.
+- `pnpm format:check` currently fails on `package.json` upstream. This is a pre-existing issue, not caused by local changes.
+- pnpm 10+ warns about ignored build scripts (`@tailwindcss/oxide`, `esbuild`, etc.). The dev server and lint still work without running those build scripts.
