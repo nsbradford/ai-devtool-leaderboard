@@ -24,6 +24,10 @@ Copy `.env.local.example` to `.env.local`. The `DATABASE_URL` secret is required
 
 Without a valid `DATABASE_URL`, the dashboard shows "Error: Failed to fetch data" — this is expected. The frontend still loads and interactive elements (theme toggle, links) work normally.
 
+### Build scripts
+
+After `pnpm install`, pnpm 10 may skip native build scripts for `esbuild`, `@tailwindcss/oxide`, `sharp`, and `unrs-resolver`. If Tailwind styles are missing or the dev server fails to compile, run: `pnpm rebuild esbuild @tailwindcss/oxide sharp unrs-resolver`.
+
 ### CI
 
 GitHub Actions runs `pnpm lint` and `pnpm format:check` on PRs. The build job is currently commented out in `.github/workflows/ci.yml`.
