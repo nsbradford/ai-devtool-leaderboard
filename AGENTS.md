@@ -27,3 +27,9 @@ Without a valid `DATABASE_URL`, the dashboard shows "Error: Failed to fetch data
 ### CI
 
 GitHub Actions runs `pnpm lint` and `pnpm format:check` on PRs. The build job is currently commented out in `.github/workflows/ci.yml`.
+
+### Cloud Agent VM notes
+
+- If `DATABASE_URL` is available as an environment secret, write it to `.env.local` (Next.js loads env from that file in dev): `printf 'DATABASE_URL="%s"\n' "$DATABASE_URL" > .env.local`
+- Cloud VMs may set `NODE_ENV=production` globally; `pnpm dev` will warn but still runs.
+- Do not run `pnpm build` while `pnpm dev` is running — both use `.next` and the dev server will break until restarted.
