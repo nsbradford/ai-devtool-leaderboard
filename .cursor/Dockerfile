@@ -6,4 +6,11 @@ RUN apt-get update && \
         curl \
         git
 
-RUN echo "nick01" > /home/nick_version.txt
+RUN groupadd --gid 3000 shared \
+    && useradd --uid 2000 --gid shared --create-home --shell /bin/bash cursor \
+    && id cursor \
+    && ! getent group cursor
+USER cursor
+WORKDIR /workspace
+
+RUN echo "cursor_user_shared_group" > /home/nick.txt
