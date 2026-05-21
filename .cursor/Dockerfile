@@ -6,10 +6,11 @@ RUN apt-get update && \
         curl \
         git
 
-RUN groupadd --gid 3000 shared \
-    && useradd --uid 2000 --gid shared --create-home --shell /bin/bash cursor \
+RUN groupadd --gid 3000 cursor \
+    && useradd --uid 2000 --gid cursor --create-home --shell /bin/bash cursor \
     && id cursor \
-    && ! getent group cursor
+    && getent group cursor
+    
 USER cursor
 WORKDIR /workspace
 
