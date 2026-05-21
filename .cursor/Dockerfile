@@ -14,4 +14,4 @@ RUN groupadd --gid 3000 cursor \
 USER cursor
 WORKDIR /workspace
 
-RUN echo "cursor_user_shared_group" > /home/nick.txt
+RUN echo "cursor_user_cursor_group" > /home/cursor/nick.txt
