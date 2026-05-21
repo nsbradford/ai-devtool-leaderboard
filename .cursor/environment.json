@@ -3,5 +3,6 @@
   "build": {
     "dockerfile": "Dockerfile",
     "context": "."
-  }
+  },
+  "user": "cursor"
 }
