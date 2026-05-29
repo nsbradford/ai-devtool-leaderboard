@@ -120,4 +120,4 @@ pnpm run backfill-bot-reviews --start 2025-01-01 --end 2025-05-01  --new-bots-on
 
 This project is open source and available under the [MIT License](LICENSE).
 
-<!-- SENTINEL: cursor/add-readme-sentinel-4f98 -->
+<!-- SENTINEL: cursor/add-readme-sentinel-4f98 | updated 2026-05-29 -->
