@@ -20,9 +20,15 @@ See `package.json` scripts and `README.md` for full details.
 
 Copy `.env.local.example` to `.env.local`. The `DATABASE_URL` secret is required for any API route that queries Postgres (`/api/leaderboard`, `/api/leaderboard-reviews`, `/api/top-repos`). The `/api/devtools` endpoint works without a database as it reads from `src/devtools.json`.
 
+If you do not have a real `DATABASE_URL`, comment out or remove that line in `.env.local`. The example placeholder hostname (`host`) causes API routes to return HTTP 500 instead of the graceful frontend fetch error.
+
 ### Database-dependent features
 
 Without a valid `DATABASE_URL`, the dashboard shows "Error: Failed to fetch data" — this is expected. The frontend still loads and interactive elements (theme toggle, links) work normally.
+
+### Runtime versions
+
+Node.js 22+ and pnpm 10.22.0 (see `.node-version`, `.mise.toml`, and `packageManager` in `package.json`). The dev server runs on port 3000.
 
 ### CI
 
