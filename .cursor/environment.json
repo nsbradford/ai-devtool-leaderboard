@@ -1,0 +1,3 @@
+{
+  "install": "echo 'testing install script' && exit 1"
+}
