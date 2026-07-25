@@ -1,3 +1,9 @@
+> # ⚠️ DEPRECATED — THIS PROJECT IS NO LONGER MAINTAINED
+>
+> **This repo is deprecated and its data is no longer being updated.**
+>
+> **We recommend the [Martian Code Review Bench](https://codereview.withmartian.com/) instead** — an independent, open-source benchmark for AI code review tools that scores precision and recall on both a curated offline dataset and a continuously updated set of real-world PRs. Source and methodology: [withmartian/code-review-benchmark](https://github.com/withmartian/code-review-benchmark).
+
 # ✨ AI Code Review Adoption Tracker
 
 A dashboard tracking the adoption of AI code review tools across open-source GitHub repositories.
