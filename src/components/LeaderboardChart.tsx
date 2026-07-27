@@ -185,7 +185,7 @@ export default function LeaderboardChart() {
   // Remove passthroughs for getXAxisTicks and xAxisTickFormatter
 
   return (
-    <div className="w-full max-w-none xl:max-w-7xl xl:mx-auto space-y-6">
+    <div className="w-full max-w-none xl:max-w-7xl xl:mx-auto space-y-6 pb-24">
       <div className="text-center relative mx-4 sm:mx-6 mt-4 sm:mt-6">
         <div className="absolute top-[-0.5em] right-[-0.5em] sm:top-0 sm:right-0">
           <ThemeToggle />
@@ -219,6 +219,18 @@ export default function LeaderboardChart() {
             className="text-blue-400 hover:text-blue-600 hover:underline"
           >
             GitHub
+          </a>
+          .
+        </p>
+        <p className="text-muted-foreground text-xs sm:text-sm">
+          Vibe coded by{' '}
+          <a
+            href="https://www.nsbradford.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-400 hover:text-blue-600 hover:underline"
+          >
+            Nick Bradford
           </a>
           .
         </p>
@@ -262,23 +274,6 @@ export default function LeaderboardChart() {
           topRepos={topRepos}
         />
       )}
-
-      <div className="mx-4 sm:mx-6">
-        <br />
-        <hr className="border-border" />
-        <p className="text-muted-foreground text-xs mt-2 mb-24">
-          Vibe coded by{' '}
-          <a
-            href="https://www.nsbradford.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-blue-400 hover:text-blue-600 hover:underline"
-          >
-            Nick Bradford
-          </a>
-          .
-        </p>
-      </div>
     </div>
   );
 }
