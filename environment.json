@@ -1,0 +1,3 @@
+{
+    "install": "echo 'testing install script' && echo 'test' > ~/test.txt && echo 'wrote test file to ~/test.txt'"
+  }
